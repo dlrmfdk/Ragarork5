@@ -1,0 +1,23 @@
+﻿id,cardName,cost,type,rarity,color,targetEnemy,targetSelf,exhaust,description,default
+1,강타,1,attack,common,Red,TRUE,TRUE,FALSE,적에게 {d}만큼 데미지를 준다.,6
+2,방어하기,1,skill,common,Blue,FALSE,TRUE,FALSE,자신의 방어도를 {d}만큼 올린다.,4
+3,연속 타격,2,attack,rare,Red,TRUE,TRUE,FALSE,피해량 {d} x 3만큼 데미지를 준다.,5
+4,더 강하게!,2,attack,legend,Red,TRUE,TRUE,FALSE,"피해량 {d}, 다음 사용 시 피해량 +5 증가",10
+5,힘의 축복,3,power,rare,White,FALSE,TRUE,TRUE,공격력이 {d} 증가한다.,2
+6,선천진기,0,skill,legend,White,FALSE,TRUE,TRUE,"이번 턴에 주는 데미지가 2배가 된다,",0
+7,타격의 대가,2,attack,rare,Red,TRUE,TRUE,FALSE,내 덱에 있는 attack 카드 수 만큼의 데미지를 준다. 데미지: {d},0
+8,독 송곳니,1,attack,common,Black,TRUE,TRUE,FALSE,적에게 {d}만큼의 데미지를 주고 독을 {p} 부여한다.,6
+9,독안개,2,skill,rare,Black,FALSE,TRUE,FALSE,모든 적에게 {p}만큼의 독을 부여한다.,7
+10,요르문간드의 산성액,5,skill,legend,Black,FALSE,TRUE,TRUE,"모든 적에게 부여된 독을 2배 증가시키고, 즉시 데미지를 한번 준다.",0
+11,헤임달의 통로,0,skill,common,White,FALSE,TRUE,FALSE,카드를 1장 뽑는다.,0
+12,오딘의 지혜,2,power,legend,White,FALSE,TRUE,TRUE,최대 마나량이 1 증가한다.,0
+13,발할라의 방패,3,skill,rare,Blue,FALSE,TRUE,TRUE,1턴 동안 적의 공격에 피해를 입지 않는다.,0
+14,펜리르의 송곳니,1,attack,common,Red,TRUE,TRUE,FALSE,적에게 {d}만큼 피해를 준다. 적의 체력이 50% 이하일 경우 2배의 데미지를 준다.,8
+15,요툰의 주먹,3,attack,rare,Red,FALSE,TRUE,FALSE,모든 적에게 {d}만큼의 피해를 준다.,20
+16,화상,0,curse,common,0,FALSE,FALSE,TRUE,턴 종료시 자신에게 5의 데미지를 주고 소멸한다.,0
+17,불꽃의 일격,2,attack,rare,Red,TRUE,TRUE,FALSE,"적에게 {d}만큼 데미지를 주고, 내 덱에 화상 카드를 1장 넣는다.",15
+18,지옥불 소환,3,skill,rare,Red,TRUE,TRUE,TRUE,덱과 패에 화상카드를 2장씩 추가하고 적에게 {d}만큼 데미지를 준다.,40
+19,수르트의 분노,3,skill,legend,Red,TRUE,TRUE,FALSE,"적에게 덱과 패에 있는 모든 화상카드의 숫자 X 5의 데미지를 주고, 화상 카드들을 소멸시킨다.",0
+20,로키의 장난,1,skill,rare,Black,TRUE,TRUE,FALSE,"적에게 저주, 약화 상태를 2턴 동안 부여한다.",0
+21,나비의 저주,0,curse,common,0,FALSE,FALSE,TRUE,사용할 수 없다. 턴 종료시 소멸한다.,0
+22,흡혈,1,attack,common,Red,TRUE,TRUE,FALSE,적에게 {d}만큼 데미지를 주고 준 피해만큼 체력을 회복한다.,6

@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 8babc97430a7b2740ab8249769b12edc
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - hpSlider: {fileID: 9125842775792010601, guid: c5094ee12b333234899f42adabfec3bc, type: 3}
+  - defenseSlider: {fileID: 1779723515714594870, guid: 497813d847bda174eb8d5a35a8b796e4, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

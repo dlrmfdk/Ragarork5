@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 78f5f5c7a0838c244876e4c414b7a79d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - atksound: {fileID: 8300000, guid: a52417591f966ef45b54278468a11ef7, type: 3}
+  - playerHpBarPrefab: {fileID: -305155101863068650, guid: b31844bc5070d1d4da9167903f60131b, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

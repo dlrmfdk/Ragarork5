@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82767c6e3cc975b458c523c504afaf0f, type: 3}
+  m_Name: ItemSO
+  m_EditorClassIdentifier: 
+  items:
+  - name: "\uAC15\uD0C0"
+    sprite: {fileID: 21300000, guid: a4e2683d47791c44c9144a096bee3992, type: 3}
+    type: 0
+    percent: 10
+    attackType: 0
+    skillType: 0
+    powerType: 0
+    curseType: 0
+  - name: "\uBC29\uC5B4\uD558\uAE30"
+    sprite: {fileID: 21300000, guid: 5d2a8f1a7cd94dc45b841a5a651c8a95, type: 3}
+    type: 1
+    percent: 12
+    attackType: 0
+    skillType: 0
+    powerType: 0
+    curseType: 0
+  - name: "\uB3C5\uC548\uAC1C"
+    sprite: {fileID: 21300000, guid: 15442254415a18f4387df8ae51770876, type: 3}
+    type: 1
+    percent: 12
+    attackType: 0
+    skillType: 2
+    powerType: 0
+    curseType: 0
+  - name: "\uD5E4\uC784\uB2EC\uC758 \uD1B5\uB85C"
+    sprite: {fileID: 21300000, guid: 4cf1228a5ba4cc640b76089fb6a0c4ea, type: 3}
+    type: 1
+    percent: 12
+    attackType: 0
+    skillType: 4
+    powerType: 0
+    curseType: 0
