@@ -21,6 +21,10 @@ public class Player : MonoBehaviour
     private int currentMana = 4;
     public int CurrentMana { get { return currentMana; } }
 
+
+    [Header("골드 관련")]
+    [SerializeField] private int gold = 0; // 초기 골드
+
     // 추가 효과를 위한 변수들
     private bool isDoubleDamageTurn = false; // 이번 턴에 공격 데미지 2배 효과
     private int invincibleTurnCount = 0;       // 무적 턴 카운트 (턴 종료마다 감소)
@@ -145,7 +149,13 @@ public class Player : MonoBehaviour
         Debug.Log($"플레이어가 {count}장의 카드를 뽑습니다.");
     }
 
-
+    // 플레이어에게 골드를 추가하는 메서드 (골드 시스템 추가)
+    public void AddGold(int amount)
+    {
+        gold += amount;
+        Debug.Log($"플레이어의 골드가 {amount}만큼 증가하였습니다. 현재 골드: {gold}");
+        // 필요 시 골드 UI 업데이트 호출
+    }
 
 
     // 플레이어의 덱에 카드 추가 (예: 불꽃의 일격 효과)

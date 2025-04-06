@@ -1,16 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using Unity.VisualScripting;
-//using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using Unity.VisualScripting;
 using static UnityEngine.EventSystems.EventTrigger;
 using Random = UnityEngine.Random;
 
 public class CardManager : MonoBehaviour
 {
-    public static CardManager Inst { get; private set; } //싱글톤 - 최초 생성한 객체를 재사용함으로 일관성 보장
+    public static CardManager Inst { get; private set; } // 싱글톤: 최초 생성된 객체를 재사용
     void Awake() => Inst = this;
 
     [SerializeField] ItemSO itemSO;
@@ -20,59 +18,113 @@ public class CardManager : MonoBehaviour
     [SerializeField] Transform myCardLeft;
     [SerializeField] Transform myCardRight;
     [SerializeField] ECardState eCardState;
-    //
-    [SerializeField] Transform graveyardParent; // 묘지 위치
-    [SerializeField] LayerMask enemyLayerMask; // 적 레이어 마스크
-    private Card draggingCard;                // 현재 드래그 중인 카드
 
-    //
-    List<Item> itemBuffer;
+    [SerializeField] Transform graveyardParent; // 묘지 위치 (비주얼용)
+    [SerializeField] LayerMask enemyLayerMask;    // 적 레이어 마스크
+    private Card draggingCard;                     // 현재 드래그 중인 카드
+
+    // 덱 관리용 리스트: deck은 현재 덱, discardPile은 사용한 카드들의 아이템을 저장
+    List<Item> deck;
+    List<Item> discardPile;
+
     Card selectCard;
-    bool isMyCardDrag; //카드 드래그
+    bool isMyCardDrag; // 카드 드래그 상태
     bool onMyCardArea;
 
-
     // Player 참조
-    [SerializeField] Player player; // 씬에 Player 오브젝트를 할당
-
+    [SerializeField] Player player; // 씬에 Player 오브젝트 할당
 
     enum ECardState { Nothing, CanMouseOver, CanMouseDrag }
 
-    public Item PopItem()
-    {
-        if (itemBuffer.Count == 0)
-            SetupItemBuffer();
+    #region 덱/묘지 시스템 구현
 
-        Item item = itemBuffer[0]; //첫번째 카드 item 변수로 가져오고
-        itemBuffer.RemoveAt(0);    //리스트에서 제거
-        return item;
-    }
-
-    void SetupItemBuffer()
+    // 덱 초기화: 초기 덱은 "강타" 5장, "방어하기" 5장으로 구성 (ItemSO는 전체 카드 정보 읽기 전용)
+    void SetupDeck()
     {
-        itemBuffer = new List<Item>(100); //100의 용량 잡아둠
+        deck = new List<Item>(100);
+        discardPile = new List<Item>(); // discardPile 초기화
+
+        // ItemSO의 모든 카드 중에서 이름이 "강타"와 "방어하기"인 카드만 추가
         for (int i = 0; i < itemSO.items.Length; i++)
         {
             Item item = itemSO.items[i];
-            for (int j = 0; j < item.percent; j++)
-                itemBuffer.Add(item); //퍼센트만큼 배열 추가 (총100개 중 10%면 10개의 배열이 추가됨)
+            if (item.name == "강타")
+            {
+                for (int j = 0; j < 5; j++)
+                    deck.Add(item);
+            }
+            else if (item.name == "방어하기")
+            {
+                for (int j = 0; j < 5; j++)
+                    deck.Add(item);
+            }
         }
+        ShuffleDeck(deck);
+    }
 
-        for (int i = 0; i < itemBuffer.Count; i++) //순서 섞기(셔플)
+    // Fisher-Yates 알고리즘을 사용한 셔플
+    void ShuffleDeck(List<Item> list)
+    {
+        for (int i = 0; i < list.Count; i++)
         {
-            int rand = Random.Range(i, itemBuffer.Count);
-            Item temp = itemBuffer[i];
-            itemBuffer[i] = itemBuffer[rand];
-            itemBuffer[rand] = temp;
+            int rand = Random.Range(i, list.Count);
+            Item temp = list[i];
+            list[i] = list[rand];
+            list[rand] = temp;
         }
     }
 
+    // 덱에서 카드 뽑기: 덱이 비어있으면 discardPile에서 카드 가져오기
+    public Item PopItem()
+    {
+        if (deck == null || deck.Count == 0)
+        {
+            if (discardPile != null && discardPile.Count > 0)
+            {
+                deck.AddRange(discardPile);
+                discardPile.Clear();
+                ShuffleDeck(deck);
+                Debug.Log("묘지에 저장된 카드를 덱으로 옮기고 셔플했습니다.");
+            }
+            else
+            {
+                // 항상 덱 또는 묘지에 카드가 있다고 가정하므로, 여기서 아무것도 하지 않음
+                Debug.Log("뽑을 카드가 없습니다!"); // 또는 예외 처리
+                return null;
+            }
+        }
+        Item item = deck[0];
+        deck.RemoveAt(0);
+        return item;
+    }
 
 
-    // Start is called before the first frame update
+    // 카드 사용 후 해당 카드를 discardPile에 추가
+    void AddToDiscardPile(Item item)
+    {
+        discardPile.Add(item);
+    }
+
+    // 보상 카드 추가: 보상으로 획득한 카드를 플레이어 덱에 추가
+    public void AddRewardCardToDeck(Item rewardCard)
+    {
+        if (rewardCard == null)
+        {
+            Debug.LogWarning("추가할 보상 카드가 null입니다.");
+            return;
+        }
+        deck.Add(rewardCard);
+        ShuffleDeck(deck);
+        Debug.Log($"{rewardCard.name} 카드가 덱에 추가되었습니다.");
+    }
+
+    #endregion
+
+    #region Unity 이벤트 및 카드 생성/정렬
+
     void Start()
     {
-        SetupItemBuffer();
+        SetupDeck();
         TurnManager.OnAddCard += AddCard;
         TurnManager.OnTurnStarted += OnTurnStarted;
     }
@@ -83,34 +135,19 @@ public class CardManager : MonoBehaviour
     }
     void OnTurnStarted(bool myTurn)
     {
-        if (myTurn)
-        {
-            //코스트 모두 소모 시 CanMouseOver만 가능하게
-        }
-        SetECardState(); // 턴 시작 시 카드 상태 업데이트
-
+        // 턴 시작 시 카드 상태 업데이트 등 추가 로직 구현 가능
+        SetECardState();
     }
 
-
-
-    // Update is called once per frame
+    // 매 프레임 카드 드래그 및 마우스 영역 체크
     void Update()
     {
         if (isMyCardDrag)
         {
             CardDrag();
-
-
         }
-
-
         DetectCardArea();
-
-
     }
-
-
-
 
     void CardDrag()
     {
@@ -118,51 +155,33 @@ public class CardManager : MonoBehaviour
         {
             Vector3 mousePos = Utils.MousePos;
             draggingCard.MoveTransform(new PRS(mousePos, Utils.QI, draggingCard.originPRS.scale), false);
-
-
-            //if (draggingCard != null && draggingCard.CompareTag("attack")) // 공격 카드 드래그 시
-            //{
-            //    Vector3 mousePos = Utils.MousePos;
-            //    draggingCard.MoveTransform(new PRS(mousePos, Utils.QI, draggingCard.originPRS.scale), false);
-
-            //}
-
-        }
-    }
-    public void SendAllCardsToGraveyard()
-    {
-        // myCards 리스트를 복사하여 순회 (리스트 수정 방지)
-        List<Card> cardsToSend = new List<Card>(myCards);
-        foreach (var card in cardsToSend)
-        {
-            Graveyard.Instance.GraveAddCard(card.gameObject);
-            myCards.Remove(card);
-            Destroy(card.gameObject); // 또는 비활성화: card.gameObject.SetActive(false);
         }
     }
 
-
-    void DetectCardArea() //핸드(onMyCardArea)와 필드 레이어 구분 
+    // 마우스 포인터가 카드 영역(MyCardArea)에 있는지 감지
+    void DetectCardArea()
     {
-        RaycastHit2D[] hits = Physics2D.RaycastAll(Utils.MousePos, Vector3.forward); ////마우스에서 충돌한 RaycastHit를 가져옴
+        RaycastHit2D[] hits = Physics2D.RaycastAll(Utils.MousePos, Vector3.forward);
         int layer = LayerMask.NameToLayer("MyCardArea");
         onMyCardArea = Array.Exists(hits, x => x.collider.gameObject.layer == layer);
     }
-    // 카드 목록을 묘지로 보내는 메서드++
 
-
-    public void AddCard(bool isMine) //카드 드로우
+    // 덱에서 카드를 뽑아 인스턴스화하여 손(Hand)에 추가
+    public void AddCard(bool isMine)
     {
+        Item drawnItem = PopItem();
+        if (drawnItem == null) return; // 뽑을 카드가 없으면 리턴
+
         var cardObject = Instantiate(cardPrefab, cardSpawnPoint.position, Utils.QI);
         var card = cardObject.GetComponent<Card>();
-        card.Setup(PopItem(), isMine, player);
-        myCards.Add(card); //턴 확인 
+        card.Setup(drawnItem, isMine, player);
+        myCards.Add(card);
 
         SetOriginOrder(isMine);
         CardAlignment(isMine);
     }
 
-    void SetOriginOrder(bool isMine) //order를 정렬
+    void SetOriginOrder(bool isMine)
     {
         int count = myCards.Count;
         for (int i = 0; i < count; i++)
@@ -171,31 +190,26 @@ public class CardManager : MonoBehaviour
             targetCard?.GetComponent<Order>().SetOriginOrder(i);
         }
     }
-    void CardAlignment(bool isMine) //카드 정렬
+    void CardAlignment(bool isMine)
     {
         List<PRS> originCardPRSs = new List<PRS>();
         if (isMine)
             originCardPRSs = RoundAlignment(myCardLeft, myCardRight, myCards.Count, 0.5f, Vector3.one * 0.6f);
 
-
-        var targetCards = myCards;
-        for (int i = 0; i < targetCards.Count; i++)
+        for (int i = 0; i < myCards.Count; i++)
         {
-            if (i < originCardPRSs.Count) // 인덱스 범위 확인++
+            if (i < originCardPRSs.Count)
             {
-                var targetCard = targetCards[i];
-
-                //targetCard.originPRS = new PRS(Vector3.zero, Utils.QI, Vector3.one * 1.9f);
+                var targetCard = myCards[i];
                 targetCard.originPRS = originCardPRSs[i];
                 targetCard.MoveTransform(targetCard.originPRS, true, 0.7f);
             }
         }
-
     }
     List<PRS> RoundAlignment(Transform leftTr, Transform rightTr, int objCount, float height, Vector3 scale)
     {
         float[] objLerps = new float[objCount];
-        List<PRS> results = new List<PRS>(objCount); //용량 잡아둠
+        List<PRS> results = new List<PRS>(objCount);
 
         switch (objCount)
         {
@@ -213,45 +227,43 @@ public class CardManager : MonoBehaviour
             var targetPos = Vector3.Lerp(leftTr.position, rightTr.position, objLerps[i]);
             var targetRot = Utils.QI;
             if (objCount >= 4)
-            { //카드 4개 이후부터 커브 
+            {
                 float curve = Mathf.Sqrt(Mathf.Pow(height, 2) - Mathf.Pow(objLerps[i] - 0.5f, 2));
                 curve = height >= 0 ? curve : -curve;
                 targetPos.y += curve;
                 targetRot = Quaternion.Slerp(leftTr.rotation, rightTr.rotation, objLerps[i]);
-
             }
             results.Add(new PRS(targetPos, targetRot, scale));
-
         }
         return results;
     }
+
+    #endregion
+
+    #region 카드 마우스 인터랙션
+
     public void CardMouseOver(Card card)
     {
         if (eCardState == ECardState.Nothing) return;
-        selectCard = card; //마우스를 올린 카드
+        selectCard = card;
         EnlargeCard(true, card);
     }
     public void CardMouseExit(Card card)
     {
-
         EnlargeCard(false, card);
-
     }
-
     public void CardMouseDown()
     {
         if (eCardState != ECardState.CanMouseDrag) return;
         isMyCardDrag = true;
-        draggingCard = selectCard; // 현재 선택된 카드를 드래그 중인 카드로 설정
+        draggingCard = selectCard;
     }
     public void CardMouseUp()
     {
         isMyCardDrag = false;
-
         if (eCardState != ECardState.CanMouseDrag || draggingCard == null)
             return;
 
-        // 플레이어의 마나가 0이면 바로 카드 사용 취소 및 원위치 복귀
         if (player.CurrentMana <= 0)
         {
             draggingCard.MoveTransform(draggingCard.originPRS, true, 0.5f);
@@ -261,7 +273,6 @@ public class CardManager : MonoBehaviour
         }
 
         Vector3 mousePos = Utils.MousePos;
-        // 드롭 위치에 적 오브젝트가 있는지 확인
         Collider2D hit = Physics2D.OverlapPoint(mousePos, enemyLayerMask);
         bool isOverEnemy = false;
         Enemy enemy = null;
@@ -270,109 +281,67 @@ public class CardManager : MonoBehaviour
         {
             enemy = hit.GetComponent<Enemy>();
             if (enemy != null)
-            {
                 isOverEnemy = true;
-            }
         }
 
-
-        // ===========================
-        // [1] 적 위에 드롭된 경우
-        // ===========================
         if (isOverEnemy)
         {
             player.AtkAni();
-
-            // 공격 카드
             if (draggingCard.item.type == ItemType.Attack)
             {
                 draggingCard.AttackPlayEffect(enemy);
                 GoToGrave();
                 Debug.Log("공격카드가 적에게 사용됨");
             }
-            //// 스킬 카드
-            //else if (draggingCard.item.type == ItemType.Skill)
-            //{
-            //    // ex) 스킬이 적에게도 적용되는 스킬이라면 여기에 로직 작성
-            //    // 아니면 스킬이 적 타겟을 필요로 하지 않으면 무효
-            //    draggingCard.SkillPlayEffect(enemy);
-            //    GoToGrave();
-            //    Debug.Log("스킬카드(적 대상) 사용");
-            //}
-            // 방어 카드 -> 적에게 사용 불가능
             else if (draggingCard.item.type == ItemType.Skill)
             {
-                // 방어카드는 적 위에 놓으면 무효 -> 손으로 돌아옴
                 draggingCard.MoveTransform(draggingCard.originPRS, true, 0.5f);
                 Debug.Log("스킬카드는 적에게 사용할 수 없습니다. (손으로 돌아옴)");
             }
-            //// 저주 카드
-            //else if (draggingCard.item.type == ItemType.Curse)
-            //{
-            //    // ex) 저주 카드를 적에게 쓸 수도 있고, 아니면 무효화할 수도 있음
-            //    draggingCard.CursePlayEffect(enemy);
-            //    GoToGrave();
-            //    Debug.Log("저주카드 사용");
-            //}
             else
             {
-                // 기타 타입
                 draggingCard.MoveTransform(draggingCard.originPRS, true, 0.5f);
             }
         }
         else
         {
-            // ===========================
-            // [2] 적이 아닌 곳(= 필드)에 드롭
-            // ===========================
-            // 방어카드는 이 위치에서 발동
             if (draggingCard.item.type == ItemType.Skill)
             {
                 draggingCard.SkillPlayEffect();
                 GoToGrave();
                 Debug.Log("스킬카드 필드 사용");
             }
-            // 공격/스킬/저주 카드는 필드에 사용 불가능 -> 손으로 복귀
             else
             {
                 draggingCard.MoveTransform(draggingCard.originPRS, true, 0.5f);
                 Debug.Log("이 카드는 적에게만 사용할 수 있습니다.");
             }
         }
-
         draggingCard = null;
     }
 
-
-
-    void GoToGrave() //카드 묘지로 보내는 함수
+    // 카드 사용 후, 카드의 아이템을 discardPile에 추가한 후 카드 GameObject를 제거
+    void GoToGrave()
     {
-        // 카드 묘지로 이동
+        AddToDiscardPile(draggingCard.item);
         Graveyard.Instance.GraveAddCard(draggingCard.gameObject);
-        // 카드 리스트에서 제거
         myCards.Remove(draggingCard);
-
-        // 카드 GameObject 파괴
         Destroy(draggingCard.gameObject);
-
-        // 카드 정렬 업데이트
         CardAlignment(true);
     }
 
-
-    void EnlargeCard(bool isEnlage, Card card) //카드 확대 및 축소
+    void EnlargeCard(bool isEnlarge, Card card)
     {
-        if (isEnlage)
+        if (isEnlarge)
         {
             Vector3 enlargePos = new Vector3(card.originPRS.pos.x, 0f, -10f);
-
             card.MoveTransform(new PRS(enlargePos, Utils.QI, Vector3.one * 2.5f), false);
         }
         else
+        {
             card.MoveTransform(card.originPRS, false);
-
-        card.GetComponent<Order>().SetMostFrontOrder(isEnlage);
-
+        }
+        card.GetComponent<Order>().SetMostFrontOrder(isEnlarge);
     }
     public void SetECardState()
     {
@@ -384,5 +353,19 @@ public class CardManager : MonoBehaviour
             eCardState = ECardState.CanMouseDrag;
     }
 
+    // (추후 소멸 카드 등 특수 카드 처리 로직 추가 가능)
+    #endregion
 
+    // 모든 카드를 묘지(Discard)로 보내는 함수
+    public void SendAllCardsToGraveyard()
+    {
+        List<Card> cardsToSend = new List<Card>(myCards);
+        foreach (var card in cardsToSend)
+        {
+            AddToDiscardPile(card.item);
+            Graveyard.Instance.GraveAddCard(card.gameObject);
+            myCards.Remove(card);
+            Destroy(card.gameObject);
+        }
+    }
 }

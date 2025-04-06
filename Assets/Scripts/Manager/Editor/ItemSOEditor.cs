@@ -52,6 +52,10 @@ public class ItemSOEditor : Editor
                 SerializedProperty percentProp = elementProp.FindPropertyRelative("percent");
                 EditorGUILayout.PropertyField(percentProp);
 
+                // rarity 필드 추가 (Rarity 타입)
+                SerializedProperty rarityProp = elementProp.FindPropertyRelative("rarity");
+                EditorGUILayout.PropertyField(rarityProp, new GUIContent("Rarity"));
+
                 // 이제 type에 따라 attackType, defenseType, skillType, curseType 중 하나만 노출
                 ItemType currentType = (ItemType)typeProp.enumValueIndex;
                 switch (currentType)
@@ -60,7 +64,7 @@ public class ItemSOEditor : Editor
                         SerializedProperty attackProp = elementProp.FindPropertyRelative("attackType");
                         EditorGUILayout.PropertyField(attackProp, new GUIContent("Attack Type"));
                         break;
-             
+
 
                     case ItemType.Skill:
                         SerializedProperty skillProp = elementProp.FindPropertyRelative("skillType");

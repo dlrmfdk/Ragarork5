@@ -15,7 +15,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] NotificationPanel NotificationPanel;
     [SerializeField] GameObject nextBt;
 
-  
+    // 보상 패널을 이미 보여줬는지 여부를 체크하기 위한 플래그
+    private bool rewardShown = false;
+
+
+
     void Start()
     {
         StartGame();
@@ -29,10 +33,17 @@ public class GameManager : MonoBehaviour
         InputCheatKey();
 #endif
 
-        
+        // 모든 적이 처치되었으면 다음 버튼 활성화
         if (EnemySpawner.Instance.SpawnedEnemies.Count == 0)
         {
             nextBt.SetActive(true);
+
+            // 보상 UI가 아직 호출되지 않았다면 보상 UI를 표시
+            if (!rewardShown)
+            {
+                //RewardManager.Instance.ShowRewardPanel();
+                rewardShown = true;
+            }
         }
     }
     void InputCheatKey() //개발자용 치트

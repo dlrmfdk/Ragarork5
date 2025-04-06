@@ -9,12 +9,24 @@ public class Item // 카드 정보 클래스
     public Sprite sprite;       // 카드 이미지
     public ItemType type;       // 카드 타입 (Attack, Skill, Power, Curse)
     public float percent;       // 카드 등장 확률
+    public Rarity rarity;     // 카드 희귀도 (Common, Uncommon, Rare, Legendary, Curse)
 
     // 각 카드 타입별 세부 효과 (해당 타입에 따라 유효한 값만 사용)
     public AttackType attackType;   // 공격 카드일 경우
     public SkillType skillType;     // 스킬 및 방어 효과 카드일 경우
     public PowerType powerType;     // 파워 카드일 경우 (새 CSV에 추가)
     public CurseType curseType;     // 저주 카드일 경우
+
+   
+}
+
+// 카드 희귀도 (CSV "rarity")
+public enum Rarity
+{
+    Common,     // 일반 카드 
+    Rare,       // 희귀 카드 
+    Legendary,  // 전설 카드 
+   
 }
 
 public enum ItemType
@@ -72,4 +84,6 @@ public enum CurseType
 public class ItemSO : ScriptableObject
 {
     public Item[] items;
+
+
 }
