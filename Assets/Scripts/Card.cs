@@ -8,7 +8,7 @@ using DG.Tweening; //do TWeen
 public class Card : MonoBehaviour
 {
     [SerializeField] SpriteRenderer card; //카드
-    [SerializeField] SpriteRenderer character;
+    [SerializeField] SpriteRenderer character; 
     [SerializeField] TMP_Text nameTMP; //카드 이름
     [SerializeField] TMP_Text attackTMP; //카드 공격력
     [SerializeField] TMP_Text healthTMP; //체력

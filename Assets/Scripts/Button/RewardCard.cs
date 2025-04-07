@@ -1,31 +1,97 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
+using DG.Tweening;
+using System;
 
 public class RewardCard : MonoBehaviour
 {
-    [SerializeField] private Image cardImage;  // 카드 이미지 표시
-    [SerializeField] private Text cardNameText;  // 카드 이름 표시
+    [Header("Sprite Renderers")]
+    [SerializeField] private SpriteRenderer cardBackground;
+    [SerializeField] private SpriteRenderer characterImage;
 
-    private Item cardData;
-    private System.Action<Item> onSelectedCallback;
+    [Header("TextMeshPro References")]
+    [SerializeField] private TMP_Text nameTMP;
+    [SerializeField] private TMP_Text attackTMP;
+    [SerializeField] private TMP_Text healthTMP; // 필요시
 
-    /// <summary>
-    /// 보상 카드 버튼을 설정합니다.
-    /// 카드의 정보를 전달받아 UI 요소를 갱신합니다.
-    /// </summary>
-    public void Setup(Item data, System.Action<Item> callback)
+    [Header("Sorting Setup")]
+    [SerializeField] private string sortingLayerName = "Default";
+    [SerializeField] private int backgroundOrder = 0; // 배경
+    [SerializeField] private int characterOrder = 1;  // 캐릭터
+    [SerializeField] private int textOrder = 2;       // 텍스트들
+
+    [Header("Card Assets")]
+    [SerializeField] private Sprite cardFront; // 배경 이미지
+    public Item item;
+    public CardData cardData;
+
+    private bool isFront;
+
+    public void Setup(Item item, Action<Item> onCardRewardSelected)
     {
-        cardData = data;
-        onSelectedCallback = callback;
-        if (cardImage != null && data.sprite != null)
-            cardImage.sprite = data.sprite;
-        if (cardNameText != null)
-            cardNameText.text = data.name;
+        this.item = item;
+        this.isFront = true;
+
+        // 배경/캐릭터 설정
+        if (cardBackground && cardFront)
+        {
+            cardBackground.sprite = cardFront;
+            cardBackground.sortingLayerName = sortingLayerName;
+            cardBackground.sortingOrder = backgroundOrder;
+        }
+        if (characterImage && item.sprite)
+        {
+            characterImage.sprite = item.sprite;
+            characterImage.sortingLayerName = sortingLayerName;
+            characterImage.sortingOrder = characterOrder;
+        }
+
+        // 텍스트들 설정
+        if (nameTMP)
+        {
+            nameTMP.text = item.name;
+            var mr = nameTMP.GetComponent<MeshRenderer>();
+            if (mr)
+            {
+                mr.sortingLayerName = sortingLayerName;
+                mr.sortingOrder = textOrder;
+            }
+        }
+        if (attackTMP && cardData != null)
+        {
+            attackTMP.text = cardData.defaultValue.ToString();
+            var mr = attackTMP.GetComponent<MeshRenderer>();
+            if (mr)
+            {
+                mr.sortingLayerName = sortingLayerName;
+                mr.sortingOrder = textOrder;
+            }
+        }
+        if (healthTMP)
+        {
+            // 필요시 healthTMP.text = ...;
+            var mr = healthTMP.GetComponent<MeshRenderer>();
+            if (mr)
+            {
+                mr.sortingLayerName = sortingLayerName;
+                mr.sortingOrder = textOrder;
+            }
+        }
+
+        // 클릭 시 콜백
+        // (OnMouseDown()으로 처리할 거면 아래 생략)
+        // Button button = GetComponent<Button>();
+        // if (button != null)
+        // {
+        //     button.onClick.RemoveAllListeners();
+        //     button.onClick.AddListener(() => onCardRewardSelected(item));
+        // }
     }
 
-    // 버튼 클릭 시 호출되는 메서드 (Button의 OnClick 이벤트에 연결)
-    public void OnButtonClicked()
+    public void PlayShowAnimation(float duration)
     {
-        onSelectedCallback?.Invoke(cardData);
+        // 스케일 0->1
+        transform.localScale = Vector3.zero;
+        transform.DOScale(Vector3.one, duration);
     }
 }

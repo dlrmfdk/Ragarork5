@@ -3036,37 +3036,10 @@ MonoBehaviour:
   cardRewardButton: {fileID: 1196661161}
   cardRewardPanel: {fileID: 171915273}
   cardRewardContainer: {fileID: 565366602}
-  rewardCardPrefab: {fileID: 3537003326510974950, guid: 9041766959f459348afb5f525a923ba0, type: 3}
+  rewardCardPrefab: {fileID: 6280220789811249933, guid: 9041766959f459348afb5f525a923ba0, type: 3}
   goldRewardAmount: 50
   cardRewardOptionCount: 3
-  candidateCards:
-  - name: 
-    sprite: {fileID: 0}
-    type: 0
-    percent: 0
-    attackType: 0
-    skillType: 0
-    powerType: 0
-    curseType: 0
-    rarity: 
-  - name: 
-    sprite: {fileID: 0}
-    type: 0
-    percent: 0
-    attackType: 0
-    skillType: 0
-    powerType: 0
-    curseType: 0
-    rarity: 
-  - name: 
-    sprite: {fileID: 0}
-    type: 0
-    percent: 0
-    attackType: 0
-    skillType: 0
-    powerType: 0
-    curseType: 0
-    rarity: 
+  itemSO: {fileID: 11400000, guid: 41f7d8ff648e28244a31e8fe1a50a19b, type: 2}
 --- !u!4 &1711405799
 Transform:
   m_ObjectHideFlags: 0
@@ -3179,7 +3152,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2003952685
 RectTransform:
   m_ObjectHideFlags: 0

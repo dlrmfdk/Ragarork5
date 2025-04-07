@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 8729533950577471980}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.0502702, y: 3.5, z: 0}
+  m_LocalPosition: {x: -1.52, y: 3.5, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -111,11 +111,26 @@ MonoBehaviour:
   cardFront: {fileID: -417712059, guid: 03f9598aa1cedf04fa271b657712ec8c, type: 3}
   item:
     name: 
-    attack: 0
     sprite: {fileID: 0}
     type: 0
     percent: 0
+    rarity: 0
     attackType: 0
+    skillType: 0
+    powerType: 0
+    curseType: 0
+  cardData:
+    id: 0
+    cardName: 
+    cost: 0
+    type: 
+    rarity: 
+    color: 
+    targetEnemy: 0
+    targetSelf: 0
+    exhaust: 0
+    description: 
+    defaultValue: 0
   originPRS:
     pos: {x: 0, y: 0, z: 0}
     rot: {x: 0, y: 0, z: 0, w: 0}

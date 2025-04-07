@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
             // 보상 UI가 아직 호출되지 않았다면 보상 UI를 표시
             if (!rewardShown)
             {
-                //RewardManager.Instance.ShowRewardPanel();
+                RewardManager.Instance.ShowRewardPanel();
                 rewardShown = true;
             }
         }
