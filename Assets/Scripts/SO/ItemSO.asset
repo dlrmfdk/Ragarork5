@@ -31,12 +31,12 @@ MonoBehaviour:
     skillType: 0
     powerType: 0
     curseType: 0
-  - name: "\uBC1C\uD560\uB77C"
-    sprite: {fileID: 21300000, guid: c7596d185bbfa6d4b96127fc94a34f34, type: 3}
+  - name: "\uB3C5\uC548\uAC1C"
+    sprite: {fileID: 21300000, guid: 7fb3729a53bc68b4ea2c8be80919308b, type: 3}
     type: 1
     percent: 1
     rarity: 1
     attackType: 0
-    skillType: 5
+    skillType: 2
     powerType: 0
     curseType: 0

@@ -8,23 +8,22 @@ public class RewardManager : MonoBehaviour
     public static RewardManager Instance { get; private set; }
 
     [Header("보상 UI 구성 요소")]
-    [SerializeField] private GameObject rewardPanel;       // 전체 보상 패널 (메인 패널)
-    [SerializeField] private Button goldRewardButton;        // 골드 보상 버튼
-    [SerializeField] private Button cardRewardButton;        // 카드 보상 버튼
+    [SerializeField] private GameObject rewardPanel;
+    [SerializeField] private Button goldRewardButton;
+    [SerializeField] private Button cardRewardButton;
 
     [Header("카드 보상 서브 패널")]
-    [SerializeField] private GameObject cardRewardPanel;     // 카드 보상 서브 패널 (별도 패널)
-    [SerializeField] private Transform cardRewardContainer;  // 보상 카드 옵션들이 배치될 부모 Transform
-    [SerializeField] private GameObject rewardCardPrefab;    // 보상 카드 프리팹 (RewardCard, CardUI 역할)
+    [SerializeField] private GameObject cardRewardPanel;
+    [SerializeField] private Transform cardRewardContainer;  // 일반 Transform으로 변경 (Panel)
+    [SerializeField] private GameObject rewardCardPrefab;      // 보상 카드 프리팹
 
     [Header("보상 설정")]
-    [SerializeField] private int goldRewardAmount = 50;        // 지급할 골드 양
-    [SerializeField] private int cardRewardOptionCount = 3;      // 보상 카드 옵션 수
+    [SerializeField] private int goldRewardAmount = 50;
+    [SerializeField] private int cardRewardOptionCount = 3;
 
     [Header("ItemSO 참조")]
-    [SerializeField] private ItemSO itemSO;  // 보상 카드 후보로 사용할 ItemSO (각 Item은 rarity 필드가 설정되어 있어야 함)
+    [SerializeField] private ItemSO itemSO;
 
-    // 보상 지급 여부 체크 (골드와 카드 보상이 모두 지급되어야 패널을 닫음)
     private bool goldClaimed = false;
     private bool cardClaimed = false;
     private bool cardChosen = false;
@@ -37,32 +36,22 @@ public class RewardManager : MonoBehaviour
             Destroy(gameObject);
 
         rewardPanel.SetActive(false);
-        cardRewardPanel.SetActive(false); // 카드 보상 서브 패널은 처음에 비활성화
+        cardRewardPanel.SetActive(false);
     }
 
-    /// <summary>
-    /// 전투 종료 후 보상 UI를 표시합니다.
-    /// </summary>
     public void ShowRewardPanel()
     {
-        // 보상 지급 여부 초기화
         goldClaimed = false;
         cardClaimed = false;
         cardChosen = false;
 
-        // 골드 보상 UI 설정 및 활성화
         ShowGoldReward();
-
-        // 카드 보상 버튼의 리스너 설정: 클릭 시 카드 보상 서브 패널을 엽니다.
         cardRewardButton.onClick.RemoveAllListeners();
         cardRewardButton.onClick.AddListener(() => { ShowCardRewardPanel(); });
 
         rewardPanel.SetActive(true);
     }
 
-    /// <summary>
-    /// 골드 보상 버튼을 설정합니다.
-    /// </summary>
     void ShowGoldReward()
     {
         goldRewardButton.onClick.RemoveAllListeners();
@@ -75,39 +64,25 @@ public class RewardManager : MonoBehaviour
         });
     }
 
-    /// <summary>
-    /// 카드 보상 서브 패널을 열어, ItemSO에서 Common, Rare 카드만 대상으로 보상 카드 옵션을 생성합니다.
-    /// 각 옵션은 60% 확률로 Common, 40% 확률로 Rare 카드를 선택하며,
-    /// RewardCard(즉, CardUI)를 사용하여 카드 정보를 표시하고 DOTween 애니메이션을 적용합니다.
-    /// </summary>
     void ShowCardRewardPanel()
     {
-        // 기존 보상 카드 옵션 제거 (컨테이너 내 모든 자식 제거)
-        foreach (Transform child in cardRewardContainer)
-        {
-            Destroy(child.gameObject);
-        }
-
-        // ItemSO의 카드 중 rarity가 Common 또는 Rare인 카드 필터링
+        // 보상 카드 후보 필터링
         List<Item> validRewardItems = new List<Item>();
         foreach (Item item in itemSO.items)
         {
-            // item.rarity는 Rarity 타입으로 설정되어 있다고 가정합니다.
             if (item != null && (item.rarity == Rarity.Common || item.rarity == Rarity.Rare))
-            {
                 validRewardItems.Add(item);
-            }
         }
 
-        // rarity별로 분리
+        // rarity별 풀 분리
         List<Item> commonItems = validRewardItems.FindAll(item => item.rarity == Rarity.Common);
         List<Item> rareItems = validRewardItems.FindAll(item => item.rarity == Rarity.Rare);
 
-        // 보상 카드 옵션 선택 (총 cardRewardOptionCount 옵션)
+        // 보상 카드 뽑기 (총 cardRewardOptionCount 옵션)
         List<Item> rewardOptions = new List<Item>();
         for (int i = 0; i < cardRewardOptionCount; i++)
         {
-            float chance = Random.value; // 0.0 ~ 1.0 사이의 값
+            float chance = Random.value;
             bool chooseCommon = chance < 0.6f;
             List<Item> pool = chooseCommon ? commonItems : rareItems;
             if (pool.Count == 0)
@@ -116,50 +91,86 @@ public class RewardManager : MonoBehaviour
             }
             int index = Random.Range(0, pool.Count);
             rewardOptions.Add(pool[index]);
-            // 중복 선택 방지를 위해 선택된 카드를 풀에서 제거
             pool.RemoveAt(index);
         }
 
-        // 각 옵션에 대해 RewardCardPrefab 인스턴스를 생성 및 설정
-        foreach (Item item in rewardOptions)
+        // 5) 보상 카드 옵션들을 배치하는 함수 호출
+        InstantiateRewardCards(rewardOptions);
+
+
+        // 카드 보상 패널 활성화
+        cardRewardPanel.SetActive(true);
+
+     
+    }
+    // RewardManager 클래스 내에 추가할 함수
+    private void InstantiateRewardCards(List<Item> rewardOptions)
+    {
+        // 카드 배치 (가운데 정렬)
+        // - spacing: 카드 간격 (월드 유닛 또는 UI 단위; 여기서는 예시로 10f 사용)
+        // - startX : 첫 카드의 X 좌표 (계산을 통해 가운데 정렬)
+        // - posY   : 카드의 Y 위치
+        // - scale  : 카드 크기 배율
+        float spacing = 10f;
+        float startX = -spacing * (rewardOptions.Count - 1) / 2f;
+        float posY = 0f;
+        float scale = 1f; // 필요에 따라 조절
+
+        for (int i = 0; i < rewardOptions.Count; i++)
         {
-            GameObject cardOption = Instantiate(rewardCardPrefab, cardRewardContainer);
-            RewardCard rewardCard = cardOption.GetComponent<RewardCard>();
-            // RewardCard의 Setup()에서 Item 정보를 UI에 적용하고 클릭 이벤트를 연결합니다.
-            rewardCard.Setup(item, OnCardRewardSelected);
-            // DOTween 애니메이션으로 카드 등장 효과 재생 (예: 0.5초)
+            // 보상 카드 프리팹 Instantiate 및 부모(cardRewardContainer) 할당
+            GameObject cardObj = Instantiate(rewardCardPrefab, cardRewardContainer);
+
+            // 일반 Transform을 사용하여 카드 위치, 회전, 스케일 설정
+            Transform cardTrans = cardObj.transform;
+            float posX = startX + spacing * i;
+            cardTrans.localPosition = new Vector3(posX, posY, 0f);
+            cardTrans.localRotation = Quaternion.identity;
+            cardTrans.localScale = Vector3.one * scale;
+
+            // RewardCard 스크립트의 Setup() 호출 (보상 카드 데이터 및 선택 시 호출할 RewardManager의 콜백 연결)
+            RewardCard rewardCard = cardObj.GetComponent<RewardCard>();
+            rewardCard.Setup(rewardOptions[i], OnCardRewardSelected);
             rewardCard.PlayShowAnimation(0.5f);
         }
-
-        // 카드 보상 서브 패널 활성화
-        cardRewardPanel.SetActive(true);
     }
 
-    /// <summary>
-    /// 카드 보상 옵션 버튼을 클릭했을 때 호출되는 콜백.
-    /// 선택된 카드가 플레이어 덱에 추가됩니다.
-    /// </summary>
-    void OnCardRewardSelected(Item selectedCard)
+    public void OnCardRewardSelected(Item selectedCard)
     {
         // 선택된 카드를 플레이어 덱에 추가
         CardManager.Inst.AddRewardCardToDeck(selectedCard);
         Debug.Log($"{selectedCard.name} 카드가 플레이어 덱에 추가되었습니다.");
+
+        // 보상 카드 선택 처리가 완료되었음을 기록
         cardClaimed = true;
         cardChosen = true;
 
-        // 카드 보상 서브 패널 닫기
+        // 보상 카드 패널 자체를 비활성화하여, 카드 보상 UI를 화면에서 제거
         cardRewardPanel.SetActive(false);
+
+        // 필요 시 추가 후속 처리
         CheckAllRewardsClaimed();
     }
 
-    /// <summary>
-    /// 두 보상이 모두 수령되었으면 보상 패널을 비활성화합니다.
-    /// </summary>
     void CheckAllRewardsClaimed()
     {
         if (goldClaimed && cardClaimed)
         {
             rewardPanel.SetActive(false);
+           
         }
     }
+
+    public void DisableRewardCards()
+    {
+        // 보상 카드들이 배치된 부모 컨테이너의 모든 자식을 비활성화
+        foreach (Transform child in cardRewardContainer)
+        {
+            child.gameObject.SetActive(false);
+        }
+
+        // 필요에 따라 카드 보상 패널도 비활성화합니다.
+        cardRewardPanel.SetActive(false);
+    }
+
 }

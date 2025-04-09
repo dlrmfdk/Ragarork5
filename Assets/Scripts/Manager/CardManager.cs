@@ -58,6 +58,11 @@ public class CardManager : MonoBehaviour
                 for (int j = 0; j < 5; j++)
                     deck.Add(item);
             }
+            else if(item.name == "µ¶¾È°³")
+            {
+                for (int j = 0; j < 1; j++)
+                    deck.Add(item);
+            }
         }
         ShuffleDeck(deck);
     }
