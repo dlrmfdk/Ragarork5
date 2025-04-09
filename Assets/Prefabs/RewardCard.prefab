@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 8194000615608483816}
   - component: {fileID: 2722992411043712050}
   - component: {fileID: 1474540469509234025}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: RewardCard
-  m_TagString: Untagged
+  m_TagString: RewardCard
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -177,7 +177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55a641191c56dd843af291f28a6db533, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  card: {fileID: 3369376875605847151}
+  cardBackground: {fileID: 0}
   characterImage: {fileID: 5307530086064231914}
   nameTMP: {fileID: 6492359464375598588}
   attackTMP: {fileID: 5755455822268649557}
@@ -216,7 +216,7 @@ GameObject:
   - component: {fileID: 6459366977836656400}
   - component: {fileID: 5270864134857461411}
   - component: {fileID: 6492359464375598588}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: NameTMP
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -387,7 +387,7 @@ GameObject:
   - component: {fileID: 1143947966733024704}
   - component: {fileID: 4059823592878413552}
   - component: {fileID: 5755455822268649557}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: AttackTMP
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -560,7 +560,7 @@ GameObject:
   - component: {fileID: 5560404601733554958}
   - component: {fileID: 7924085381500825903}
   - component: {fileID: 2864094579650545650}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: HealthTMP
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -730,7 +730,7 @@ GameObject:
   m_Component:
   - component: {fileID: 60184556255585404}
   - component: {fileID: 5307530086064231914}
-  m_Layer: 5
+  m_Layer: 6
   m_Name: Character
   m_TagString: Untagged
   m_Icon: {fileID: 0}

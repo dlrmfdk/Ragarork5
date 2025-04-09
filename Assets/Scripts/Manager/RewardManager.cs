@@ -27,7 +27,8 @@ public class RewardManager : MonoBehaviour
     private bool goldClaimed = false;
     private bool cardClaimed = false;
     private bool cardChosen = false;
-
+    private List<GameObject> cachedRewardPanels = new List<GameObject>();
+    //private GameObject[] rewardPanels;
     private void Awake()
     {
         if (Instance == null)
@@ -37,6 +38,7 @@ public class RewardManager : MonoBehaviour
 
         rewardPanel.SetActive(false);
         cardRewardPanel.SetActive(false);
+        //rewardPanels = GameObject.FindGameObjectsWithTag("RewardPanel");
     }
 
     public void ShowRewardPanel()
@@ -66,6 +68,17 @@ public class RewardManager : MonoBehaviour
 
     void ShowCardRewardPanel()
     {
+
+        // 카드 획득 버튼 숨김
+        cardRewardButton.gameObject.SetActive(false);
+
+        //태그가 RewardPanel인 오브젝트 비활성화
+        GameObject[] rewardPanels = GameObject.FindGameObjectsWithTag("RewardPanel");
+        foreach (GameObject panel in rewardPanels)
+        {
+            cachedRewardPanels.Add(panel);
+            panel.SetActive(false);
+        }
         // 보상 카드 후보 필터링
         List<Item> validRewardItems = new List<Item>();
         foreach (Item item in itemSO.items)
@@ -101,7 +114,7 @@ public class RewardManager : MonoBehaviour
         // 카드 보상 패널 활성화
         cardRewardPanel.SetActive(true);
 
-     
+
     }
     // RewardManager 클래스 내에 추가할 함수
     private void InstantiateRewardCards(List<Item> rewardOptions)
@@ -145,7 +158,7 @@ public class RewardManager : MonoBehaviour
         cardClaimed = true;
         cardChosen = true;
 
-        // 보상 카드 패널 자체를 비활성화하여, 카드 보상 UI를 화면에서 제거
+        // 카드 보상 패널 비활성화
         cardRewardPanel.SetActive(false);
 
         // 필요 시 추가 후속 처리
@@ -157,20 +170,23 @@ public class RewardManager : MonoBehaviour
         if (goldClaimed && cardClaimed)
         {
             rewardPanel.SetActive(false);
-           
+
         }
     }
-
+    //클릭 하면 Hierarchy창에 있는 rewardcard 태그들 전부 비활성화 하는 함수
     public void DisableRewardCards()
     {
-        // 보상 카드들이 배치된 부모 컨테이너의 모든 자식을 비활성화
-        foreach (Transform child in cardRewardContainer)
+        GameObject[] rewardCards = GameObject.FindGameObjectsWithTag("RewardCard");
+        foreach (GameObject card in rewardCards)
         {
-            child.gameObject.SetActive(false);
+            card.SetActive(false);
         }
 
-        // 필요에 따라 카드 보상 패널도 비활성화합니다.
-        cardRewardPanel.SetActive(false);
-    }
+        //rewardPanel 활성화
+        foreach (GameObject panel in cachedRewardPanels)
+        {
+            panel.SetActive(true);
+        }
 
+    }
 }

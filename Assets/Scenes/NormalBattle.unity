@@ -3112,7 +3112,7 @@ GameObject:
   - component: {fileID: 2003952686}
   m_Layer: 5
   m_Name: RewardPanel
-  m_TagString: Untagged
+  m_TagString: RewardPanel
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
