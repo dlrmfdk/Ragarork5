@@ -6,6 +6,7 @@ public class SkillCardEffect : BaseCardEffect
 {
     private SkillType skillType;
     private int power;
+    private Card card;
 
     // SkillType에 대응하는 CSV 카드 이름 매핑
     private Dictionary<SkillType, string> skillNameMap = new Dictionary<SkillType, string>()
@@ -24,10 +25,11 @@ public class SkillCardEffect : BaseCardEffect
     /// <summary>HeavenlyEnergy
     /// 효과 초기화: 스킬 타입과 추가 파워 설정
     /// </summary>
-    public void Initialize(SkillType type, int powerVal = 0)
+    public void Initialize(SkillType type, int powerVal = 0, Card cardRef = null)
     {
         skillType = type;
         power = powerVal;
+        card = cardRef;
     }
 
     /// <summary>
@@ -62,6 +64,12 @@ public class SkillCardEffect : BaseCardEffect
             //    //player.DoubleDamageThisTurn();
             //    break;
             case SkillType.PoisonMist:
+                ///독안개 카드를 쓸 때 Card.cs에 있는 atksound[0]을 재생
+                if (card != null)
+                {
+                    card.PlaySound(card.GetAttackSound(0)); // 사운드 재생
+                }
+
                 // 독안개: 모든 적에게 독을 부여 (예시)
                 EnemySpawner.Instance.ApplyPoisonToAllEnemies((int)cardData.defaultValue);
                 break;

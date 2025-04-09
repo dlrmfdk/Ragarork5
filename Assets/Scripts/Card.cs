@@ -12,8 +12,10 @@ public class Card : MonoBehaviour
     [SerializeField] TMP_Text nameTMP; //카드 이름
     [SerializeField] TMP_Text attackTMP; //카드 공격력
     [SerializeField] TMP_Text healthTMP; //체력
-    [SerializeField] Sprite cardFront; 
+    [SerializeField] Sprite cardFront;
     //[SerializeField] Sprite cardBack; 
+    [Header("UI 관련")]
+    [SerializeField] private AudioClip[] atksound;
 
     public Item item;
     public CardData cardData;
@@ -22,7 +24,20 @@ public class Card : MonoBehaviour
     private BaseCardEffect CardEffect; // 카드 효과 참조                                    
     private Enemy targetEnemy;
     private Player player;
+    private AudioSource audioSource; //오디오 소스
 
+    public static EnemySpawner Instance { get; private set; }
+
+
+    private void Awake()
+    {
+        // AudioSource 컴포넌트가 없으면 자동으로 추가
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+    }
     public void Setup(Item item, bool isFront, Player currentPlayer)
     {
         this.item = item;
@@ -48,13 +63,14 @@ public class Card : MonoBehaviour
         else if(item.type == ItemType.Skill)
         {
             CardEffect = gameObject.AddComponent<SkillCardEffect>();
-            ((SkillCardEffect)CardEffect).Initialize(item.skillType);
+            ((SkillCardEffect)CardEffect).Initialize(item.skillType,0,this);
         }
 
     }
     // 카드의 효과를 실행하는 메서드
     public void AttackPlayEffect(Enemy target)
     {
+        
         this.targetEnemy = target;
         CardEffect?.Execute(player, target);
     }
@@ -101,4 +117,22 @@ public class Card : MonoBehaviour
         }
     }
 
+    public void PlaySound(AudioClip audioClip)
+    {
+        if (audioSource == null)
+        {
+            Debug.LogWarning("AudioSource가 없습니다! 사운드를 재생할 수 없습니다.");
+            return;
+        }
+
+        if (audioClip != null)
+            audioSource.PlayOneShot(audioClip);
+    }
+
+    public AudioClip GetAttackSound(int index)
+    {
+        if (index >= 0 && index < atksound.Length)
+            return atksound[index];
+        return null;
+    }
 }

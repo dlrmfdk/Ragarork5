@@ -109,6 +109,8 @@ MonoBehaviour:
   attackTMP: {fileID: 8729533952171542577}
   healthTMP: {fileID: 8729533952425266922}
   cardFront: {fileID: -417712059, guid: 03f9598aa1cedf04fa271b657712ec8c, type: 3}
+  atksound:
+  - {fileID: 8300000, guid: 29c234deb0fa76e49abdd991dd09ada9, type: 3}
   item:
     name: 
     sprite: {fileID: 0}
