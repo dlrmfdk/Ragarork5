@@ -1,24 +1,27 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using TMPro;
 
 public class HpBarController : MonoBehaviour
 {
     [Header("HP 관련 슬라이더")]
     [SerializeField] private Slider hpSlider;
 
+    // HP바 숫자를 표시할 텍스트 컴포넌트
+    [Header("HP 텍스트")]
+    [SerializeField] private TMP_Text hpText;
+
     [Header("방어도(Defense) 슬라이더")]
     [SerializeField] private Slider defenseSlider;
 
-     private Vector3 offset = new Vector3(0, -80f, 0);
-
+    private Vector3 offset = new Vector3(0, -80f, 0);
     private Transform targetTransform;
     private Camera mainCamera;
     private Canvas canvas;
 
-    // HP 갱신용 코루틴
+    // 슬라이더 값 업데이트용 코루틴
     private Coroutine updateHPCoroutine;
-    // 방어도 갱신용 코루틴
     private Coroutine updateDefenseCoroutine;
 
     void Start()
@@ -31,7 +34,6 @@ public class HpBarController : MonoBehaviour
             return;
         }
 
-        // HP 슬라이더 초기화
         if (hpSlider != null)
         {
             hpSlider.value = hpSlider.maxValue;
@@ -41,18 +43,23 @@ public class HpBarController : MonoBehaviour
             Debug.LogError("HPBarController: hpSlider가 할당되지 않았습니다.");
         }
 
-        // 방어도 슬라이더 초기화
         if (defenseSlider != null)
         {
             defenseSlider.value = 0;
-           defenseSlider.maxValue = hpSlider != null ? hpSlider.maxValue : 100; //hp와 동일한 최대값
-            // 필요하면 적정 최대값으로 설정(혹은 매번 설정)
+            defenseSlider.maxValue = hpSlider != null ? hpSlider.maxValue : 100;
         }
         else
         {
             Debug.LogWarning("HPBarController: defenseSlider가 할당되지 않았습니다. 방어도 표시 불가.");
         }
+
+        // 시작 시 hpText에 체력 숫자 표시 (예: "100 / 100")
+        if (hpText != null && hpSlider != null)
+        {
+            hpText.text = $"{(int)hpSlider.value} / {(int)hpSlider.maxValue}";
+        }
     }
+
 
     void Update()
     {
@@ -67,37 +74,37 @@ public class HpBarController : MonoBehaviour
             else if (canvas.renderMode == RenderMode.ScreenSpaceCamera)
             {
                 RectTransform canvasRect = canvas.GetComponent<RectTransform>();
-
                 Vector2 anchoredPos;
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(
                     canvasRect, screenPos + offset, canvas.worldCamera, out anchoredPos);
-
                 RectTransform rectTransform = GetComponent<RectTransform>();
                 rectTransform.anchoredPosition = anchoredPos;
             }
         }
     }
 
-    // 타겟 설정
+    // 타겟 설정 (체력바가 캐릭터를 따라다닙니다.)
     public void SetTarget(Transform target)
     {
         targetTransform = target;
     }
 
-    // HP 최대값 설정
+    // 최대 체력 설정 (슬라이더와 텍스트 모두 설정)
     public void SetMaxHP(int maxHP)
     {
         if (hpSlider != null)
         {
-            hpSlider.maxValue = maxHP;
-            hpSlider.value = maxHP;
+            hpSlider.maxValue = maxHP;          
+            if (hpText != null)
+                hpText.text = $"{maxHP} / {maxHP}";
         }
     }
 
-    // 현재 HP 설정
+    // 현재 체력 설정 (애니메이션 효과와 함께 텍스트 업데이트)
     public void SetCurrentHP(int currentHP)
     {
-        if (hpSlider == null || !gameObject.activeInHierarchy) return;
+        if (hpSlider == null || !gameObject.activeInHierarchy)
+            return;
 
         if (updateHPCoroutine != null)
             StopCoroutine(updateHPCoroutine);
@@ -105,7 +112,7 @@ public class HpBarController : MonoBehaviour
         updateHPCoroutine = StartCoroutine(UpdateHealthBar(hpSlider, currentHP));
     }
 
-    // 방어도(Defense) 최대값 설정 (필요 시)
+    // 방어도 최대값 설정 (필요 시)
     public void SetMaxDefense(int maxDefense)
     {
         if (defenseSlider != null)
@@ -117,7 +124,8 @@ public class HpBarController : MonoBehaviour
     // 현재 방어도 설정
     public void SetCurrentDefense(int currentDefense)
     {
-        if (defenseSlider == null || !gameObject.activeInHierarchy) return;
+        if (defenseSlider == null || !gameObject.activeInHierarchy)
+            return;
 
         if (updateDefenseCoroutine != null)
             StopCoroutine(updateDefenseCoroutine);
@@ -125,24 +133,31 @@ public class HpBarController : MonoBehaviour
         updateDefenseCoroutine = StartCoroutine(UpdateHealthBar(defenseSlider, currentDefense));
     }
 
-    // 공통 코루틴 (슬라이더 값 부드럽게 변경)
+    // 슬라이더 값을 부드럽게 변경하고, 동시에 텍스트도 업데이트합니다.
     private IEnumerator UpdateHealthBar(Slider slider, float targetValue)
     {
         float duration = 0.5f;
         float elapsed = 0f;
         float startValue = slider.value;
-        float endValue = targetValue;
 
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            slider.value = Mathf.Lerp(startValue, endValue, elapsed / duration);
+            slider.value = Mathf.Lerp(startValue, targetValue, elapsed / duration);
+
+            // hpText 업데이트
+            if (hpText != null)
+                hpText.text = $"{(int)slider.value} / {(int)slider.maxValue}";
+
+
             yield return null;
         }
-        slider.value = endValue;
+        slider.value = targetValue;
+        if (hpText != null)
+            hpText.text = $"{(int)targetValue} / {(int)slider.maxValue}";
     }
 
-    // 오프셋 설정
+    // 오프셋 설정 (HP바의 위치 조정)
     public void SetOffset(Vector3 newOffset)
     {
         offset = newOffset;
