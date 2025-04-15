@@ -6,11 +6,13 @@ using TMPro;
 public class HpBarController : MonoBehaviour
 {
     [Header("HP 관련 슬라이더")]
-    [SerializeField] private Slider hpSlider;
+    [SerializeField] public Slider hpSlider;
+
+    
 
     // HP바 숫자를 표시할 텍스트 컴포넌트
     [Header("HP 텍스트")]
-    [SerializeField] private TMP_Text hpText;
+    //[SerializeField] private TMP_Text hpText;
 
     [Header("방어도(Defense) 슬라이더")]
     [SerializeField] private Slider defenseSlider;
@@ -53,11 +55,6 @@ public class HpBarController : MonoBehaviour
             Debug.LogWarning("HPBarController: defenseSlider가 할당되지 않았습니다. 방어도 표시 불가.");
         }
 
-        // 시작 시 hpText에 체력 숫자 표시 (예: "100 / 100")
-        if (hpText != null && hpSlider != null)
-        {
-            hpText.text = $"{(int)hpSlider.value} / {(int)hpSlider.maxValue}";
-        }
     }
 
 
@@ -95,8 +92,6 @@ public class HpBarController : MonoBehaviour
         if (hpSlider != null)
         {
             hpSlider.maxValue = maxHP;          
-            if (hpText != null)
-                hpText.text = $"{maxHP} / {maxHP}";
         }
     }
 
@@ -145,16 +140,9 @@ public class HpBarController : MonoBehaviour
             elapsed += Time.deltaTime;
             slider.value = Mathf.Lerp(startValue, targetValue, elapsed / duration);
 
-            // hpText 업데이트
-            if (hpText != null)
-                hpText.text = $"{(int)slider.value} / {(int)slider.maxValue}";
-
-
             yield return null;
         }
         slider.value = targetValue;
-        if (hpText != null)
-            hpText.text = $"{(int)targetValue} / {(int)slider.maxValue}";
     }
 
     // 오프셋 설정 (HP바의 위치 조정)
