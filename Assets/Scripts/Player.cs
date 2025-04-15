@@ -32,8 +32,6 @@ public class Player : MonoBehaviour
 
     [Header("UI 관련")]
     [SerializeField] private AudioClip atksound;
-    [SerializeField] private AudioClip defsound;
-    [SerializeField] private AudioClip diesound;
     [SerializeField] private HpBarController playerHpBarPrefab; // [SerializeField]으로 프리팹 할당
 
     private HpBarController hpBarController;
@@ -176,7 +174,6 @@ public class Player : MonoBehaviour
     // 방어도 증가
     public void IncreaseDefense(int defense)
     {
-        audioSource.PlayOneShot(defsound);
         currentDefense += defense;
         Debug.Log($"플레이어가 {defense}만큼 방어도를 얻었습니다. 현재 방어도: {currentDefense}");
 
@@ -291,7 +288,6 @@ public class Player : MonoBehaviour
 
     public void Die()
     {
-        audioSource.PlayOneShot(diesound);
         Debug.Log("플레이어가 사망했습니다.");
         // 게임 오버 처리
     }

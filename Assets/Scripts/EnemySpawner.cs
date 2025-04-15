@@ -75,8 +75,6 @@ public class EnemySpawner : MonoBehaviour
     {
         foreach (var enemy in SpawnedEnemies)
         {
-            
-            // 적에게 독을 부여
             if (enemy != null)
                 enemy.ApplyPoison(poisonValue);
         }
