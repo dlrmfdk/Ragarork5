@@ -123,7 +123,7 @@ public class TurnManager : MonoBehaviour
         if (isLoading) return; // 로딩 중일 때 턴 종료 방지
 
         // Discard all cards to the graveyard
-        CardManager.Inst.SendAllCardsToGraveyard();
+        //CardManager.Inst.SendAllCardsToGraveyard();
 
 
         myTurn = false; // 턴을 적에게로 변경

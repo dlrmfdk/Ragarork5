@@ -1,3 +1,4 @@
+ï»¿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,7 +9,7 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance { get; private set; }
     void Awake() => Instance = this;
 
-    [Header("·é µ¦ ¹öÆ°µé")]
+    [Header("ë£¬ ë± ë²„íŠ¼ë“¤")]
     public Button redButton;
     public TextMeshProUGUI redCountText;
     public Button blueButton;
@@ -18,56 +19,96 @@ public class UIManager : MonoBehaviour
     public Button yellowButton;
     public TextMeshProUGUI yellowCountText;
 
-    [Header("Áß¾Ó ½½·Ô")]
-    public List<Button> slotButtons;           // 5°³ ½½·Ô ¹öÆ°
-    public List<Image> slotIconImages;        // ½½·Ô ¾ÆÀÌÄÜ Ç¥½Ã¿ë
+    [Header("ì¤‘ì•™ ìŠ¬ë¡¯")]
+    public List<Button> slotButtons;      // 5ê°œ ìŠ¬ë¡¯ ë²„íŠ¼
+    public List<Image> slotIconImages;   // ìŠ¬ë¡¯ ì•„ì´ì½˜ í‘œì‹œìš©
 
-    [Header("»Ì±â ¹öÆ°")]
+    [Header("ë½‘ê¸°/ë¦¬ë¡¤ ë²„íŠ¼")]
     public Button drawButton;
+    public Button rerollButton;
 
-    [Header("ÆĞ³Îµé")]
-    public GameObject runeDeckPanel;           // ÇÏ´Ü µ¦ ÀüÃ¼
-    public GameObject centralSlotPanel;        // Áß¾Ó ½½·Ô ÀüÃ¼
+    [Header("íŒ¨ë„ë“¤")]
+    public GameObject runeDeckPanel;
+    public GameObject centralSlotPanel;
 
     void Start()
     {
-        // ÃÊ±â¿¡´Â ¼û±è
+        // ì´ˆê¸°ì—ëŠ” UI ìˆ¨ê¸°ê³  ë²„íŠ¼ ë¹„í™œì„±í™”
         runeDeckPanel.SetActive(false);
         centralSlotPanel.SetActive(false);
         drawButton.interactable = false;
+        rerollButton.interactable = false;
     }
 
     /// <summary>
-    /// Å¬¸¯ ÀÌº¥Æ®¿Í ÅØ½ºÆ® ¾÷µ¥ÀÌÆ®¸¦ À§ÇÑ ¿¬°á
+    /// ë± ë²„íŠ¼, ìŠ¬ë¡¯ ë²„íŠ¼, ë½‘ê¸° ë²„íŠ¼ ì½œë°± ë°”ì¸ë”©
     /// </summary>
     public void BindRuneDeck(
-        System.Action<RuneColor> onDeckClick, //µ¨¸®°ÔÀÌÆ®
-        System.Action<int> onSlotClick,
-        System.Action onDrawClick
+        Action<RuneColor> onDeckClick,
+        Action<int> onSlotClick,
+        Action onDrawClick
     )
     {
+        redButton.onClick.RemoveAllListeners();
         redButton.onClick.AddListener(() => onDeckClick(RuneColor.Red));
+
+        blueButton.onClick.RemoveAllListeners();
         blueButton.onClick.AddListener(() => onDeckClick(RuneColor.Blue));
+
+        whiteButton.onClick.RemoveAllListeners();
         whiteButton.onClick.AddListener(() => onDeckClick(RuneColor.White));
+
+        yellowButton.onClick.RemoveAllListeners();
         yellowButton.onClick.AddListener(() => onDeckClick(RuneColor.Yellow));
 
         for (int i = 0; i < slotButtons.Count; i++)
         {
             int idx = i;
+            slotButtons[i].onClick.RemoveAllListeners();
             slotButtons[i].onClick.AddListener(() => onSlotClick(idx));
         }
 
+        drawButton.onClick.RemoveAllListeners();
         drawButton.onClick.AddListener(() => onDrawClick());
     }
 
     /// <summary>
-    /// µ¦ & ½½·Ô ÆĞ³Î ¸ğµÎ º¸ÀÌ±â/¼û±â±â
+    /// ë¦¬ë¡¤ ë²„íŠ¼ ì½œë°± ë°”ì¸ë”©
+    /// </summary>
+    public void BindReRoll(Action onReRoll)
+    {
+        rerollButton.onClick.RemoveAllListeners();
+        rerollButton.onClick.AddListener(() => onReRoll());
+    }
+
+    /// <summary>
+    /// ë¦¬ë¡¤ ë²„íŠ¼ í™œì„±í™”/ë¹„í™œì„±í™”
+    /// </summary>
+    public void SetReRollButton(bool enabled)
+    {
+        rerollButton.interactable = enabled;
+    }
+
+    /// <summary>
+    /// í™•ì • ë²„íŠ¼ í™œì„±í™”/ë¹„í™œì„±í™”
+    /// </summary>
+    public void SetDrawButton(bool enabled)
+    {
+        drawButton.interactable = enabled;
+    }
+
+    /// <summary>
+    /// ë±/ìŠ¬ë¡¯ íŒ¨ë„ ë³´ì´ê¸°
     /// </summary>
     public void ShowRuneUI()
     {
         runeDeckPanel.SetActive(true);
         centralSlotPanel.SetActive(true);
     }
+
+    /// <summary>
+    /// ë±/ìŠ¬ë¡¯ íŒ¨ë„ ìˆ¨ê¸°ê¸°
+    /// </summary>
     public void HideRuneUI()
     {
         runeDeckPanel.SetActive(false);
@@ -75,7 +116,7 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ³²Àº µ¦ °³¼ö °»½Å
+    /// ë±ì— ë‚¨ì€ ê° ë£¬ ê°œìˆ˜ ì—…ë°ì´íŠ¸
     /// </summary>
     public void UpdateDeckCounts(Dictionary<RuneColor, int> counts)
     {
@@ -86,25 +127,41 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Áß¾Ó ½½·Ô ³»¿ë °»½Å (nullÀÌ¸é ºó ¾ÆÀÌÄÜ)
+    /// ì¤‘ì•™ ìŠ¬ë¡¯ì— ì„ íƒëœ ë£¬ ì•„ì´ì½˜ í‘œì‹œ
     /// </summary>
-    public void UpdateCentralSlots(List<RuneColor?> selections, Dictionary<RuneColor, Sprite> icons)
+    //public void UpdateCentralSlots(
+    //    List<RuneColor?> selections,
+    //    Dictionary<RuneColor, Sprite> iconMap
+    //)
+    //{
+    //    for (int i = 0; i < slotIconImages.Count; i++)
+    //    {
+    //        var clr = selections[i];
+    //        if (clr.HasValue)
+    //        {
+    //            slotIconImages[i].sprite = iconMap[clr.Value];
+    //            slotIconImages[i].enabled = true;
+    //        }
+    //        else
+    //        {
+    //            slotIconImages[i].enabled = false;
+    //        }
+    //    }
+    //}
+    public void UpdateCentralSlotsWithSO(List<RuneSO> selections)
     {
         for (int i = 0; i < slotIconImages.Count; i++)
         {
-            var clr = selections[i];
-            slotIconImages[i].sprite = clr.HasValue
-                ? icons[clr.Value]
-                : null;
-            slotIconImages[i].enabled = clr.HasValue;
+            var so = selections[i];
+            if (so != null)
+            {
+                slotIconImages[i].sprite = so.icon;
+                slotIconImages[i].enabled = true;
+            }
+            else
+            {
+                slotIconImages[i].enabled = false;
+            }
         }
-    }
-
-    /// <summary>
-    /// Draw ¹öÆ° È°¼ºÈ­/ºñÈ°¼ºÈ­
-    /// </summary>
-    public void SetDrawButton(bool enabled)
-    {
-        drawButton.interactable = enabled;
     }
 }
