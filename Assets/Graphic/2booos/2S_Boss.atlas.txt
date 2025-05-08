@@ -1,0 +1,132 @@
+
+2S_Boss.png
+size: 4096,2048
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+Bass/fire
+  rotate: false
+  xy: 1, 1
+  size: 1287, 1483
+  orig: 1287, 1483
+  offset: 0, 0
+  index: -1
+Bass/back_horn
+  rotate: false
+  xy: 1290, 1
+  size: 926, 893
+  orig: 926, 893
+  offset: 0, 0
+  index: -1
+Bass/back_armar
+  rotate: false
+  xy: 3388, 1632
+  size: 506, 414
+  orig: 506, 414
+  offset: 0, 0
+  index: -1
+Bass/leg
+  rotate: false
+  xy: 1, 1486
+  size: 220, 528
+  orig: 220, 528
+  offset: 0, 0
+  index: -1
+Bass/bust
+  rotate: false
+  xy: 3388, 896
+  size: 538, 734
+  orig: 538, 734
+  offset: 0, 0
+  index: -1
+Bass/leg_cloth
+  rotate: false
+  xy: 1290, 896
+  size: 680, 853
+  orig: 680, 853
+  offset: 0, 0
+  index: -1
+Bass/foot
+  rotate: false
+  xy: 2445, 1491
+  size: 302, 455
+  orig: 302, 455
+  offset: 0, 0
+  index: -1
+Bass/knee
+  rotate: false
+  xy: 758, 1795
+  size: 161, 145
+  orig: 161, 145
+  offset: 0, 0
+  index: -1
+Bass/pelvis
+  rotate: false
+  xy: 2749, 1657
+  size: 506, 253
+  orig: 506, 253
+  offset: 0, 0
+  index: -1
+Boss_!/left_arm1
+  rotate: false
+  xy: 501, 1486
+  size: 255, 337
+  orig: 255, 337
+  offset: 0, 0
+  index: -1
+Boss_!/right_arm1
+  rotate: false
+  xy: 223, 1486
+  size: 276, 342
+  orig: 276, 342
+  offset: 0, 0
+  index: -1
+Bass/head
+  rotate: false
+  xy: 1972, 1491
+  size: 471, 407
+  orig: 471, 407
+  offset: 0, 0
+  index: -1
+Bass/armor
+  rotate: false
+  xy: 1972, 896
+  size: 868, 593
+  orig: 868, 593
+  offset: 0, 0
+  index: -1
+fireball
+  rotate: false
+  xy: 2842, 896
+  size: 544, 759
+  orig: 544, 759
+  offset: 0, 0
+  index: -1
+Boss_!/left_arm2
+  rotate: false
+  xy: 3896, 1632
+  size: 186, 366
+  orig: 186, 366
+  offset: 0, 0
+  index: -1
+Boss_!/right_arm2
+  rotate: false
+  xy: 758, 1486
+  size: 276, 307
+  orig: 276, 307
+  offset: 0, 0
+  index: -1
+Boss_!/right_hand
+  rotate: false
+  xy: 1036, 1486
+  size: 216, 188
+  orig: 216, 188
+  offset: 0, 0
+  index: -1
+Boss_!/left_arm_hand
+  rotate: false
+  xy: 1036, 1751
+  size: 271, 280
+  orig: 271, 280
+  offset: 0, 0
+  index: -1
