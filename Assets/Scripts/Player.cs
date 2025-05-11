@@ -146,7 +146,7 @@ public class Player : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             // CardManager의 AddCard(true)를 호출하면, 손패에 카드가 추가됩니다.
-            CardManager.Inst.AddCard(true);
+            //CardManager.Inst.AddCard(true);
         }
         Debug.Log($"플레이어가 {count}장의 카드를 뽑습니다.");
     }

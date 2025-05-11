@@ -1,3 +1,4 @@
+ï»¿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,57 +6,78 @@ public class RuneDeckManager : MonoBehaviour
 {
     public static RuneDeckManager Instance { get; private set; }
 
-    [Header("·é Á¤ÀÇ SO ¸®½ºÆ®")]
-    [Tooltip("¿¡µğÅÍ¿¡¼­ ¸ğµç RuneSO ¿¡¼ÂÀ» ÇÒ´çÇÏ¼¼¿ä")]
-    public List<RuneSO> runeDefinitions;
+    [Header("ë£¬ ì •ì˜ SO ë¦¬ìŠ¤íŠ¸")]
+    [Tooltip("ì—ë””í„°ì—ì„œ ìƒì„±í•œ ëª¨ë“  RuneSO ì—ì…‹ì„ í• ë‹¹")]
+    [SerializeField] private List<RuneSO> runeDefinitions;
 
-    // ·±Å¸ÀÓ µ¦ Ä«¿îÆ® (RuneSO ¡æ ³²Àº °³¼ö)
+    [Header("ë± ìƒíƒœ ì €ì¥ìš© SO")]
+    [Tooltip("ì—ë””í„°ì—ì„œ ìƒì„±í•œ RuneDeckDataSO.assetì„ í• ë‹¹")]
+    [SerializeField] private RuneDeckDataSO deckData;
+
+    // ëŸ°íƒ€ì„ ë± ì¹´ìš´íŠ¸: SOë³„ ë³´ìœ  ê°œìˆ˜
     private Dictionary<RuneSO, int> deckCounts;
-    // »ö»óº° SO ¸®½ºÆ® (·£´ı ÃßÃâ¿ë)
+
+    // ìƒ‰ìƒë³„ SO ê·¸ë£¹í•‘ (ëœë¤ ì¶”ì¶œìš©)
     private Dictionary<RuneColor, List<RuneSO>> runeSOByColor;
 
-    // Áß¾Ó ½½·Ô(ÃÖ´ë 5°³)¿¡ ¼±ÅÃµÈ RuneSO
+    // ì¤‘ì•™ ìŠ¬ë¡¯(5ê°œ)ì— ì„ íƒëœ ë£¬ë“¤
     private List<RuneSO> selections = new List<RuneSO>(new RuneSO[5]);
-    private int selectionCount = 0;
+    private int selectionCount;
 
-    // ¹¦Áö(»ç¿ëµÈ ·é º¸°ü¿ë)
-    private List<RuneSO> graveyard = new List<RuneSO>();
-
-    // ÅÏ´ç ¸®·Ñ »ç¿ë ¿©ºÎ
+    // í„´ë‹¹ ë¦¬ë¡¤ 1íšŒ ì œí•œ í”Œë˜ê·¸
     private bool hasRerolledThisTurn;
-
 
     void Awake()
     {
-        if (Instance == null) Instance = this;
-        else { Destroy(gameObject); return; }
-
-        // 1) µ¦ Ä«¿îÆ® ÃÊ±âÈ­
-        deckCounts = new Dictionary<RuneSO, int>();
-        foreach (var so in runeDefinitions)
-            deckCounts[so] = so.initialCount;
-
-        // 2) »ö»óº° SO ¸®½ºÆ® ±¸¼º
-        runeSOByColor = new Dictionary<RuneColor, List<RuneSO>>();
-        foreach (var so in runeDefinitions)
+        if (Instance == null)
         {
-            if (!runeSOByColor.ContainsKey(so.color))
-                runeSOByColor[so.color] = new List<RuneSO>();
-            runeSOByColor[so.color].Add(so);
+            Instance = this;
+         
+
+            // deckData ì¸ìŠ¤í„´ìŠ¤ ë³µì œ(ì›ë³¸ ë³´í˜¸)
+            deckData = Instantiate(deckData);
+
+            // 1) ì´ˆê¸° ì¹´ìš´íŠ¸ë¥¼ SO.initialCountë¡œ ì„¸íŒ…
+            deckCounts = new Dictionary<RuneSO, int>();
+            foreach (var so in runeDefinitions)
+                deckCounts[so] = so.initialCount;
+
+            // 2) ì €ì¥ëœ entries ê°’ìœ¼ë¡œ ë®ì–´ì“°ê¸°
+            foreach (var entry in deckData.entries)
+            {
+                // SO.name ê³¼ entry.runeID ì¼ì¹˜ì‹œí‚¤ì„¸ìš”
+                var so = runeDefinitions.Find(r => r.name == entry.runeID);
+                if (so != null)
+                    deckCounts[so] = entry.count;
+            }
+
+            // 3) ìƒ‰ìƒë³„ SO ë¦¬ìŠ¤íŠ¸ êµ¬ì„±
+            runeSOByColor = new Dictionary<RuneColor, List<RuneSO>>();
+            foreach (var so in runeDefinitions)
+            {
+                if (!runeSOByColor.ContainsKey(so.color))
+                    runeSOByColor[so.color] = new List<RuneSO>();
+                runeSOByColor[so.color].Add(so);
+            }
+
+            // 4) í„´ ì‹œì‘ ì´ë²¤íŠ¸ êµ¬ë… (Awakeì—ì„œ)
+            TurnManager.OnTurnStarted += OnTurnStarted;
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
 
     void Start()
     {
-        //  Äİ¹é ¹ÙÀÎµù: ½½·Ô Ãë¼Ò ±â´ÉÀº ºó ¶÷´Ù·Î ´ëÃ¼
+        // UIManagerì— ë±/ìŠ¬ë¡¯/ë“œë¡œìš°/ë¦¬ë¡¤ ë°”ì¸ë”©
         UIManager.Instance.BindRuneDeck(
             OnDeckRuneClicked,
-            idx => { /* ½½·Ô Å¬¸¯ Ãë¼Ò ±â´É »èÁ¦ */ },
+            /* ìŠ¬ë¡¯ ì·¨ì†Œ ê¸°ëŠ¥ì€ ì œê±°ë¨ */ idx => { },
             OnDrawClicked
         );
-        UIManager.Instance.BindReRoll(OnReRollClicked);
-
-        TurnManager.OnTurnStarted += OnTurnStarted;
+        UIManager.Instance.BindReRoll(OnRerollClicked);
     }
 
     void OnDestroy()
@@ -71,100 +93,118 @@ public class RuneDeckManager : MonoBehaviour
             return;
         }
 
-        // 1) µ¦ ¸®ÇÊ
+        // ë± ë¦¬í•„: ì¹´ìš´íŠ¸ 0ì¸ ë£¬ì€ initialCountë§Œí¼ ì¬ì„¤ì •
         foreach (var so in runeDefinitions)
+        {
             if (deckCounts[so] <= 0)
                 deckCounts[so] = so.initialCount;
+        }
 
-        // 2) ½½·Ô ÃÊ±âÈ­
+        // ìŠ¬ë¡¯ ì´ˆê¸°í™”
         selectionCount = 0;
         for (int i = 0; i < selections.Count; i++)
             selections[i] = null;
 
-        // 3) ¸®·Ñ ÇÃ·¡±× ¸®¼Â
         hasRerolledThisTurn = false;
 
-        // 4) UI °»½Å ¹× Ç¥½Ã
         RefreshUI();
         UIManager.Instance.ShowRuneUI();
     }
 
-    // »ö»ó ¹öÆ° Å¬¸¯ ¡æ ÇØ´ç »ö»óÀÇ SO ¸®½ºÆ®¿¡¼­ ·£´ı ÃßÃâ
     private void OnDeckRuneClicked(RuneColor color)
     {
-        if (selectionCount >= 5) return;
+        if (selectionCount >= selections.Count) return;
+        if (!runeSOByColor.TryGetValue(color, out var list) || list.Count == 0) return;
 
-        var list = runeSOByColor[color];
-        if (list == null || list.Count == 0) return;
+        // ê°™ì€ ìƒ‰ìƒ ì¤‘ ëœë¤ ì„ íƒ
+        var chosen = list[UnityEngine.Random.Range(0, list.Count)];
+        if (deckCounts[chosen] <= 0) return;
 
-        // ·£´ıÀ¸·Î ÇÏ³ª °ñ¶ó¾²±â
-        var chosenSO = list[Random.Range(0, list.Count)];
-        if (deckCounts[chosenSO] <= 0) return;
-
-        deckCounts[chosenSO]--;
-        selections[selectionCount++] = chosenSO;
+        deckCounts[chosen]--;
+        selections[selectionCount++] = chosen;
 
         RefreshUI();
     }
 
-    // ¸®·Ñ ¹öÆ° Å¬¸¯ ¡æ Áß¾Ó ½½·Ô¿¡ ÀÖ´ø ¸ğµç ·éÀ» ¹¦Áö¿¡ º¸³»°í ºó ½½·ÔÀ¸·Î
-
-    private void OnReRollClicked()
+    private void OnRerollClicked()
     {
-        // ÀÌ¹Ì ¸®·ÑÇßÀ¸¸é µ¿ÀÛ ¾È ÇÔ
         if (hasRerolledThisTurn) return;
 
-        // ±âÁ¸ ¸®·Ñ ·ÎÁ÷: ¹¦Áö·Î º¸³»°í ½½·Ô ºñ¿ì±â
+        // ìŠ¬ë¡¯ ë¹„ìš°ê¸°
         for (int i = 0; i < selections.Count; i++)
-        {
-            var so = selections[i];
-            if (so != null)
-                graveyard.Add(so);
             selections[i] = null;
-        }
         selectionCount = 0;
 
-        // ¸®·Ñ »ç¿ë Ã³¸®
         hasRerolledThisTurn = true;
-
-        // UI °»½Å (¹öÆ° ºñÈ°¼ºÈ­ Æ÷ÇÔ)
         RefreshUI();
     }
 
-
-    // »Ì±â ¹öÆ° Å¬¸¯ ¡æ ¼±ÅÃµÈ ·é È¿°ú ½ÇÇà ÈÄ UI ¼û±è
     private void OnDrawClicked()
     {
+        // ì„ íƒëœ ë£¬ íš¨ê³¼ ì‹¤í–‰
         var targets = EnemySpawner.Instance.SpawnedEnemies;
         foreach (var so in selections)
             so?.effectSO.Execute(Player.Instance, targets);
 
         UIManager.Instance.HideRuneUI();
+        TurnManager.Inst.EndTurn();
     }
 
-    // UI °»½Å
+    /// <summary>
+    /// UI ê°±ì‹ : ë± ì¹´ìš´íŠ¸, ì¤‘ì•™ ìŠ¬ë¡¯, ë²„íŠ¼ ìƒíƒœ
+    /// </summary>
     private void RefreshUI()
     {
-        // 1) »ö»óº° ³²Àº °³¼ö ÇÕ»ê
+        // 1) ìƒ‰ìƒë³„ ë‚¨ì€ ê°œìˆ˜ ì§‘ê³„
         var countsByColor = new Dictionary<RuneColor, int>();
+        foreach (RuneColor c in Enum.GetValues(typeof(RuneColor)))
+            countsByColor[c] = 0;
         foreach (var kv in deckCounts)
-        {
-            var so = kv.Key;
-            var cnt = kv.Value;
-            if (!countsByColor.ContainsKey(so.color))
-                countsByColor[so.color] = 0;
-            countsByColor[so.color] += cnt;
-        }
+            countsByColor[kv.Key.color] += kv.Value;
         UIManager.Instance.UpdateDeckCounts(countsByColor);
 
-        // 2) ½½·Ô ¾ÆÀÌÄÜ °»½Å
+        // 2) ì¤‘ì•™ ìŠ¬ë¡¯ ê°±ì‹  (List ê·¸ëŒ€ë¡œ ì „ë‹¬)
         UIManager.Instance.UpdateCentralSlotsWithSO(selections);
 
-        // 3) ¹öÆ° »óÅÂ
+        // 3) ë²„íŠ¼ ìƒíƒœ
         bool full = (selectionCount == selections.Count);
         UIManager.Instance.SetDrawButton(full);
-
-        // ¸®·ÑÀº ¡°½½·ÔÀÌ °¡µæ Â÷°í, ¾ÆÁ÷ ¸®·Ñ ¾È ÇßÀ» ¶§¡±¸¸ È°¼ºÈ­
         UIManager.Instance.SetReRollButton(full && !hasRerolledThisTurn);
+    }
+
+    /// <summary>
+    /// ë³´ìƒ ë£¬ìœ¼ë¡œ ê¸°ë³¸ë£¬ êµì²´
+    /// </summary>
+    public void ReplaceBasicRune(RuneSO rewardRune)
+    {
+        // ê°™ì€ ìƒ‰ìƒ & ê¸°ë³¸ë£¬(isBasic) ë¨¼ì € ì œê±°
+        foreach (var kv in new Dictionary<RuneSO, int>(deckCounts))
+        {
+            var so = kv.Key;
+            if (so.color == rewardRune.color && so.isBasic && kv.Value > 0)
+            {
+                deckCounts[so]--;
+                break;
+            }
+        }
+
+        // ë³´ìƒë£¬ ì¶”ê°€
+        if (!deckCounts.ContainsKey(rewardRune))
+            deckCounts[rewardRune] = 0;
+        deckCounts[rewardRune]++;
+
+        // ì €ì¥ ë°ì´í„° ê°±ì‹ 
+        deckData.entries.Clear();
+        foreach (var kv in deckCounts)
+        {
+            deckData.entries.Add(new RuneDeckDataSO.Entry
+            {
+                runeID = kv.Key.name,
+                count = kv.Value
+            });
+        }
+
+        RefreshUI();
+        Debug.Log($"[RuneDeck] Replaced with {rewardRune.displayName}");
     }
 }

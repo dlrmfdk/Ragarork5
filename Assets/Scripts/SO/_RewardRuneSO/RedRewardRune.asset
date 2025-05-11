@@ -10,10 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a7f609cf4ce8afc4f8e8cfa894e58f39, type: 3}
-  m_Name: RedRune2
+  m_Name: RedRewardRune
   m_EditorClassIdentifier: 
   color: 0
-  displayName: b
-  icon: {fileID: 21300000, guid: cd2b34b9d7875154d88bfb6ecfbc8d6a, type: 3}
+  displayName: RedRewardRune1
+  icon: {fileID: 21300000, guid: 46de016b782d61f40be071b1cdab3a02, type: 3}
   initialCount: 1
+  isBasic: 0
   effectSO: {fileID: 11400000, guid: 98527adcb808e4845aa87822255bcf10, type: 2}

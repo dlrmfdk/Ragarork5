@@ -76,6 +76,13 @@ public class Enemy : MonoBehaviour
         // EnemySpawner의 SpawnedEnemies 리스트에서 이 적 제거
         EnemySpawner.Instance.SpawnedEnemies.Remove(this);
 
+        // ─── 여기에 보상 패널 띄우기 추가 ───
+        if (EnemySpawner.Instance.SpawnedEnemies.Count == 0)
+        {
+            // 마지막 적이 죽었을 때
+            RewardManager.Instance.ShowRewardPanel();
+        }
+
         Destroy(gameObject);
     }
 

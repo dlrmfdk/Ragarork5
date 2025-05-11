@@ -1,5 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,186 +7,108 @@ public class RewardManager : MonoBehaviour
 {
     public static RewardManager Instance { get; private set; }
 
-    [Header("보상 UI 구성 요소")]
-    [SerializeField] private GameObject rewardPanel;
-    [SerializeField] private Button goldRewardButton;
-    [SerializeField] private Button cardRewardButton;
+    [Header("메인 보상 패널")]
+    [SerializeField] private GameObject RewardPanel;        // 메인 보상 패널
+    [SerializeField] private Button RewardRuneButton;   // ‘룬 보상’ 버튼
 
-    [Header("카드 보상 서브 패널")]
-    [SerializeField] private GameObject cardRewardPanel;
-    [SerializeField] private Transform cardRewardContainer;  // 일반 Transform으로 변경 (Panel)
-    [SerializeField] private GameObject rewardCardPrefab;      // 보상 카드 프리팹
+    [Header("룬 보상 UI")]
+    [SerializeField] private GameObject RuneRewardPanel;    // 룬 옵션 서브 패널
+    [SerializeField] private Button[] OptionButtons;      // 옵션 버튼 1~3
 
-    [Header("보상 설정")]
-    [SerializeField] private int goldRewardAmount = 50;
-    [SerializeField] private int cardRewardOptionCount = 3;
+    [Header("보상 룬 SO 목록 (Inspector에서 채워주세요)")]
+    [SerializeField] private List<RuneSO> RewardPool;       // 보상으로 제시할 RuneSO 리스트
 
-    [Header("ItemSO 참조")]
-    [SerializeField] private ItemSO itemSO;
-
-    private bool goldClaimed = false;
-    private bool cardClaimed = false;
-    private bool cardChosen = false;
-    private List<GameObject> cachedRewardPanels = new List<GameObject>();
-    //private GameObject[] rewardPanels;
     private void Awake()
     {
         if (Instance == null)
+        {
             Instance = this;
-        else
-            Destroy(gameObject);
 
-        rewardPanel.SetActive(false);
-        cardRewardPanel.SetActive(false);
-        //rewardPanels = GameObject.FindGameObjectsWithTag("RewardPanel");
+            // 초기 UI 상태
+            RewardPanel.SetActive(false);
+            RuneRewardPanel.SetActive(false);
+
+            // 메인 패널 ‘룬 보상’ 버튼에 클릭 리스너 등록
+            RewardRuneButton.onClick.RemoveAllListeners();
+            RewardRuneButton.onClick.AddListener(OpenRuneRewardPanel);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
+    /// <summary>
+    /// 전투 종료 직후 호출: 메인 보상 패널만 켜기
+    /// </summary>
     public void ShowRewardPanel()
     {
-        goldClaimed = false;
-        cardClaimed = false;
-        cardChosen = false;
-
-        ShowGoldReward();
-        cardRewardButton.onClick.RemoveAllListeners();
-        cardRewardButton.onClick.AddListener(() => { ShowCardRewardPanel(); });
-
-        rewardPanel.SetActive(true);
+        RewardPanel.SetActive(true);
+        RuneRewardPanel.SetActive(false);
     }
 
-    void ShowGoldReward()
+    /// <summary>
+    /// ‘룬 보상’ 버튼 클릭 시
+    /// </summary>
+    private void OpenRuneRewardPanel()
     {
-        goldRewardButton.onClick.RemoveAllListeners();
-        goldRewardButton.onClick.AddListener(() =>
-        {
-            Player.Instance.AddGold(goldRewardAmount);
-            Debug.Log($"{goldRewardAmount} 골드가 지급되었습니다.");
-            goldClaimed = true;
-            CheckAllRewardsClaimed();
-        });
-    }
+        // 1) 메인 패널 닫기
+        RewardPanel.SetActive(false);
 
-    void ShowCardRewardPanel()
-    {
+        // 2) 보상풀 복사 및 랜덤 3개 추출
+        var tempPool = new List<RuneSO>(RewardPool);
+        var choices = new List<RuneSO>();
+        int maxCount = Mathf.Min(OptionButtons.Length, tempPool.Count);
 
-        // 카드 획득 버튼 숨김
-        cardRewardButton.gameObject.SetActive(false);
-
-        //태그가 RewardPanel인 오브젝트 비활성화
-        GameObject[] rewardPanels = GameObject.FindGameObjectsWithTag("RewardPanel");
-        foreach (GameObject panel in rewardPanels)
+        for (int i = 0; i < maxCount; i++)
         {
-            cachedRewardPanels.Add(panel);
-            panel.SetActive(false);
-        }
-        // 보상 카드 후보 필터링
-        List<Item> validRewardItems = new List<Item>();
-        foreach (Item item in itemSO.items)
-        {
-            if (item != null && (item.rarity == Rarity.Common || item.rarity == Rarity.Rare))
-                validRewardItems.Add(item);
+            int idx = Random.Range(0, tempPool.Count);
+            choices.Add(tempPool[idx]);
+            tempPool.RemoveAt(idx);
         }
 
-        // rarity별 풀 분리
-        List<Item> commonItems = validRewardItems.FindAll(item => item.rarity == Rarity.Common);
-        List<Item> rareItems = validRewardItems.FindAll(item => item.rarity == Rarity.Rare);
-
-        // 보상 카드 뽑기 (총 cardRewardOptionCount 옵션)
-        List<Item> rewardOptions = new List<Item>();
-        for (int i = 0; i < cardRewardOptionCount; i++)
+        // 3) 옵션 버튼마다 정보 세팅
+        for (int i = 0; i < OptionButtons.Length; i++)
         {
-            float chance = Random.value;
-            bool chooseCommon = chance < 0.6f;
-            List<Item> pool = chooseCommon ? commonItems : rareItems;
-            if (pool.Count == 0)
+            var button = OptionButtons[i];
+
+            if (i < choices.Count)
             {
-                pool = validRewardItems;
+                var so = choices[i];
+
+                // 아이콘 설정
+                var iconImage = button.GetComponent<Image>();
+                iconImage.sprite = so.icon;
+
+                // 이름 설정
+                var nameText = button.GetComponentInChildren<TMP_Text>();
+                nameText.text = so.displayName;
+
+                // 클릭 리스너 등록
+                button.gameObject.SetActive(true);
+                button.onClick.RemoveAllListeners();
+                button.onClick.AddListener(() => OnRuneOptionChosen(so));
             }
-            int index = Random.Range(0, pool.Count);
-            rewardOptions.Add(pool[index]);
-            pool.RemoveAt(index);
+            else
+            {
+                // 선택지보다 버튼이 많으면 숨김
+                button.gameObject.SetActive(false);
+            }
         }
 
-        // 5) 보상 카드 옵션들을 배치하는 함수 호출
-        InstantiateRewardCards(rewardOptions);
-
-
-        // 카드 보상 패널 활성화
-        cardRewardPanel.SetActive(true);
-
-
-    }
-    // RewardManager 클래스 내에 추가할 함수
-    private void InstantiateRewardCards(List<Item> rewardOptions)
-    {
-        // 카드 배치 (가운데 정렬)
-        // - spacing: 카드 간격 (월드 유닛 또는 UI 단위; 여기서는 예시로 10f 사용)
-        // - startX : 첫 카드의 X 좌표 (계산을 통해 가운데 정렬)
-        // - posY   : 카드의 Y 위치
-        // - scale  : 카드 크기 배율
-        float spacing = 10f;
-        float startX = -spacing * (rewardOptions.Count - 1) / 2f;
-        float posY = 0f;
-        float scale = 1f; // 필요에 따라 조절
-
-        for (int i = 0; i < rewardOptions.Count; i++)
-        {
-            // 보상 카드 프리팹 Instantiate 및 부모(cardRewardContainer) 할당
-            GameObject cardObj = Instantiate(rewardCardPrefab, cardRewardContainer);
-
-            // 일반 Transform을 사용하여 카드 위치, 회전, 스케일 설정
-            Transform cardTrans = cardObj.transform;
-            float posX = startX + spacing * i;
-            cardTrans.localPosition = new Vector3(posX, posY, 0f);
-            cardTrans.localRotation = Quaternion.identity;
-            cardTrans.localScale = Vector3.one * scale;
-
-            // RewardCard 스크립트의 Setup() 호출 (보상 카드 데이터 및 선택 시 호출할 RewardManager의 콜백 연결)
-            RewardCard rewardCard = cardObj.GetComponent<RewardCard>();
-            rewardCard.Setup(rewardOptions[i], OnCardRewardSelected);
-            rewardCard.PlayShowAnimation(0.5f);
-        }
+        // 4) 룬 보상 서브 패널 열기
+        RuneRewardPanel.SetActive(true);
     }
 
-    public void OnCardRewardSelected(Item selectedCard)
+    /// <summary>
+    /// 보상 룬 하나 선택 시
+    /// </summary>
+    private void OnRuneOptionChosen(RuneSO chosenRune)
     {
-        // 선택된 카드를 플레이어 덱에 추가
-        CardManager.Inst.AddRewardCardToDeck(selectedCard);
-        Debug.Log($"{selectedCard.name} 카드가 플레이어 덱에 추가되었습니다.");
+        // 덱에서 기본 룬 제거 후 보상 룬 추가
+        RuneDeckManager.Instance.ReplaceBasicRune(chosenRune);
 
-        // 보상 카드 선택 처리가 완료되었음을 기록
-        cardClaimed = true;
-        cardChosen = true;
-
-        // 카드 보상 패널 비활성화
-        cardRewardPanel.SetActive(false);
-
-        // 필요 시 추가 후속 처리
-        CheckAllRewardsClaimed();
-    }
-
-    void CheckAllRewardsClaimed()
-    {
-        if (goldClaimed && cardClaimed)
-        {
-            rewardPanel.SetActive(false);
-
-        }
-    }
-    //클릭 하면 Hierarchy창에 있는 rewardcard 태그들 전부 비활성화 하는 함수
-    public void DisableRewardCards()
-    {
-        GameObject[] rewardCards = GameObject.FindGameObjectsWithTag("RewardCard");
-        foreach (GameObject card in rewardCards)
-        {
-            card.SetActive(false);
-        }
-
-        //rewardPanel 활성화
-        foreach (GameObject panel in cachedRewardPanels)
-        {
-            panel.SetActive(true);
-        }
-
+        // 보상 UI 닫기
+        RuneRewardPanel.SetActive(false);
     }
 }

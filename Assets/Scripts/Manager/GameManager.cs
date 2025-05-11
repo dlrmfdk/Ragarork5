@@ -20,11 +20,6 @@ public class GameManager : MonoBehaviour
 
 
 
-    void Start()
-    {
-        StartGame();
-        
-    }
 
     // Update is called once per frame
     void Update()
@@ -41,16 +36,14 @@ public class GameManager : MonoBehaviour
             // 보상 UI가 아직 호출되지 않았다면 보상 UI를 표시
             if (!rewardShown)
             {
-                RewardManager.Instance.ShowRewardPanel();
+                //RewardManager.Instance.ShowRewardPanel();
                 rewardShown = true;
             }
         }
     }
     void InputCheatKey() //개발자용 치트
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1)) //1번 누르면
-            //print(PopItem().name);
-            TurnManager.OnAddCard?.Invoke(true);
+      
 
         if (Input.GetKeyDown(KeyCode.Alpha3)) //3번            
             TurnManager.Inst.EndTurn(); //엔드 턴 호출
@@ -58,7 +51,7 @@ public class GameManager : MonoBehaviour
     }
     public void StartGame()
     {
-        StartCoroutine(TurnManager.Inst.StartGameCo());
+        //StartCoroutine(TurnManager.Inst.StartGameCo());
     }
     public void Notification(string message)
     {

@@ -126,28 +126,6 @@ public class UIManager : MonoBehaviour
         yellowCountText.text = counts[RuneColor.Yellow].ToString();
     }
 
-    /// <summary>
-    /// 중앙 슬롯에 선택된 룬 아이콘 표시
-    /// </summary>
-    //public void UpdateCentralSlots(
-    //    List<RuneColor?> selections,
-    //    Dictionary<RuneColor, Sprite> iconMap
-    //)
-    //{
-    //    for (int i = 0; i < slotIconImages.Count; i++)
-    //    {
-    //        var clr = selections[i];
-    //        if (clr.HasValue)
-    //        {
-    //            slotIconImages[i].sprite = iconMap[clr.Value];
-    //            slotIconImages[i].enabled = true;
-    //        }
-    //        else
-    //        {
-    //            slotIconImages[i].enabled = false;
-    //        }
-    //    }
-    //}
     public void UpdateCentralSlotsWithSO(List<RuneSO> selections)
     {
         for (int i = 0; i < slotIconImages.Count; i++)
