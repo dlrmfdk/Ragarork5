@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -24,6 +25,8 @@ public class Player : MonoBehaviour
 
     [Header("골드 관련")]
     [SerializeField] private int gold = 0; // 초기 골드
+    //골드 관련 텍스트 매쉬 프로
+    [SerializeField] private TextMeshProUGUI goldText; // 골드 UI 텍스트 (필요 시 사용)
 
     // 추가 효과를 위한 변수들
     private bool isDoubleDamageTurn = false; // 이번 턴에 공격 데미지 2배 효과
@@ -156,6 +159,16 @@ public class Player : MonoBehaviour
     {
         gold += amount;
         Debug.Log($"플레이어의 골드가 {amount}만큼 증가하였습니다. 현재 골드: {gold}");
+        //골드 텍스트 업데이트
+        if (goldText != null)
+        {
+            goldText.text = $"{gold}";
+        }
+        else
+        {
+            Debug.LogError("골드 텍스트 UI가 할당되지 않았습니다.");
+        }
+
         // 필요 시 골드 UI 업데이트 호출
     }
 
