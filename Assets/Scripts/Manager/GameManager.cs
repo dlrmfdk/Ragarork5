@@ -12,7 +12,6 @@ public class GameManager : MonoBehaviour
 
     
 
-    [SerializeField] NotificationPanel NotificationPanel;
     [SerializeField] GameObject nextBt;
 
     // 보상 패널을 이미 보여줬는지 여부를 체크하기 위한 플래그
@@ -53,10 +52,7 @@ public class GameManager : MonoBehaviour
     {
         //StartCoroutine(TurnManager.Inst.StartGameCo());
     }
-    public void Notification(string message)
-    {
-        NotificationPanel.Show(message);
-    }
+
 
     
 }

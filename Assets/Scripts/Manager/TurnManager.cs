@@ -45,24 +45,22 @@ public class TurnManager : MonoBehaviour
             yield return StartCoroutine(EnemyTurn());
         }
     }
-
-    /// <summary>
-    /// 플레이어 턴: 알림을 띄우고, EndTurn() 호출을 기다립니다.
-    /// </summary>
     private IEnumerator PlayerTurn()
     {
         isLoading = true;
         myTurn = true;
-        GameManager.Inst.Notification("나의 턴");
-        OnTurnStarted?.Invoke(true);
 
-        // 플레이어가 EndTurn()을 부르면 myTurn이 false가 됩니다.
-        //플레이어가 턴을 끝내겠다고 선언(EndTurn 호출)하기 전까지 이 코루틴을 종료시키지 말라
+        //RuneDeckManager.Instance.LoadDeckState();
+        RuneDeckManager.Instance.RefreshUI();
+        UIManager.Instance.ShowRuneUI();
+
+        // 기존 대기 로직: 플레이어가 EndTurn() 호출할 때까지
         while (myTurn)
             yield return null;
 
         isLoading = false;
     }
+
 
     /// <summary>
     /// 적 턴: 모든 적이 PerformTurn을 마치면 곧바로 종료됩니다.
@@ -71,20 +69,19 @@ public class TurnManager : MonoBehaviour
     {
         isLoading = true;
         myTurn = false;
-        GameManager.Inst.Notification("적의 턴");
+ 
 
-        // 복사본으로 순회하여 원본 리스트 수정 방지
+        // → 여기서 덱 UI 숨기기
+        UIManager.Instance.HideRuneUI();
+
         var enemies = new List<Enemy>(enemySpawner.SpawnedEnemies);
         foreach (var e in enemies)
-        {
             if (e != null)
                 yield return StartCoroutine(e.PerformTurn());
-        }
 
-        // 적 턴 끝나면 즉시 플레이어 턴으로 돌아갑니다.
+        // 적 턴 종료 후 자동으로 플레이어 턴으로…
         isLoading = false;
     }
-
     /// <summary>
     /// 외부(End Turn 버튼 등)에서 호출하세요.
     /// </summary>

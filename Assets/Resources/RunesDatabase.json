@@ -1,0 +1,28 @@
+{
+    "runes": [
+        {
+            "id": "RedBasicRune",
+            "color": "Red",
+            "displayName": "기본 빨강 룬",
+            "iconPath": "Icons/RedBasicRune",
+            "initialCount": 10,
+            "effectID": "RedBasicEffect"
+        },
+        {
+            "id": "BlueBasicRune",
+            "color": "Blue",
+            "displayName": "기본 파랑 룬",
+            "iconPath": "Icons/BlueBasicRune",
+            "initialCount": 10,
+            "effectID": "BlueBasicEffect"
+        },
+        {
+            "id": "ImmortalRune",
+            "color": "Red",
+            "displayName": "불멸의 룬",
+            "iconPath": "Icons/ImmortalRune",
+            "initialCount": 0,
+            "effectID": "ImmortalEffect"
+        }
+    ]
+}

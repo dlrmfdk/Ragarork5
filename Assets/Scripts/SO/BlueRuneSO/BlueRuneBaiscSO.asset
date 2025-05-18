@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a7f609cf4ce8afc4f8e8cfa894e58f39, type: 3}
-  m_Name: BlueRuneSO
+  m_Name: BlueRuneBaiscSO
   m_EditorClassIdentifier: 
   color: 1
   displayName: "\uBC29\uC5B4\uB3C4\uC99D\uAC00"

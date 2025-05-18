@@ -262,6 +262,53 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &73206012
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 73206014}
+  - component: {fileID: 73206013}
+  m_Layer: 0
+  m_Name: RuneDatabaseManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &73206013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 73206012}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f64a8c87c76e7e4b9b159bb8fcca48b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  effectSOList:
+  - {fileID: 11400000, guid: 98527adcb808e4845aa87822255bcf10, type: 2}
+  - {fileID: 11400000, guid: 4099c990cd6bbb643895858bd4a835c8, type: 2}
+--- !u!4 &73206014
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 73206012}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 993.4382, y: 551.2294, z: -1.846614}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &87549074
 GameObject:
   m_ObjectHideFlags: 0
@@ -675,9 +722,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6212d879c04147345aa4b6b774ebd113, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  active: {fileID: 0}
-  inactive: {fileID: 0}
-  btnText: {fileID: 0}
 --- !u!1 &127811972
 GameObject:
   m_ObjectHideFlags: 0
@@ -826,7 +870,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdef9c7e882f2c54ba61eecd6d0d81c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NotificationPanel: {fileID: 1014361646}
   nextBt: {fileID: 781733877}
 --- !u!114 &136321632
 MonoBehaviour:
@@ -3960,7 +4003,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62b1e0ac638904b4cb09ec17c27d008b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  notificationTMP: {fileID: 1433997447}
 --- !u!1 &1048118887
 GameObject:
   m_ObjectHideFlags: 0
@@ -4265,7 +4307,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1022722c004f76a4187fb690e684f4bc, type: 2}
   - {fileID: 11400000, guid: cd1018af527f9b3489b0ca4385165445, type: 2}
   - {fileID: 11400000, guid: 3d4ddefec1d5c98449b9f85aa571bdc3, type: 2}
-  deckData: {fileID: 11400000, guid: a7b678507cb18b74b9ad74d388e97558, type: 2}
 --- !u!1 &1099484328
 GameObject:
   m_ObjectHideFlags: 0
@@ -5879,8 +5920,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbbaab169c076fb43bf5e7067f9fda9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  graveyardParent: {fileID: 508344571}
-  GraveCount: 0
 --- !u!114 &1523740885
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6548,6 +6587,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1604796846}
   m_CullTransparentMesh: 1
+--- !u!1 &1688308878
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1688308879}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1688308879
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1688308878}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 698.2, y: 116.5773, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1711405797
 GameObject:
   m_ObjectHideFlags: 0
@@ -6588,6 +6658,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 149caf03e6117bc46a429d687604f77e, type: 2}
   - {fileID: 11400000, guid: d7d96e9fd7d9bd3468fefef816a3e20d, type: 2}
   - {fileID: 11400000, guid: 7d4fe99cde3ffa041b0ab13904f4703d, type: 2}
+  deckManager: {fileID: 1086702939}
 --- !u!4 &1711405799
 Transform:
   m_ObjectHideFlags: 0
@@ -7773,6 +7844,7 @@ SceneRoots:
   - {fileID: 1711405799}
   - {fileID: 718253328}
   - {fileID: 1086702938}
+  - {fileID: 73206014}
   - {fileID: 519420032}
   - {fileID: 1099484330}
   - {fileID: 861068916}
@@ -7786,3 +7858,4 @@ SceneRoots:
   - {fileID: 1434559961}
   - {fileID: 1533538188}
   - {fileID: 1802988019}
+  - {fileID: 1688308879}

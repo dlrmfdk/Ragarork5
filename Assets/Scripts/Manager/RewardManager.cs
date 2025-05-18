@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,28 +7,43 @@ public class RewardManager : MonoBehaviour
 {
     public static RewardManager Instance { get; private set; }
 
-    [Header("¸ŞÀÎ º¸»ó ÆĞ³Î")]
-    [SerializeField] private GameObject RewardPanel;        // ¸ŞÀÎ º¸»ó ÆĞ³Î
-    [SerializeField] private Button RewardRuneButton;   // ¡®·é º¸»ó¡¯ ¹öÆ°
+    [Header("ë©”ì¸ ë³´ìƒ íŒ¨ë„")]
+    [SerializeField] private GameObject RewardPanel;        // ë©”ì¸ ë³´ìƒ íŒ¨ë„
+    [SerializeField] private Button RewardRuneButton;   // â€˜ë£¬ ë³´ìƒâ€™ ë²„íŠ¼
 
-    [Header("·é º¸»ó UI")]
-    [SerializeField] private GameObject RuneRewardPanel;    // ·é ¿É¼Ç ¼­ºê ÆĞ³Î
-    [SerializeField] private Button[] OptionButtons;      // ¿É¼Ç ¹öÆ° 1~3
+    [Header("ë£¬ ë³´ìƒ UI")]
+    [SerializeField] private GameObject RuneRewardPanel;    // ë£¬ ì˜µì…˜ ì„œë¸Œ íŒ¨ë„
+    [SerializeField] private Button[] OptionButtons;      // ì˜µì…˜ ë²„íŠ¼ 1~3
 
-    [Header("º¸»ó ·é SO ¸ñ·Ï (Inspector¿¡¼­ Ã¤¿öÁÖ¼¼¿ä)")]
-    [SerializeField] private List<RuneSO> RewardPool;       // º¸»óÀ¸·Î Á¦½ÃÇÒ RuneSO ¸®½ºÆ®
+    [Header("ë³´ìƒ ë£¬ SO ëª©ë¡ (Inspectorì—ì„œ ì±„ì›Œì£¼ì„¸ìš”)")]
+    [SerializeField] private List<RuneSO> RewardPool;       // ë³´ìƒìœ¼ë¡œ ì œì‹œí•  RuneSO ë¦¬ìŠ¤íŠ¸
 
-    private void Awake()
+    // ì—ë””í„°ì—ì„œ ì—°ê²°
+    [SerializeField] private RuneDeckManager deckManager;
+
+    //ë³´ìƒ ë£¬ ì„ íƒí–ˆì„ë•Œ
+    public void OnRuneRewardChosen(string rewardRuneID)
+    {
+       // 1) ë³´ìƒë£¬ IDë¡œ ë± ë§¤ë‹ˆì €ì— êµì²´ ìš”ì²­
+        RuneDeckManager.Instance.ReplaceBasicWithReward(rewardRuneID);
+
+      // 2) êµì²´ëœ ë± ìƒíƒœë¥¼ ì¦‰ì‹œ ì €ì¥
+       RuneDeckManager.Instance.SaveDeckState();
+
+        // 3) ë³´ìƒ UI ë‹«ê¸°
+        RuneRewardPanel.SetActive(false);
+    }
+private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
 
-            // ÃÊ±â UI »óÅÂ
+            // ì´ˆê¸° UI ìƒíƒœ
             RewardPanel.SetActive(false);
             RuneRewardPanel.SetActive(false);
 
-            // ¸ŞÀÎ ÆĞ³Î ¡®·é º¸»ó¡¯ ¹öÆ°¿¡ Å¬¸¯ ¸®½º³Ê µî·Ï
+            // ë©”ì¸ íŒ¨ë„ â€˜ë£¬ ë³´ìƒâ€™ ë²„íŠ¼ì— í´ë¦­ ë¦¬ìŠ¤ë„ˆ ë“±ë¡
             RewardRuneButton.onClick.RemoveAllListeners();
             RewardRuneButton.onClick.AddListener(OpenRuneRewardPanel);
         }
@@ -39,7 +54,7 @@ public class RewardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ÀüÅõ Á¾·á Á÷ÈÄ È£Ãâ: ¸ŞÀÎ º¸»ó ÆĞ³Î¸¸ ÄÑ±â
+    /// ì „íˆ¬ ì¢…ë£Œ ì§í›„ í˜¸ì¶œ: ë©”ì¸ ë³´ìƒ íŒ¨ë„ë§Œ ì¼œê¸°
     /// </summary>
     public void ShowRewardPanel()
     {
@@ -48,14 +63,14 @@ public class RewardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ¡®·é º¸»ó¡¯ ¹öÆ° Å¬¸¯ ½Ã
+    /// â€˜ë£¬ ë³´ìƒâ€™ ë²„íŠ¼ í´ë¦­ ì‹œ ì—´ë¦¬ëŠ” íŒ¨ë„
     /// </summary>
     private void OpenRuneRewardPanel()
     {
-        // 1) ¸ŞÀÎ ÆĞ³Î ´İ±â
+        // 1) ë©”ì¸ íŒ¨ë„ ë‹«ê¸°
         RewardPanel.SetActive(false);
 
-        // 2) º¸»óÇ® º¹»ç ¹× ·£´ı 3°³ ÃßÃâ
+        // 2) ë³´ìƒí’€ ë³µì‚¬ ë° ëœë¤ 3ê°œ ì¶”ì¶œ
         var tempPool = new List<RuneSO>(RewardPool);
         var choices = new List<RuneSO>();
         int maxCount = Mathf.Min(OptionButtons.Length, tempPool.Count);
@@ -67,7 +82,7 @@ public class RewardManager : MonoBehaviour
             tempPool.RemoveAt(idx);
         }
 
-        // 3) ¿É¼Ç ¹öÆ°¸¶´Ù Á¤º¸ ¼¼ÆÃ
+        // 3) ì˜µì…˜ ë²„íŠ¼ë§ˆë‹¤ ì •ë³´ ì„¸íŒ…
         for (int i = 0; i < OptionButtons.Length; i++)
         {
             var button = OptionButtons[i];
@@ -76,39 +91,45 @@ public class RewardManager : MonoBehaviour
             {
                 var so = choices[i];
 
-                // ¾ÆÀÌÄÜ ¼³Á¤
+                // ì•„ì´ì½˜ ì„¤ì •
                 var iconImage = button.GetComponent<Image>();
                 iconImage.sprite = so.icon;
 
-                // ÀÌ¸§ ¼³Á¤
+                // ì´ë¦„ ì„¤ì •
                 var nameText = button.GetComponentInChildren<TMP_Text>();
                 nameText.text = so.displayName;
 
-                // Å¬¸¯ ¸®½º³Ê µî·Ï
+                // í´ë¦­ ë¦¬ìŠ¤ë„ˆ ë“±ë¡
                 button.gameObject.SetActive(true);
                 button.onClick.RemoveAllListeners();
-                button.onClick.AddListener(() => OnRuneOptionChosen(so));
+                button.onClick.AddListener(() => {
+                    OnRuneOptionChosen(so);
+                    OnRuneRewardChosen(so.name);
+                });
+
             }
             else
             {
-                // ¼±ÅÃÁöº¸´Ù ¹öÆ°ÀÌ ¸¹À¸¸é ¼û±è
+                // ì„ íƒì§€ë³´ë‹¤ ë²„íŠ¼ì´ ë§ìœ¼ë©´ ìˆ¨ê¹€
                 button.gameObject.SetActive(false);
             }
         }
 
-        // 4) ·é º¸»ó ¼­ºê ÆĞ³Î ¿­±â
+        // 4) ë£¬ ë³´ìƒ ì„œë¸Œ íŒ¨ë„ ì—´ê¸°
         RuneRewardPanel.SetActive(true);
     }
 
     /// <summary>
-    /// º¸»ó ·é ÇÏ³ª ¼±ÅÃ ½Ã
+    /// ë³´ìƒ ë£¬ í•˜ë‚˜ ì„ íƒ ì‹œ
     /// </summary>
     private void OnRuneOptionChosen(RuneSO chosenRune)
     {
-        // µ¦¿¡¼­ ±âº» ·é Á¦°Å ÈÄ º¸»ó ·é Ãß°¡
-        RuneDeckManager.Instance.ReplaceBasicRune(chosenRune);
+        // ì˜ˆ: chosenRune.name ëŒ€ì‹  string ID, ë˜ëŠ” ì§ì ‘ RuneSO ë„˜ê¸°ê¸°
+        RuneDeckManager.Instance.ReplaceBasicWithReward(chosenRune.name);
+        RuneDeckManager.Instance.SaveDeckState();
 
-        // º¸»ó UI ´İ±â
+
+        // ë³´ìƒ UI ë‹«ê¸°
         RuneRewardPanel.SetActive(false);
     }
 }
