@@ -45,7 +45,7 @@ public class UIManager : MonoBehaviour
     /// </summary>
     public void BindRuneDeck(
         Action<RuneColor> onDeckClick,
-        Action<int> onSlotClick,
+       
         Action onDrawClick
     )
     {
@@ -61,13 +61,7 @@ public class UIManager : MonoBehaviour
         yellowButton.onClick.RemoveAllListeners();
         yellowButton.onClick.AddListener(() => onDeckClick(RuneColor.Yellow));
 
-        for (int i = 0; i < slotButtons.Count; i++)
-        {
-            int idx = i;
-            slotButtons[i].onClick.RemoveAllListeners();
-            slotButtons[i].onClick.AddListener(() => onSlotClick(idx));
-        }
-
+        // Draw버튼에 해당 콜백 연결
         drawButton.onClick.RemoveAllListeners();
         drawButton.onClick.AddListener(() => onDrawClick());
     }
@@ -124,22 +118,32 @@ public class UIManager : MonoBehaviour
         blueCountText.text = counts[RuneColor.Blue].ToString();
         whiteCountText.text = counts[RuneColor.White].ToString();
         yellowCountText.text = counts[RuneColor.Yellow].ToString();
+
     }
 
     public void UpdateCentralSlotsWithSO(List<RuneSO> selections)
     {
+        // 1) slotIconImages는 중앙 슬롯에 배치된 Image 컴포넌트들의 리스트
         for (int i = 0; i < slotIconImages.Count; i++)
         {
+            // 2) selections 리스트에서 i번째 RuneSO를 꺼냄
             var so = selections[i];
+
             if (so != null)
             {
+                // 3) 해당 슬롯에 룬이 있으면
+                //   3-1) Image 컴포넌트의 sprite를 RuneSO.icon으로 설정
                 slotIconImages[i].sprite = so.icon;
+                //   3-2) 이미지 표시(enabled) 켜기
                 slotIconImages[i].enabled = true;
             }
             else
             {
+                // 4) so가 null이면(빈 슬롯) 
+                //   이미지 표시(enabled) 끄기 → 빈 칸으로 보이게 함
                 slotIconImages[i].enabled = false;
             }
         }
     }
+
 }

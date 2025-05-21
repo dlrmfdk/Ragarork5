@@ -32,7 +32,7 @@ public class TurnManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 무한 루프: 플레이어 턴 → 적 턴 → 플레이어 턴 → ...
+    /// 무한 루프: 플레이어 턴 → 적 턴 → 플레이어 턴 → ... 무한으로 돌려도되나?
     /// </summary>
     private IEnumerator GameLoop()
     {
@@ -41,23 +41,36 @@ public class TurnManager : MonoBehaviour
 
         while (true)
         {
+
+            RuneDeckManager.Instance.ResetDeckToDefault();
+            // 플레이어 턴
             yield return StartCoroutine(PlayerTurn());
+            // 적 턴
             yield return StartCoroutine(EnemyTurn());
+
         }
     }
     private IEnumerator PlayerTurn()
     {
-        isLoading = true;
-        myTurn = true;
+        Debug.Log("[PlayerTurn] 시작");
+        // 1) 턴 진입 플래그 세팅
+        isLoading = true;    // 게임 루프 차단용 플래그
+        myTurn = true;    // 플레이어 입력 허용 플래그
 
-        //RuneDeckManager.Instance.LoadDeckState();
+        // 2) 덱이 비어 있는 색상은 묘지에서 자동 보충
+        RuneDeckManager.Instance.RefillEmptyColorsFromDiscard();
+
+        // 3) 덱 UI 갱신 및 표시
         RuneDeckManager.Instance.RefreshUI();
         UIManager.Instance.ShowRuneUI();
 
-        // 기존 대기 로직: 플레이어가 EndTurn() 호출할 때까지
+        // 4) 실제 플레이어 입력 대기
+        //    EndTurn() 호출 시 myTurn=false 로 설정되도록 되어 있음
         while (myTurn)
+        {
             yield return null;
-
+        }
+        Debug.Log("[PlayerTurn] myTurn=false, 적 턴으로 넘어갑니다");
         isLoading = false;
     }
 
@@ -87,10 +100,10 @@ public class TurnManager : MonoBehaviour
     /// </summary>
     public void EndTurn()
     {
-        // 플레이어가 자신의 턴 중에 언제든 EndTurn()을 부르면
-            // 바로 myTurn을 false로 바꿔주고,
-           // isLoading 체크는 제거합니다.
-           if (!myTurn) return;     // 이미 적 턴일 땐 무시
-         myTurn = false;
+        Debug.Log("[TurnManager] EndTurn() 호출됨, myTurn 이전값=" + myTurn);
+        if (!myTurn) return;     // 이미 적 턴일 땐 무시
+        myTurn = false;
+        Debug.Log("[TurnManager] myTurn 설정 후값=" + myTurn);
+           
     }
 }
