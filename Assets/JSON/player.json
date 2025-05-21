@@ -1,0 +1,7 @@
+{
+  "id": "player",
+  "hp": 100,
+  "attack": 10,
+  "defense": 5,
+  "gold": 0
+}

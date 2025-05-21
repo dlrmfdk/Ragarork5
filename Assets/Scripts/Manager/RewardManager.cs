@@ -7,9 +7,15 @@ public class RewardManager : MonoBehaviour
 {
     public static RewardManager Instance { get; private set; }
 
+<<<<<<< HEAD
     [Header("메인 보상 패널")]
     [SerializeField] private GameObject RewardPanel;        // 메인 보상 패널
     [SerializeField] private Button RewardRuneButton;   // ‘룬 보상’ 버튼
+    [SerializeField] private Button RewardGoldButton;   // ‘골드 보상’ 버튼
+=======
+   
+   
+>>>>>>> a84f91ad78528519c4583b53ca1869ddd83a031e
 
     [Header("룬 보상 UI")]
     [SerializeField] private GameObject RuneRewardPanel;    // 룬 옵션 서브 패널
@@ -46,6 +52,11 @@ private void Awake()
             // 메인 패널 ‘룬 보상’ 버튼에 클릭 리스너 등록
             RewardRuneButton.onClick.RemoveAllListeners();
             RewardRuneButton.onClick.AddListener(OpenRuneRewardPanel);
+
+            // ���� �г� ������ ������ ��ư�� Ŭ�� ������ ����
+            RewardGoldButton.onClick.RemoveAllListeners();
+            RewardGoldButton.onClick.AddListener(OnGoldButtonClick);
+
         }
         else
         {
@@ -131,5 +142,17 @@ private void Awake()
 
         // 보상 UI 닫기
         RuneRewardPanel.SetActive(false);
+    }
+
+    //���� ��ư Ŭ�� �� �÷��̾��� ���� ���� �Լ�
+    public void OnGoldButtonClick()
+    {
+        // �÷��̾��� ���� ����
+        Player.Instance.AddGold(100); // ���÷� 100���� ����
+
+        //���� ���� ��ư ��Ȱ��ȭ
+        RewardGoldButton.interactable = false;
+
+
     }
 }
