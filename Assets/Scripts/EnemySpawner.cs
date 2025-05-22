@@ -126,7 +126,7 @@ public class EnemySpawner : MonoBehaviour
                     hpBarController.SetCurrentHP(newEnemy.EnemyData.HP);
                    
                     // HP 바의 오프셋 설정 (적의 y축 아래로 위치)
-                    hpBarController.SetOffset(new Vector3(0, 150f, 0)); // 필요에 따라 조정
+                    hpBarController.SetOffset(new Vector3(0, -155f, 0)); // 필요에 따라 조정
 
                     newEnemy.SetHPBarController(hpBarController);
 

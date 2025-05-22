@@ -85,7 +85,7 @@ public class Player : MonoBehaviour
                     // hpBarController.SetMaxDefense(원하는값);
 
                     // HP바가 캐릭터 머리 위에 뜨도록 오프셋 조절 (원하는 위치로)
-                    hpBarController.SetOffset(new Vector3(0, 180f, 0));
+                    hpBarController.SetOffset(new Vector3(0, -230f, 0));
                 }
                 else
                 {

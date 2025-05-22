@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Boss Enemy
   m_EditorClassIdentifier: 
   enemyName: Boss
-  hp: 20
+  hp: 100
   damage: 10
   defense: 0

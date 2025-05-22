@@ -7,15 +7,12 @@ public class RewardManager : MonoBehaviour
 {
     public static RewardManager Instance { get; private set; }
 
-<<<<<<< HEAD
+
     [Header("메인 보상 패널")]
     [SerializeField] private GameObject RewardPanel;        // 메인 보상 패널
     [SerializeField] private Button RewardRuneButton;   // ‘룬 보상’ 버튼
     [SerializeField] private Button RewardGoldButton;   // ‘골드 보상’ 버튼
-=======
-   
-   
->>>>>>> a84f91ad78528519c4583b53ca1869ddd83a031e
+
 
     [Header("룬 보상 UI")]
     [SerializeField] private GameObject RuneRewardPanel;    // 룬 옵션 서브 패널
