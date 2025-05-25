@@ -7,7 +7,23 @@ using TMPro;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
-    void Awake() => Instance = this;
+    // UIManager.cs
+    void Awake()
+    {
+        Debug.Log($"[UIManager.Awake] UIManager 게임 오브젝트 '{this.gameObject.name}'의 Awake 호출됨. Instance 설정 시도. 현재 UIManager.Instance는 {(Instance == null ? "null" : Instance.gameObject.name)}");
+        Instance = this;
+        Debug.Log($"[UIManager.Awake] UIManager.Instance가 '{Instance.gameObject.name}'으로 설정됨.");
+    }
+
+    void OnDestroy()
+    {
+        Debug.Log($"[UIManager.OnDestroy] UIManager 게임 오브젝트 '{this.gameObject.name}'의 OnDestroy 호출됨.");
+        if (Instance == this)
+        {
+            Instance = null;
+            Debug.Log("[UIManager.OnDestroy] 현재 Instance가 파괴되는 인스턴스와 동일하여 UIManager.Instance를 null로 설정함.");
+        }
+    }
 
     [Header("룬 덱 버튼들")]
     public Button redButton;
@@ -123,14 +139,15 @@ public class UIManager : MonoBehaviour
 
     public void UpdateCentralSlotsWithSO(List<RuneSO> selections)
     {
+        Debug.Log($"[UpdateCentralSlotsWithSO] 슬롯 아이콘 업데이트 시작. selections 개수: {selections.Count}");
         // 1) slotIconImages는 중앙 슬롯에 배치된 Image 컴포넌트들의 리스트
         for (int i = 0; i < slotIconImages.Count; i++)
         {
             // 2) selections 리스트에서 i번째 RuneSO를 꺼냄
             var so = selections[i];
-
             if (so != null)
             {
+                Debug.Log($"Slot {i}: 룬 {so.name}, 아이콘 {(so.icon == null ? "NULL" : so.icon.name)}");
                 // 3) 해당 슬롯에 룬이 있으면
                 //   3-1) Image 컴포넌트의 sprite를 RuneSO.icon으로 설정
                 slotIconImages[i].sprite = so.icon;

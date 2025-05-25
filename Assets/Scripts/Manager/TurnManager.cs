@@ -38,11 +38,10 @@ public class TurnManager : MonoBehaviour
     {
         // 처음엔 적 스폰
         enemySpawner.SpawnRandomEnemies();
+        RuneDeckManager.Instance.ResetDeckToDefault(); // 덱 초기화
 
         while (true)
         {
-
-            RuneDeckManager.Instance.ResetDeckToDefault();
             // 플레이어 턴
             yield return StartCoroutine(PlayerTurn());
             // 적 턴
@@ -58,7 +57,7 @@ public class TurnManager : MonoBehaviour
         myTurn = true;    // 플레이어 입력 허용 플래그
 
         // 2) 덱이 비어 있는 색상은 묘지에서 자동 보충
-        RuneDeckManager.Instance.RefillEmptyColorsFromDiscard();
+        RuneDeckManager.Instance.RefillFlaggedColorsFromDiscard();
 
         // 3) 덱 UI 갱신 및 표시
         RuneDeckManager.Instance.RefreshUI();
@@ -97,13 +96,15 @@ public class TurnManager : MonoBehaviour
     }
     /// <summary>
     /// 외부(End Turn 버튼 등)에서 호출하세요.
-    /// </summary>
+    /// </summary> 
     public void EndTurn()
     {
         Debug.Log("[TurnManager] EndTurn() 호출됨, myTurn 이전값=" + myTurn);
-        if (!myTurn) return;     // 이미 적 턴일 땐 무시
-        myTurn = false;
-        Debug.Log("[TurnManager] myTurn 설정 후값=" + myTurn);
-           
+        if (!myTurn) return;
+        myTurn = false; // 플레이어 턴 플래그를 false로 설정
+
+        // 플레이어 턴 종료 직후, 다음 턴에 리필할 룬 색상 검사 및 플래그 설정
+        RuneDeckManager.Instance.CheckAndFlagEmptyColorsForRefill();
+        Debug.Log("[TurnManager] myTurn 설정 후값=" + myTurn + ", CheckAndFlagEmptyColorsForRefill() 호출 완료.");
     }
 }

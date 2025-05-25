@@ -13,6 +13,8 @@ public class RewardManager : MonoBehaviour
     [SerializeField] private Button RewardRuneButton;   // ‘룬 보상’ 버튼
     [SerializeField] private Button RewardGoldButton;   // ‘골드 보상’ 버튼
 
+    [Header("다음 진행 버튼")]
+    [SerializeField] private Button mapButton; // Inspector에서 MapButton 연결
 
     [Header("룬 보상 UI")]
     [SerializeField] private GameObject RuneRewardPanel;    // 룬 옵션 서브 패널
@@ -50,7 +52,7 @@ private void Awake()
             RewardRuneButton.onClick.RemoveAllListeners();
             RewardRuneButton.onClick.AddListener(OpenRuneRewardPanel);
 
-            // ���� �г� ������ ������ ��ư�� Ŭ�� ������ ����
+          
             RewardGoldButton.onClick.RemoveAllListeners();
             RewardGoldButton.onClick.AddListener(OnGoldButtonClick);
 
@@ -68,6 +70,12 @@ private void Awake()
     {
         RewardPanel.SetActive(true);
         RuneRewardPanel.SetActive(false);
+
+        if (mapButton != null)
+        {
+            mapButton.gameObject.SetActive(false); // 또는 mapButton.interactable = false;
+            Debug.Log("[RewardManager] MapButton 비활성화됨.");
+        }
     }
 
     /// <summary>
@@ -135,19 +143,22 @@ private void Awake()
         // 예: chosenRune.name 대신 string ID, 또는 직접 RuneSO 넘기기
         RuneDeckManager.Instance.ReplaceBasicWithReward(chosenRune.name);
         RuneDeckManager.Instance.SaveDeckState();
-
-
         // 보상 UI 닫기
         RuneRewardPanel.SetActive(false);
+        if (mapButton != null)
+        {
+            mapButton.gameObject.SetActive(true); // 또는 mapButton.interactable = true;
+            Debug.Log("[RewardManager] 보상 선택 완료, MapButton 활성화됨.");
+        }
+        
     }
 
-    //���� ��ư Ŭ�� �� �÷��̾��� ���� ���� �Լ�
     public void OnGoldButtonClick()
     {
-        // �÷��̾��� ���� ����
-        Player.Instance.AddGold(100); // ���÷� 100���� ����
+    
+        Player.Instance.AddGold(100); 
 
-        //���� ���� ��ư ��Ȱ��ȭ
+        
         RewardGoldButton.interactable = false;
 
 

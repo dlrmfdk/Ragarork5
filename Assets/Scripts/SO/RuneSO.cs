@@ -12,8 +12,9 @@ public class RuneSO : ScriptableObject
     [Header("룬 아이콘")]
     public Sprite icon;
 
-    [Header("룬 개수")]
-    public int initialCount = 0;
+    [Header("덱 구성 정보")]
+    public bool isBasicRune = false; // 이 룬이 기본 룬인지 여부
+    public int initialDeckCount = 0; // 기본 룬일 경우, 시작 덱에 포함될 개수 (보상 룬은 0)
 
     [Header("효과 SO")]
     public BaseRuneEffectSO effectSO;
