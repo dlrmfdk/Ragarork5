@@ -447,7 +447,64 @@ public class RuneDeckManager : MonoBehaviour
     }
 
 
+    // (기존 PrepareDeckForNewBattle() 메서드는 그대로 유지합니다.
+    //  TurnManager.GameLoop() 시작 시 호출되어 새 전투의 패 초기화 등을 담당합니다.)
 
+    /// <summary>
+    /// 전투 종료 후 호출되어 묘지의 룬들을 덱 카운트로 복원합니다.
+    /// </summary>
+    public void ConsolidateDeckPostBattle()
+    {
+        Debug.Log("[RDM.ConsolidateDeckPostBattle] 전투 후 덱 정리 시작 (묘지 -> 덱 카운트 복원)");
+        if (discardPile != null && discardPile.Any())
+        {
+            int restoredCount = 0;
+            // 묘지에 있는 각 룬에 대해 반복 (ToList()로 복사본을 만들어 순회 중 컬렉션 변경 문제 방지)
+            List<RuneSO> runesToRestore = new List<RuneSO>(discardPile);
+            discardPile.Clear(); // 묘지를 먼저 비웁니다.
+
+            foreach (var runeSO_instance in runesToRestore)
+            {
+                if (runeSO_instance != null)
+                {
+                    if (deckCounts.ContainsKey(runeSO_instance))
+                    {
+                        deckCounts[runeSO_instance]++;
+                        restoredCount++;
+                    }
+                    else
+                    {
+                        // 이 경우는 이론적으로 발생하면 안 됩니다 (덱에서 나온 룬이므로).
+                        deckCounts[runeSO_instance] = 1;
+                        restoredCount++;
+                        Debug.LogWarning($"[RDM.ConsolidateDeckPostBattle] 묘지의 룬 '{runeSO_instance.name}'이 deckCounts에 없어 1로 추가합니다.");
+                    }
+                }
+            }
+            Debug.Log($"[RDM.ConsolidateDeckPostBattle] 묘지에서 {restoredCount}개의 룬을 덱 카운트로 복원했습니다. 현재 묘지 크기: {discardPile.Count}");
+        }
+        else
+        {
+            Debug.Log("[RDM.ConsolidateDeckPostBattle] 묘지가 비어있어 복원할 룬이 없습니다.");
+        }
+
+        // 중요: 이 시점에서는 패(selections)나 리롤 상태는 건드리지 않습니다.
+        // 오직 deckCounts만 갱신하여 보상 선택 시 정확한 덱 상태를 반영하도록 합니다.
+        // SaveDeckState()도 여기서 호출하지 않습니다. 보상 선택 후 ReplaceBasicWithReward에서 저장합니다.
+
+        Debug.Log("[RDM.ConsolidateDeckPostBattle] 전투 후 덱 정리 완료. 현재 덱 카운트 상태:");
+        foreach (var kvp in deckCounts)
+        {
+            if (kvp.Key != null)
+            {
+                Debug.Log($" - {kvp.Key.displayName} ({kvp.Key.name}): {kvp.Value}개");
+            }
+        }
+
+        // 만약 이 시점에 덱 카운트 UI를 즉시 갱신하고 싶다면 RefreshUI()를 호출할 수 있으나,
+        // 보상 화면으로 넘어가므로 필수는 아닐 수 있습니다.
+        // if (isUIManagerReady && UIManager.Instance != null) RefreshUI();
+    }
 
     public void SaveDeckState()
     {

@@ -169,7 +169,7 @@ public class TurnManager : MonoBehaviour
     private void HandleBattleEnd(bool playerWon)
     {
         Debug.Log($"[TurnManager.HandleBattleEnd] 전투 종료. 플레이어 승리: {playerWon}");
-        isLoading = true;
+        isLoading = true; // 추가 입력 방지
 
         if (UIManager.Instance != null && RuneDeckManager.Instance != null && RuneDeckManager.Instance.isUIManagerReady)
         {
@@ -178,11 +178,22 @@ public class TurnManager : MonoBehaviour
 
         if (playerWon)
         {
+            // ★★★ 전투 종료 후, 보상 전 덱 상태 정리 (묘지 -> 덱 카운트로) ★★★
+            if (RuneDeckManager.Instance != null)
+            {
+                RuneDeckManager.Instance.ConsolidateDeckPostBattle();
+            }
+            else
+            {
+                Debug.LogError("[TurnManager.HandleBattleEnd] RuneDeckManager.Instance가 null입니다. 전투 후 덱 정리를 할 수 없습니다.");
+            }
+
+            // 이제 보상 UI 표시 요청
             if (RewardManager.Instance != null && GameManager.Inst != null && !GameManager.Inst.rewardShownPublic)
             {
                 Debug.Log("[TurnManager.HandleBattleEnd] 보상 UI 표시 요청.");
                 RewardManager.Instance.ShowRewardPanel();
-                GameManager.Inst.SetRewardShown(true);
+                GameManager.Inst.SetRewardShown(true); // GameManager에 보상 표시되었음을 알림
             }
             else if (GameManager.Inst != null && GameManager.Inst.nextBt != null)
             {
@@ -194,10 +205,11 @@ public class TurnManager : MonoBehaviour
                 Debug.LogWarning("[TurnManager.HandleBattleEnd] RewardManager 또는 GameManager의 참조가 없어 보상/다음 단계 처리를 못했습니다.");
             }
         }
-        else
+        else // 플레이어 패배
         {
             Debug.Log("[TurnManager.HandleBattleEnd] 플레이어 패배. 게임 오버 처리.");
-            // SceneManager.LoadScene("GameOverScene"); 
+            // SceneManager.LoadScene("GameOverScene"); // 예시
         }
+        // 이 GameLoop 코루틴은 여기서 종료되므로, 씬 전환은 RewardManager의 버튼이나 GameManager에서 처리
     }
 }
