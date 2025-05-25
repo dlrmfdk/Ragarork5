@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: RedRewardRune 2
   m_EditorClassIdentifier: 
   color: 0
-  displayName: RedRewardRune3
+  displayName: RedRewardRune2
   icon: {fileID: 21300000, guid: 4048028f0da989d479a74e552bd92f5f, type: 3}
   isBasicRune: 0
   initialDeckCount: 1

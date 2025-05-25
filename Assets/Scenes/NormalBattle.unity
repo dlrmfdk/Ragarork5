@@ -2855,7 +2855,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &781733878
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6329,7 +6329,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 149caf03e6117bc46a429d687604f77e, type: 2}
   - {fileID: 11400000, guid: d7d96e9fd7d9bd3468fefef816a3e20d, type: 2}
   - {fileID: 11400000, guid: 7d4fe99cde3ffa041b0ab13904f4703d, type: 2}
-  deckManager: {fileID: 1086702939}
 --- !u!4 &1711405799
 Transform:
   m_ObjectHideFlags: 0
