@@ -1,19 +1,19 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static UnityEngine.GraphicsBuffer;
 
 /// <summary>
 /// 덱 및 묘지 관리를 담당하며, JSON 파일로 상태를 저장/로드합니다.
+/// UIManager가 준비되면 이벤트를 통해 UI 관련 작업을 초기화합니다.
 /// </summary>
 public class RuneDeckManager : MonoBehaviour
 {
     public static RuneDeckManager Instance { get; private set; }
+
+    public bool isUIManagerReady = false; // UIManager 준비 및 바인딩 완료 여부 플래그
 
     [Header("룬 정의 SO 리스트")]
     public List<RuneSO> runeDefinitions;
@@ -26,7 +26,7 @@ public class RuneDeckManager : MonoBehaviour
     private Dictionary<RuneColor, List<RuneSO>> runeSOByColor;
 
     /// <summary>다음 턴에 리필할 색상 목록</summary>
-    private HashSet<RuneColor> colorsToRefillNextTurn = new HashSet<RuneColor>(); // 다음 턴에 리필할 색상을 저장
+    private HashSet<RuneColor> colorsToRefillNextTurn = new HashSet<RuneColor>();
 
     // 중앙 슬롯 (최대 5개)
     private List<RuneSO> selections = new List<RuneSO>(new RuneSO[5]);
@@ -55,108 +55,112 @@ public class RuneDeckManager : MonoBehaviour
         foreach (RuneColor c in Enum.GetValues(typeof(RuneColor)))
             runeSOByColor[c] = new List<RuneSO>();
 
-        // runeDefinitions에 있는 모든 룬을 대상으로 작업
         foreach (var so in runeDefinitions)
         {
             if (so.isBasicRune)
             {
-                deckCounts[so] = so.initialDeckCount; // 기본 룬은 지정된 초기 수량으로 설정
+                deckCounts[so] = so.initialDeckCount;
             }
             else
             {
-                deckCounts[so] = 0; // 보상 룬 및 기타 룬은 시작 시 0개
+                deckCounts[so] = 0;
             }
-            runeSOByColor[so.color].Add(so); // 색상별 그룹핑은 그대로 유지
+            runeSOByColor[so.color].Add(so);
         }
 
         foreach (var kv in deckCounts)
-            Debug.Log($"[Awake - Initial Setup] {kv.Key.name}: {kv.Value}");
+            Debug.Log($"[RDM.Awake - Initial Setup] {kv.Key.name}: {kv.Value}");
 
-        LoadDeckState(); // 저장된 상태가 있으면 여기서 덮어쓰므로, 초기 설정은 이전에 와야 함
+        LoadDeckState();
     }
 
     void Start()
     {
-        //// UI 이벤트 바인딩
-        //UIManager.Instance.BindRuneDeck(OnDeckClick, OnDrawClick);
-        //UIManager.Instance.BindReRoll(OnReRoll);
-        //RefreshUI();
+        Debug.Log("[RDM.Start] 시작됨. UIManager.OnUIManagerReady 이벤트를 기다려 UI 설정 예정.");
+        // Start에서 직접적인 UI 바인딩 및 RefreshUI 호출 제거
+        // 모든 UI 관련 초기화는 HandleUIManagerReady에서 수행
     }
+
     void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+        UIManager.OnUIManagerReady += HandleUIManagerReady; // UIManager 준비 이벤트 구독
+        Debug.Log("[RDM.OnEnable] UIManager.OnUIManagerReady 이벤트 구독 완료.");
     }
 
     void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
-        // 만약 UIManager.Instance가 여전히 유효하고, 이 RuneDeckManager가 파괴될 때
-        // UIManager의 리스너를 정리하고 싶다면 여기서 처리할 수 있지만,
-        // 보통은 UIManager가 자신의 OnDestroy에서 리스너를 정리하는 것이 더 일반적입니다.
+        UIManager.OnUIManagerReady -= HandleUIManagerReady; // UIManager 준비 이벤트 구독 해제
+        Debug.Log("[RDM.OnDisable] UIManager.OnUIManagerReady 이벤트 구독 해제 완료.");
     }
 
-
-
-    // RuneDeckManager.cs의 OnSceneLoaded 수정 (코루틴 사용 제안)
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log($"[RDM.OnSceneLoaded] >>>>> 씬 로드 시작: '{scene.name}', 로드 모드: {mode}, 시간: {Time.time} <<<<<");
+        Debug.Log($"[RDM.OnSceneLoaded] >>>>> 씬 로드 완료: '{scene.name}', 로드 모드: {mode}, 시간: {Time.time} <<<<<");
+        isUIManagerReady = false; // 새 씬이 로드되면 UIManager 준비 상태 초기화
+                                  // UIManager가 준비되면 OnUIManagerReady 이벤트가 발생하여 isUIManagerReady가 true로 설정될 것임.
+                                  // 씬 로드 시 특별히 RuneDeckManager가 해야 할 작업 (UI 바인딩 외)이 있다면 여기에 추가
+    }
 
-        if (scene.name == "MapScene" || scene.name == "SomeOtherSceneWithoutRuneDeckUI" || scene.name == "sampleScene")
+    private void HandleUIManagerReady()
+    {
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        Debug.Log($"[RDM.HandleUIManagerReady] UIManager.OnUIManagerReady 이벤트 수신! 현재 활성 씬: {currentSceneName}");
+
+        if (IsUISceneToSkip(currentSceneName))
         {
-            Debug.LogWarning($"[RDM.OnSceneLoaded] '{scene.name}' 씬은 UIManager 관련 로직을 건너뜁니다.");
-            Debug.Log($"[RDM.OnSceneLoaded] <<<<< 씬 '{scene.name}' 처리 완료 (건너뜀) >>>>>");
+            Debug.Log($"[RDM.HandleUIManagerReady] 현재 씬 '{currentSceneName}'은 UIManager 연동을 건너뜁니다.");
+            isUIManagerReady = false;
             return;
         }
 
-        // UIManager가 준비될 시간을 주기 위해 코루틴으로 실행
-        StartCoroutine(ProcessSceneLoad(scene));
-    }
-
-    private IEnumerator ProcessSceneLoad(Scene scene)
-    {
-        // 한 프레임 대기 (또는 아주 짧은 시간 대기)
-        yield return null; // 또는 yield return new WaitForSeconds(0.1f);
-
-        Debug.Log($"[RDM.ProcessSceneLoad] 코루틴 실행됨. 씬: '{scene.name}'. UIManager.Instance 확인 중...");
         if (UIManager.Instance != null)
         {
-            Debug.Log($"[RDM.ProcessSceneLoad] UIManager.Instance 유효함! (오브젝트: {UIManager.Instance.gameObject.name}). UI 바인딩 및 RefreshUI를 시도합니다.");
+            Debug.Log($"[RDM.HandleUIManagerReady] UIManager.Instance 유효함! (오브젝트: {UIManager.Instance.gameObject.name}). UI 바인딩 및 RefreshUI를 시도합니다.");
             try
             {
                 UIManager.Instance.BindRuneDeck(OnDeckClick, OnDrawClick);
                 UIManager.Instance.BindReRoll(OnReRoll);
-                RefreshUI();
-                Debug.Log("[RDM.ProcessSceneLoad] UI 바인딩 및 RefreshUI 성공적으로 완료됨.");
+                isUIManagerReady = true; // UIManager 준비 및 바인딩 완료
+                RefreshUI(); // UIManager가 준비된 후 첫 UI 새로고침
+                Debug.Log("[RDM.HandleUIManagerReady] UI 바인딩 및 RefreshUI 성공적으로 완료됨.");
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[RDM.ProcessSceneLoad] UI 바인딩 또는 RefreshUI 중 예외 발생: {e}");
+                Debug.LogError($"[RDM.HandleUIManagerReady] UI 바인딩 또는 RefreshUI 중 예외 발생: {e}");
+                isUIManagerReady = false;
             }
         }
         else
         {
-            Debug.LogError($"[RDM.ProcessSceneLoad] !!! UIManager.Instance가 NULL입니다. 씬 '{scene.name}'은 UIManager가 필요하지만 찾을 수 없습니다. UI 관련 작업 실패 !!!");
+            Debug.LogError($"[RDM.HandleUIManagerReady] !!! UIManager.OnUIManagerReady 이벤트는 발생했으나, UIManager.Instance가 NULL입니다. 심각한 오류 !!!");
+            isUIManagerReady = false;
         }
-        Debug.Log($"[RDM.ProcessSceneLoad] <<<<< 씬 '{scene.name}' 처리 완료 >>>>>");
     }
-    /// <summary>
-    /// 덱 버튼 클릭: 슬롯에 룬 추가 (덱이 비어 있을 경우 묘지에서 재생성)
-    /// </summary>
-    // RuneDeckManager.cs 의 OnDeckClick 수정 예시
+
+    // UI 연동을 건너뛸 씬인지 확인하는 헬퍼 메서드
+    private bool IsUISceneToSkip(string sceneName)
+    {
+        return sceneName == "MapScene" || sceneName == "sampleScene" || sceneName == "SomeOtherSceneWithoutRuneDeckUI";
+    }
+
     private void OnDeckClick(RuneColor color)
     {
-        var group = runeSOByColor[color]; // 뽑을 룬 그룹 가져오기
+        if (!isUIManagerReady)
+        {
+            Debug.LogWarning("[RDM.OnDeckClick] UIManager가 아직 준비되지 않아 작업을 건너뜁니다.");
+            return;
+        }
 
-        // 이제 남은 수량이 있는 룬만 뽑을 수 있게
+        var group = runeSOByColor[color];
         if (selectionCount >= selections.Count) return;
 
-        // TryGetValue를 사용하여 더 안전하게 접근
         var available = group.Where(so => deckCounts.TryGetValue(so, out int count) && count > 0).ToList();
         Debug.Log($"[OnDeckClick] 색상 {color}의 뽑을 수 있는 룬 목록 ({available.Count}개):");
         foreach (var r_so in available)
         {
-            Debug.Log($" - {r_so.name} (아이콘: {(r_so.icon == null ? "NULL" : r_so.icon.name)}, 현재 덱 개수: {deckCounts[r_so]})");
+            Debug.Log($" - {r_so.name} (아이콘: {(r_so.icon == null ? "NULL" : r_so.icon.name)}, 현재 덱 개수: {(deckCounts.ContainsKey(r_so) ? deckCounts[r_so] : 0)})");
         }
 
         if (available.Count == 0)
@@ -173,276 +177,363 @@ public class RuneDeckManager : MonoBehaviour
         RefreshUI();
     }
 
-
-
     private void OnDrawClick()
     {
-  
-           // 1) 슬롯에 담긴 모든 룬 효과 발동 및 묘지로 이동
-            var user = Player.Instance;
-            var targets = EnemySpawner.Instance.SpawnedEnemies;
-           for (int i = 0; i < selectionCount; i++)
-               {
-                var so = selections[i];
-                  // 효과 실행
-             so.effectSO.Execute(user, targets);
-                   // 묘지로 이동
-                discardPile.Add(so);
-               }
+        if (!isUIManagerReady)
+        {
+            Debug.LogWarning("[RDM.OnDrawClick] UIManager가 아직 준비되지 않아 작업을 건너뜁니다.");
+            return;
+        }
 
-    
-        // 2) 슬롯 초기화
-        selections = new List<RuneSO>(new RuneSO[5]);
+        if (Player.Instance == null) { Debug.LogError("[RDM.OnDrawClick] Player.Instance is null!"); return; }
+        // EnemySpawner.Instance 또는 targets에 대한 null 체크도 필요에 따라 추가
+        var user = Player.Instance;
+        var targets = EnemySpawner.Instance != null ? EnemySpawner.Instance.SpawnedEnemies : null;
+        if (targets == null) { Debug.LogWarning("[RDM.OnDrawClick] targets (SpawnedEnemies) is null!"); /* 전투 대상이 없으면 효과 발동이 무의미할 수 있음 */ }
+
+
+        for (int i = 0; i < selectionCount; i++)
+        {
+            var so = selections[i];
+            if (so != null) // selections에 null이 들어갈 수 있으므로 체크
+            {
+                if (so.effectSO == null)
+                {
+                    Debug.LogError($"[RDM.OnDrawClick] {so.name}의 effectSO가 null입니다! 효과를 실행할 수 없습니다.");
+                    continue;
+                }
+                if (targets != null) // 대상이 있을 때만 효과 실행 (혹은 effectSO 내부에서 처리)
+                {
+                    so.effectSO.Execute(user, targets);
+                }
+                discardPile.Add(so);
+            }
+        }
+
+        selections = new List<RuneSO>(new RuneSO[5]); // 새 리스트로 초기화
         selectionCount = 0;
         hasRerolledThisTurn = false;
 
-   
-      
-        // 3) 덱 상태 저장 (덱은 변화 없지만, 묘지 변화가 반영될 수 있음)
         SaveDeckState();
 
-         // 4) 플레이어 턴 종료 신호
-        Debug.Log("[OnDrawClick] EndTurn 호출 전 myTurn=" + TurnManager.Inst.myTurn);
-        TurnManager.Inst.EndTurn();
-        Debug.Log("[OnDrawClick] EndTurn 호출 후 myTurn=" + TurnManager.Inst.myTurn);
-
+        Debug.Log("[OnDrawClick] EndTurn 호출 전 myTurn=" + (TurnManager.Inst != null ? TurnManager.Inst.myTurn.ToString() : "TurnManager.Inst is NULL"));
+        if (TurnManager.Inst != null)
+        {
+            TurnManager.Inst.EndTurn();
+        }
+        else
+        {
+            Debug.LogError("[RDM.OnDrawClick] TurnManager.Inst is null! EndTurn을 호출할 수 없습니다.");
+        }
+        Debug.Log("[OnDrawClick] EndTurn 호출 후 myTurn=" + (TurnManager.Inst != null ? TurnManager.Inst.myTurn.ToString() : "TurnManager.Inst is NULL"));
 
         RefreshUI();
     }
 
-
-
-    /// <summary>리롤 클릭: 슬롯 전체 반환 후 재드로우 X</summary>
     private void OnReRoll()
     {
-        if (hasRerolledThisTurn) return;
-        // ✅ 올바른 처리: 뽑았던 룬들은 묘지로 보내고, 덱에는 돌려주지 않음
-        for (int i = 0; i < selectionCount; i++)
-            discardPile.Add(selections[i]);
+        if (!isUIManagerReady)
+        {
+            Debug.LogWarning("[RDM.OnReRoll] UIManager가 아직 준비되지 않아 작업을 건너뜁니다.");
+            return;
+        }
 
-        // 슬롯 비우기
-        selections = new List<RuneSO>(new RuneSO[5]);
+        if (hasRerolledThisTurn) return;
+
+        for (int i = 0; i < selectionCount; i++)
+        {
+            if (selections[i] != null) // null 체크
+                discardPile.Add(selections[i]);
+        }
+
+        selections = new List<RuneSO>(new RuneSO[5]); // 새 리스트로 초기화
         selectionCount = 0;
         hasRerolledThisTurn = true;
-       
+
         RefreshUI();
     }
 
-    //보상룬 획득 시 기본룬 1개 교체
     public void ReplaceBasicWithReward(string rewardRuneID)
     {
         var rewardSO = runeDefinitions.FirstOrDefault(r => r.name == rewardRuneID);
         if (rewardSO == null)
         {
-            Debug.LogError($"[RuneDeckManager] 룬 데이터베이스(runeDefinitions)에 '{rewardRuneID}' ID를 가진 RuneSO가 없습니다. 모든 RuneSO가 RuneDeckManager의 runeDefinitions 리스트에 등록되어 있는지 확인해주세요.");
+            Debug.LogError($"[RDM.ReplaceBasicWithReward] 룬 데이터베이스(runeDefinitions)에 '{rewardRuneID}' ID를 가진 RuneSO가 없습니다.");
             return;
         }
-        Debug.Log($"[ReplaceBasicWithReward] 찾은 보상 룬: {rewardSO.name}, 아이콘: {(rewardSO.icon == null ? "NULL" : rewardSO.icon.name)}"); // 아이콘 정보 로그 추가
+        Debug.Log($"[ReplaceBasicWithReward] 찾은 보상 룬: {rewardSO.name}, 아이콘: {(rewardSO.icon == null ? "NULL" : rewardSO.icon.name)}");
 
-        // 교체 대상: 같은 색상의 '기본 룬' 중에서, 현재 플레이어가 1개 이상 소유하고 있는 룬
         var basicSOToReplace = deckCounts
-            .Where(kvp => kvp.Key.isBasicRune &&              // '기본 룬'이어야 하고
-                          kvp.Key.color == rewardSO.color &&  // 보상 룬과 색상이 같아야 하며
-                          kvp.Value > 0)                      // 현재 1개 이상 소유하고 있어야 함
+            .Where(kvp => kvp.Key.isBasicRune && kvp.Key.color == rewardSO.color && kvp.Value > 0)
             .Select(kvp => kvp.Key)
             .FirstOrDefault();
 
-        if (basicSOToReplace == null)
-        {
-            // 교체할 기본 룬이 없는 경우의 처리:
-            // 1. 경고만 출력하고 아무것도 안 함 (기획상 교체이므로)
-            // 2. 보상 룬을 그냥 추가 (덱 개수 제한 깨짐) - 현재 기획과는 다름
-            // 3. 다른 색상의 기본 룬이라도 교체? - 기획과 다름
-            Debug.LogWarning($"[RuneDeckManager] 교체할 기본 {rewardSO.color} 룬이 덱에 없습니다. (해당 색상의 기본 룬이 모두 보상 룬으로 교체되었거나, RuneSO의 isBasicRune 설정 오류일 수 있습니다)");
-            // 기획서에 따르면 "기존 룬 중 1개에 효과 부여" [cite: 5] 이므로, 교체 대상이 없으면 더 이상 진행하지 않는 것이 적절해 보입니다.
-            return;
-        }
+       
 
-        // 덱 카운트 업데이트: 기본 룬 감소, 보상 룬 증가
         deckCounts[basicSOToReplace]--;
-        // deckCounts에 rewardSO 키가 없다면(Awake에서 0으로 초기화되었으므로 보통은 존재함), 추가해줍니다.
-        if (!deckCounts.ContainsKey(rewardSO))
-        {
-            deckCounts[rewardSO] = 0;
-        }
+        if (!deckCounts.ContainsKey(rewardSO)) { deckCounts[rewardSO] = 0; }
         deckCounts[rewardSO]++;
-        Debug.Log($"[ReplaceBasicWithReward] 덱 카운트 업데이트 후 - {basicSOToReplace.name}: {deckCounts[basicSOToReplace]}, {rewardSO.name}: {deckCounts[rewardSO]}"); // 카운트 확인
+        Debug.Log($"[ReplaceBasicWithReward] 덱 카운트 업데이트 후 - {basicSOToReplace.name}: {deckCounts[basicSOToReplace]}, {rewardSO.name}: {deckCounts[rewardSO]}");
         Debug.Log($"룬 교체 완료: '{basicSOToReplace.displayName}' 1개 감소, '{rewardSO.displayName}' 1개 증가. 총 룬 개수 유지.");
 
         RefreshUI();
-        SaveDeckState(); // 변경된 덱 상태 저장
+        SaveDeckState();
     }
 
-    /// <summary>UI 갱신: 덱 상태, 슬롯, 버튼</summary>
     public void RefreshUI()
     {
-        var countsByColor = new Dictionary<RuneColor, int>();
-        foreach (RuneColor c in Enum.GetValues(typeof(RuneColor))) countsByColor[c] = 0;
-        foreach (var kv in deckCounts) countsByColor[kv.Key.color] += kv.Value;
-        UIManager.Instance.UpdateDeckCounts(countsByColor);
-        UIManager.Instance.UpdateCentralSlotsWithSO(selections);
-
-        //슬롯이 *전부* 채워진 경우에만 Draw/Reroll 활성화
-        bool full = (selectionCount == selections.Count);  // selections.Count == 최대 슬롯 개수(예:5)
-        UIManager.Instance.SetDrawButton(full);
-        UIManager.Instance.SetReRollButton(full && !hasRerolledThisTurn);
-    }
-    /// <summary>
-    /// 플레이어 턴 시작 시 호출:
-    /// 덱에 남은 수량이 0인 색상의 룬을 묘지에서 모두 덱으로 복원합니다.
-    /// </summary>
-    // RuneDeckManager.cs
-    public void RefillFlaggedColorsFromDiscard() // 메서드 이름 변경 제안 (기존 것 수정해도 무방)
-    {
-        Debug.Log("[RuneDeckManager] RefillFlaggedColorsFromDiscard 호출됨 (플레이어 턴 시작 시점)");
-
-        if (colorsToRefillNextTurn.Count == 0)
+        if (!isUIManagerReady || UIManager.Instance == null)
         {
-            Debug.Log("[RuneDeckManager] 이번 턴에 리필하도록 플래그된 색상이 없습니다.");
+            Debug.LogWarning($"[RDM.RefreshUI] UIManager가 준비되지 않았거나 Instance가 null입니다. UI 새로고침을 건너뜁니다. isUIManagerReady: {isUIManagerReady}, UIManager.Instance is null: {(UIManager.Instance == null)}");
             return;
         }
 
-        // HashSet을 순회 중 변경할 수 없으므로, 복사본 사용 또는 플래그를 나중에 지움
-        List<RuneColor> flaggedColors = colorsToRefillNextTurn.ToList();
+        var countsByColor = new Dictionary<RuneColor, int>();
+        foreach (RuneColor c in Enum.GetValues(typeof(RuneColor))) countsByColor[c] = 0;
 
+        foreach (var kv in deckCounts)
+        {
+            if (kv.Key != null) // 키가 null이 아닌지 확인
+            {
+                countsByColor[kv.Key.color] += kv.Value;
+            }
+        }
+
+        UIManager.Instance.UpdateDeckCounts(countsByColor);
+        UIManager.Instance.UpdateCentralSlotsWithSO(selections);
+
+        bool full = (selectionCount == selections.Count);
+        UIManager.Instance.SetDrawButton(full);
+        UIManager.Instance.SetReRollButton(full && !hasRerolledThisTurn);
+    }
+
+    public void RefillFlaggedColorsFromDiscard()
+    {
+        Debug.Log("[RDM.RefillFlaggedColorsFromDiscard] 호출됨 (플레이어 턴 시작 시점)");
+        if (colorsToRefillNextTurn.Count == 0)
+        {
+            Debug.Log("[RDM.RefillFlaggedColorsFromDiscard] 이번 턴에 리필하도록 플래그된 색상이 없습니다.");
+            return;
+        }
+
+        List<RuneColor> flaggedColors = colorsToRefillNextTurn.ToList();
         foreach (RuneColor colorToRefill in flaggedColors)
         {
-            Debug.Log($"[RuneDeckManager] 플래그된 {colorToRefill} 색상 룬 리필을 시도합니다.");
-
-            var runesToRestore = discardPile
-                .Where(runeSO => runeSO.color == colorToRefill)
-                .ToList(); // 묘지에서 해당 색상의 모든 룬을 가져옴
+            Debug.Log($"[RDM.RefillFlaggedColorsFromDiscard] 플래그된 {colorToRefill} 색상 룬 리필을 시도합니다.");
+            var runesToRestore = discardPile.Where(runeSO => runeSO != null && runeSO.color == colorToRefill).ToList(); // null 체크 추가
 
             if (runesToRestore.Any())
             {
                 foreach (var runeToMove in runesToRestore)
                 {
-                    // deckCounts에 해당 룬의 카운트를 증가시킴
-                    if (!deckCounts.ContainsKey(runeToMove))
-                    {
-                        // 이 경우는 Awake에서 모든 SO를 deckCounts에 0으로라도 초기화했다면 발생하지 않아야 함
-                        deckCounts[runeToMove] = 0;
-                        Debug.LogWarning($"[RuneDeckManager] {runeToMove.name} ({runeToMove.color}) 가 deckCounts에 없어 0으로 초기화 후 리필합니다.");
-                    }
+                    if (!deckCounts.ContainsKey(runeToMove)) { deckCounts[runeToMove] = 0; }
                     deckCounts[runeToMove]++;
-                    discardPile.Remove(runeToMove); // 묘지에서 해당 '인스턴스' 제거
+                    // discardPile.Remove(runeToMove)는 List<T>.Remove의 특성상 첫 번째로 일치하는 요소만 제거합니다.
+                    // 만약 동일한 SO 인스턴스가 여러 번 묘지에 갔다면, 한 번만 제거됩니다.
+                    // 묘지에 있는 모든 인스턴스를 제거하려면 RemoveAll 또는 역순 루프 후 RemoveAt을 사용해야 하지만,
+                    // 현재는 카운트 기반이므로 이 방식도 문제는 없습니다 (단, 묘지에는 중복 SO가 여러 개 있을 수 있음).
+                    // 여기서는 일단 기존 로직 유지.
+                    discardPile.Remove(runeToMove);
                 }
-                Debug.Log($"[RuneDeckManager] {colorToRefill} 색상 룬 {runesToRestore.Count}개를 묘지에서 덱으로 리필했습니다.");
+                Debug.Log($"[RDM.RefillFlaggedColorsFromDiscard] {colorToRefill} 색상 룬 {runesToRestore.Count}개를 묘지에서 덱으로 리필했습니다.");
             }
             else
             {
-                Debug.LogWarning($"[RuneDeckManager] {colorToRefill} 색상은 리필 플래그되었으나, 묘지에서 가져올 룬이 없습니다.");
+                Debug.LogWarning($"[RDM.RefillFlaggedColorsFromDiscard] {colorToRefill} 색상은 리필 플래그되었으나, 묘지에서 가져올 룬이 없습니다.");
             }
         }
-
-        colorsToRefillNextTurn.Clear(); // 모든 플래그된 색상에 대한 리필 시도 후 플래그 초기화
-        RefreshUI(); // UI 갱신
+        colorsToRefillNextTurn.Clear();
+        RefreshUI();
     }
 
-    /// <summary>외부 호출용: JSON 파일에 현재 덱 상태를 저장</summary>
-    public void SaveDeckState()
-    {
-        var state = new DeckState();
-        foreach (var kv in deckCounts)
-            state.entries.Add(new DeckEntry
-            {
-                runeID = kv.Key.name,
-                count = kv.Value
-            });
-        string json = JsonUtility.ToJson(state, true);
-        File.WriteAllText(deckStatePath, json);
-        Debug.Log($"Saved deck state to {deckStatePath}");
-    }
-    /// <summary>Awake에서 호출: 저장된 JSON이 있으면 불러와 덱Counts 복원</summary>
-    public void LoadDeckState()
-    {
-        if (!File.Exists(deckStatePath)) return;
-        string json = File.ReadAllText(deckStatePath);
-        var state = JsonUtility.FromJson<DeckState>(json);
-        if (state?.entries == null) return;
-
-        // 덱 초기화
-        foreach (var so in runeDefinitions)
-            deckCounts[so] = 0;
-        // JSON대로 덮어쓰기
-        foreach (var entry in state.entries)
-        {
-            var so = runeDefinitions
-                .FirstOrDefault(r => r.name == entry.runeID);
-            if (so != null)
-                deckCounts[so] = entry.count;
-        }
-        foreach (var kv in deckCounts)
-            Debug.Log($"[Load] {kv.Key.name}: {kv.Value}");
-    }
-    /// <summary>
-    /// 덱을 기본 최대치(10/10/5/10)로 전부 리셋하고 묘지 비우기
-    /// </summary>
     public void ResetDeckToDefault()
     {
         discardPile.Clear();
-        deckCounts.Clear(); // 덱 카운트 초기화
-
+        deckCounts.Clear();
         foreach (var so in runeDefinitions)
         {
-            if (so.isBasicRune)
-            {
-                deckCounts[so] = so.initialDeckCount; // 기본 룬은 지정된 초기 수량으로 설정 [cite: 1]
-            }
-            else
-            {
-                deckCounts[so] = 0; // 보상 룬 및 기타 룬은 0개로 초기화
-            }
+            if (so.isBasicRune) { deckCounts[so] = so.initialDeckCount; } // [cite: 1] // 기본 룬 초기화
+            else { deckCounts[so] = 0; } // 보상 룬은 0으로
         }
         Debug.Log("덱이 기본 상태로 리셋되었습니다.");
-        RefreshUI();
-        SaveDeckState(); // 리셋된 상태 저장 (선택 사항)
+        isUIManagerReady = false; // UI 매니저도 새 씬에서 다시 준비해야 할 수 있으므로 리셋
+        if (UIManager.Instance != null)
+        { // 즉시 RefreshUI를 시도하기보다, UIManagerReady 이벤트를 통해 처리되도록 유도
+            RefreshUI(); // 이 호출은 UIManager.Instance가 null이 아닐 때만 의미 있음
+        }
+        SaveDeckState(); // 리셋된 상태 저장
     }
-    // RuneDeckManager.cs
+
     public void CheckAndFlagEmptyColorsForRefill()
     {
-        Debug.Log("[RuneDeckManager] CheckAndFlagEmptyColorsForRefill 호출됨 (플레이어 턴 종료 시점)");
-        colorsToRefillNextTurn.Clear(); // 이전 턴의 플래그는 초기화
-
-        foreach (var colorEntry in runeSOByColor) // runeSOByColor는 Dictionary<RuneColor, List<RuneSO>>
+        Debug.Log("[RDM.CheckAndFlagEmptyColorsForRefill] 호출됨 (플레이어 턴 종료 시점)");
+        colorsToRefillNextTurn.Clear();
+        foreach (var colorEntry in runeSOByColor)
         {
             RuneColor currentColor = colorEntry.Key;
-            List<RuneSO> runesInColorGroup = colorEntry.Value; // 해당 색상으로 정의된 모든 RuneSO (기본+보상)
+            List<RuneSO> runesInColorGroup = colorEntry.Value;
 
-            // 해당 색상의 모든 종류의 룬(기본, 보상 포함)이 현재 deckCounts에서 0개인지 확인
+            if (runesInColorGroup == null || !runesInColorGroup.Any()) continue; // 해당 색상 그룹에 룬 정의가 없으면 건너뜀
+
             bool isColorDeckCompletelyEmpty = runesInColorGroup.All(runeSO =>
-                deckCounts.TryGetValue(runeSO, out int count) && count == 0
+                runeSO != null && deckCounts.TryGetValue(runeSO, out int count) && count == 0 // runeSO null 체크 추가
             );
 
             if (isColorDeckCompletelyEmpty)
             {
-                // 덱이 비었더라도, 묘지에 해당 색상 룬이 있어야 리필 의미가 있음
-                bool hasMatchingRunesInDiscard = discardPile.Any(discardedRune => discardedRune.color == currentColor);
+                bool hasMatchingRunesInDiscard = discardPile.Any(discardedRune => discardedRune != null && discardedRune.color == currentColor); // null 체크 추가
                 if (hasMatchingRunesInDiscard)
                 {
-                    Debug.Log($"[RuneDeckManager] {currentColor} 색상 덱이 비었고, 묘지에 관련 룬이 있어 다음 턴 리필 대상으로 플래그합니다.");
+                    Debug.Log($"[RDM.CheckAndFlagEmptyColorsForRefill] {currentColor} 색상 덱이 비었고, 묘지에 관련 룬이 있어 다음 턴 리필 대상으로 플래그합니다.");
                     colorsToRefillNextTurn.Add(currentColor);
                 }
                 else
                 {
-                    Debug.Log($"[RuneDeckManager] {currentColor} 색상 덱은 비었지만, 묘지에 관련 룬이 없어 리필 플래그를 설정하지 않습니다.");
+                    Debug.Log($"[RDM.CheckAndFlagEmptyColorsForRefill] {currentColor} 색상 덱은 비었지만, 묘지에 관련 룬이 없어 리필 플래그를 설정하지 않습니다.");
                 }
             }
+        }
+    }
+    // RuneDeckManager.cs 에 추가
+    public void PrepareDeckForNewBattle()
+    {
+        Debug.Log("[RDM.PrepareDeckForNewBattle] 새 전투를 위해 덱을 준비합니다.");
+
+        // 1. 묘지에 있는 룬들을 다시 deckCounts로 옮기기
+        if (discardPile != null && discardPile.Any())
+        {
+            foreach (var runeSO_instance in discardPile)
+            {
+                if (runeSO_instance != null)
+                {
+                    if (deckCounts.ContainsKey(runeSO_instance))
+                    {
+                        deckCounts[runeSO_instance]++;
+                    }
+                    else
+                    {
+                        deckCounts[runeSO_instance] = 1;
+                        Debug.LogWarning($"[RDM.PrepareDeckForNewBattle] 묘지의 룬 '{runeSO_instance.name}'이 deckCounts에 없어 1로 추가합니다.");
+                    }
+                }
+            }
+            Debug.Log($"[RDM.PrepareDeckForNewBattle] 묘지에서 {discardPile.Count}개의 룬을 덱으로 복원했습니다.");
+            discardPile.Clear(); // 묘지 비우기
+        }
+        else
+        {
+            Debug.Log("[RDM.PrepareDeckForNewBattle] 묘지가 비어있어 복원할 룬이 없습니다.");
+        }
+
+        // 2. 선택된 룬(패) 초기화 및 리롤 상태 리셋
+        selections = new List<RuneSO>(new RuneSO[5]); // 최대 패 크기가 5라고 가정
+        selectionCount = 0;
+        hasRerolledThisTurn = false;
+
+        // 3. 다음 턴 리필 플래그 초기화 (이전 전투의 상태가 다음 전투로 이어지지 않도록)
+        colorsToRefillNextTurn.Clear();
+
+        Debug.Log("[RDM.PrepareDeckForNewBattle] 새 전투 준비 완료. 현재 덱 상태:");
+        foreach (var kvp in deckCounts)
+        {
+            if (kvp.Key != null)
+            {
+                Debug.Log($" - {kvp.Key.displayName} ({kvp.Key.name}): {kvp.Value}개");
+            }
+        }
+        // RefreshUI()는 이후 PlayerTurn 시작 시 또는 UIManager가 준비될 때 호출될 것이므로 여기서 직접 호출하지 않아도 될 수 있습니다.
+        // 만약 이 시점에 즉시 UI 갱신이 필요하다면, isUIManagerReady 플래그를 확인하고 호출하세요.
+        // if (isUIManagerReady && UIManager.Instance != null) RefreshUI();
+    }
+
+
+
+
+    public void SaveDeckState()
+    {
+        var state = new DeckState();
+        foreach (var kv in deckCounts)
+        {
+            if (kv.Key != null) // 키가 null이 아닌지 확인
+            {
+                state.entries.Add(new DeckEntry
+                {
+                    runeID = kv.Key.name, // RuneSO의 name (에셋 파일 이름)을 ID로 사용
+                    count = kv.Value
+                });
+            }
+        }
+        try
+        {
+            string json = JsonUtility.ToJson(state, true);
+            File.WriteAllText(deckStatePath, json);
+            Debug.Log($"Saved deck state to {deckStatePath}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to save deck state: {e.Message}");
+        }
+    }
+
+    public void LoadDeckState()
+    {
+        if (!File.Exists(deckStatePath)) return;
+        try
+        {
+            string json = File.ReadAllText(deckStatePath);
+            var state = JsonUtility.FromJson<DeckState>(json);
+            if (state?.entries == null) return;
+
+            // deckCounts를 직접 수정하기 전에, 모든 정의된 룬에 대해 기본 카운트(보통 0)를 설정할 수 있음
+            // Awake에서 이미 isBasicRune에 따라 초기화 했으므로, 여기서는 로드된 값으로 덮어쓰기만 해도 됨.
+            // 다만, 안전을 위해 deckCounts에 키가 없는 경우를 대비할 수 있으나, Awake에서 모든 키를 생성하므로 문제는 없을 것.
+
+            foreach (var entry in state.entries)
+            {
+                var so = runeDefinitions.FirstOrDefault(r => r != null && r.name == entry.runeID); // null 체크 추가
+                if (so != null)
+                {
+                    deckCounts[so] = entry.count; // Awake에서 이미 키가 존재함
+                }
+                else
+                {
+                    Debug.LogWarning($"[RDM.LoadDeckState] 저장된 룬 ID '{entry.runeID}'에 해당하는 RuneSO를 runeDefinitions에서 찾을 수 없습니다.");
+                }
+            }
+            Debug.Log("Deck state loaded from JSON.");
+            foreach (var kv in deckCounts) // 로드 후 상태 확인 로그
+                if (kv.Key != null) Debug.Log($"[Load - 확인] {kv.Key.name}: {kv.Value}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to load deck state: {e.Message}");
         }
     }
 
     void OnDestroy()
     {
-        UIManager.Instance.BindRuneDeck(null, null);
-        UIManager.Instance.BindReRoll(null);
+        // UIManager.Instance가 null일 수 있으므로 null 체크 추가
+        if (UIManager.Instance != null && isUIManagerReady) // UIManager가 준비되었을 때만 해제 시도
+        {
+            Debug.Log("[RDM.OnDestroy] UIManager의 리스너 해제 시도.");
+            // BindRuneDeck(null, null)은 UIManager의 해당 메서드에서 RemoveAllListeners를 호출함
+            UIManager.Instance.BindRuneDeck(null, null);
+            UIManager.Instance.BindReRoll(null);
+        }
     }
 
-    [ContextMenu("Reset DeckState.json")]
-    private void ResetDeckState()
+    [ContextMenu("Delete DeckState.json File")]
+    public void DeleteSavedDeckStateFile()
     {
         if (File.Exists(deckStatePath))
+        {
             File.Delete(deckStatePath);
-        Debug.Log("Deleted DeckState.json");
+            Debug.Log($"[RuneDeckManager] DeckState.json 파일 삭제 완료: {deckStatePath}");
+        }
+        else
+        {
+            Debug.Log("[RuneDeckManager] DeckState.json 파일이 없어 삭제할 수 없습니다.");
+        }
     }
-
 }
+

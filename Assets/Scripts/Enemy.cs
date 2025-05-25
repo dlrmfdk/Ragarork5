@@ -12,6 +12,9 @@ public class Enemy : MonoBehaviour
 
     private int currentHp; //현재 체력
 
+    // TurnManager 등 외부에서 현재 체력을 읽을 수 있도록 public 속성 추가
+    public int currentHealth => currentHp;
+
     private HpBarController hpBarController; // HPBarController 참조 변수 추가
 
     // 독 효과를 위한 변수 (현재 독 스택)

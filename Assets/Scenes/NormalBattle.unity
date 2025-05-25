@@ -2855,7 +2855,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &781733878
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4101,6 +4101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3bb0699326e8e7418000f0edc550096, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isUIManagerReady: 0
   runeDefinitions:
   - {fileID: 11400000, guid: 432ec8dca1b56a446a5d6db591591187, type: 2}
   - {fileID: 11400000, guid: 1022722c004f76a4187fb690e684f4bc, type: 2}
@@ -6318,6 +6319,7 @@ MonoBehaviour:
   RewardPanel: {fileID: 2003952684}
   RewardRuneButton: {fileID: 1196661161}
   RewardGoldButton: {fileID: 1048118889}
+  mapButton: {fileID: 781733879}
   RuneRewardPanel: {fileID: 1271729704}
   OptionButtons:
   - {fileID: 1234103844}

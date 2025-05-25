@@ -1,19 +1,17 @@
+// TurnManager.cs
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class TurnManager : MonoBehaviour
 {
     public static TurnManager Inst { get; private set; }
 
-    /// <summary>턴 진행 중(true)에는 입력을 막습니다.</summary>
     public bool isLoading { get; private set; }
-
-    /// <summary>현재 플레이어 턴 여부</summary>
     public bool myTurn { get; private set; }
-
-    /// <summary>플레이어 턴이 시작될 때마다 호출됩니다. 파라미터는 myTurn 플래그입니다.</summary>
     public static event Action<bool> OnTurnStarted;
 
     [Header("적 스포너")]
@@ -27,44 +25,87 @@ public class TurnManager : MonoBehaviour
 
     void Start()
     {
-        // 게임 루프 시작
         StartCoroutine(GameLoop());
     }
 
-    /// <summary>
-    /// 무한 루프: 플레이어 턴 → 적 턴 → 플레이어 턴 → ... 무한으로 돌려도되나?
-    /// </summary>
     private IEnumerator GameLoop()
     {
-        // 처음엔 적 스폰
-        enemySpawner.SpawnRandomEnemies();
-        RuneDeckManager.Instance.ResetDeckToDefault(); // 덱 초기화
+        Debug.Log("[TurnManager.GameLoop] 새 전투 사이클 시작.");
 
+        // 1. 새 전투를 위해 덱 준비
+        if (RuneDeckManager.Instance != null)
+        {
+            RuneDeckManager.Instance.PrepareDeckForNewBattle();
+        }
+        else
+        {
+            Debug.LogError("[TurnManager.GameLoop] RuneDeckManager.Instance가 null입니다! 덱을 준비할 수 없습니다.");
+            yield break;
+        }
+
+        // 2. 현재 전투에 맞는 적 스폰
+        if (enemySpawner != null)
+        {
+            enemySpawner.SpawnRandomEnemies();
+        }
+        else
+        {
+            Debug.LogError("[TurnManager.GameLoop] EnemySpawner가 할당되지 않았습니다!");
+            yield break;
+        }
+
+        // 3. ★★★ 전투 시작 직전 UI 갱신 추가 ★★★
+        // 이 시점에는 해당 씬의 UIManager가 준비되어 OnUIManagerReady 이벤트가 발생했고,
+        // RuneDeckManager.HandleUIManagerReady가 호출되어 isUIManagerReady가 true로 설정되었을 것으로 기대합니다.
+        if (RuneDeckManager.Instance != null && RuneDeckManager.Instance.isUIManagerReady && UIManager.Instance != null)
+        {
+            Debug.Log("[TurnManager.GameLoop] 전투 시작 전 RefreshUI 호출합니다.");
+            RuneDeckManager.Instance.RefreshUI(); // 덱 카운트 등 최신 정보로 UI 갱신
+            UIManager.Instance.ShowRuneUI();      // 전투 UI 패널들이 보이도록 확실히 처리
+        }
+        else
+        {
+            Debug.LogWarning("[TurnManager.GameLoop] 전투 시작 전 RefreshUI 호출 시도 실패: RuneDeckManager.Instance가 null이거나 UIManager가 아직 준비되지 않음.");
+        }
+
+        // 4. 전투 내 턴 반복
         while (true)
         {
-            // 플레이어 턴
             yield return StartCoroutine(PlayerTurn());
-            // 적 턴
-            yield return StartCoroutine(EnemyTurn());
+            if (IsBattleOver())
+            {
+                HandleBattleEnd(true); // 플레이어 승리 (예시)
+                yield break;
+            }
 
+            yield return StartCoroutine(EnemyTurn());
+            if (IsBattleOver()) // 예: 플레이어 체력 확인
+            {
+                HandleBattleEnd(false); // 플레이어 패배 (예시)
+                yield break;
+            }
         }
     }
+
     private IEnumerator PlayerTurn()
     {
         Debug.Log("[PlayerTurn] 시작");
-        // 1) 턴 진입 플래그 세팅
-        isLoading = true;    // 게임 루프 차단용 플래그
-        myTurn = true;    // 플레이어 입력 허용 플래그
+        isLoading = true;
+        myTurn = true;
+        OnTurnStarted?.Invoke(myTurn);
 
-        // 2) 덱이 비어 있는 색상은 묘지에서 자동 보충
-        RuneDeckManager.Instance.RefillFlaggedColorsFromDiscard();
+        if (RuneDeckManager.Instance != null && UIManager.Instance != null && RuneDeckManager.Instance.isUIManagerReady)
+        {
+            RuneDeckManager.Instance.RefillFlaggedColorsFromDiscard(); // 내부에서 RefreshUI 호출 가능성 있음
+            // 추가적인 RefreshUI 호출이 필요하다면 여기에, 또는 GameLoop에서 한 것으로 충분할 수 있음.
+            // RuneDeckManager.Instance.RefreshUI(); 
+            UIManager.Instance.ShowRuneUI(); // RuneDeckPanel, CentralSlotPanel 활성화
+        }
+        else
+        {
+            Debug.LogWarning("[PlayerTurn] RuneDeckManager 또는 UIManager가 준비되지 않아 UI 관련 작업을 완전히 수행할 수 없습니다.");
+        }
 
-        // 3) 덱 UI 갱신 및 표시
-        RuneDeckManager.Instance.RefreshUI();
-        UIManager.Instance.ShowRuneUI();
-
-        // 4) 실제 플레이어 입력 대기
-        //    EndTurn() 호출 시 myTurn=false 로 설정되도록 되어 있음
         while (myTurn)
         {
             yield return null;
@@ -73,38 +114,90 @@ public class TurnManager : MonoBehaviour
         isLoading = false;
     }
 
-
-    /// <summary>
-    /// 적 턴: 모든 적이 PerformTurn을 마치면 곧바로 종료됩니다.
-    /// </summary>
+    // EnemyTurn, EndTurn, IsBattleOver, HandleBattleEnd 메서드는 이전과 동일하게 유지...
+    // (이전에 제공해드린 전체 코드를 참고하세요.)
     private IEnumerator EnemyTurn()
     {
         isLoading = true;
         myTurn = false;
- 
+        OnTurnStarted?.Invoke(myTurn);
 
-        // → 여기서 덱 UI 숨기기
-        UIManager.Instance.HideRuneUI();
+        if (UIManager.Instance != null && RuneDeckManager.Instance != null && RuneDeckManager.Instance.isUIManagerReady)
+        {
+            UIManager.Instance.HideRuneUI();
+        }
 
-        var enemies = new List<Enemy>(enemySpawner.SpawnedEnemies);
-        foreach (var e in enemies)
-            if (e != null)
-                yield return StartCoroutine(e.PerformTurn());
-
-        // 적 턴 종료 후 자동으로 플레이어 턴으로…
+        if (enemySpawner != null && enemySpawner.SpawnedEnemies != null)
+        {
+            var currentEnemies = new List<Enemy>(enemySpawner.SpawnedEnemies);
+            foreach (var e in currentEnemies)
+            {
+                if (e != null && e.gameObject.activeInHierarchy && e.currentHealth > 0)
+                {
+                    yield return StartCoroutine(e.PerformTurn());
+                }
+            }
+        }
         isLoading = false;
     }
-    /// <summary>
-    /// 외부(End Turn 버튼 등)에서 호출하세요.
-    /// </summary> 
+
     public void EndTurn()
     {
         Debug.Log("[TurnManager] EndTurn() 호출됨, myTurn 이전값=" + myTurn);
         if (!myTurn) return;
-        myTurn = false; // 플레이어 턴 플래그를 false로 설정
+        myTurn = false;
 
-        // 플레이어 턴 종료 직후, 다음 턴에 리필할 룬 색상 검사 및 플래그 설정
-        RuneDeckManager.Instance.CheckAndFlagEmptyColorsForRefill();
+        if (RuneDeckManager.Instance != null)
+        {
+            RuneDeckManager.Instance.CheckAndFlagEmptyColorsForRefill();
+        }
         Debug.Log("[TurnManager] myTurn 설정 후값=" + myTurn + ", CheckAndFlagEmptyColorsForRefill() 호출 완료.");
+    }
+
+    private bool IsBattleOver()
+    {
+        if (enemySpawner != null && enemySpawner.SpawnedEnemies != null &&
+            !enemySpawner.SpawnedEnemies.Any(e => e != null && e.gameObject.activeInHierarchy && e.currentHealth > 0))
+        {
+            Debug.Log("[TurnManager.IsBattleOver] 모든 적 사망 감지.");
+            return true;
+        }
+        // if (Player.Instance != null && Player.Instance.currentHealth <= 0) { /* 플레이어 사망 처리 */ return true; }
+        return false;
+    }
+
+    private void HandleBattleEnd(bool playerWon)
+    {
+        Debug.Log($"[TurnManager.HandleBattleEnd] 전투 종료. 플레이어 승리: {playerWon}");
+        isLoading = true;
+
+        if (UIManager.Instance != null && RuneDeckManager.Instance != null && RuneDeckManager.Instance.isUIManagerReady)
+        {
+            UIManager.Instance.HideRuneUI();
+        }
+
+        if (playerWon)
+        {
+            if (RewardManager.Instance != null && GameManager.Inst != null && !GameManager.Inst.rewardShownPublic)
+            {
+                Debug.Log("[TurnManager.HandleBattleEnd] 보상 UI 표시 요청.");
+                RewardManager.Instance.ShowRewardPanel();
+                GameManager.Inst.SetRewardShown(true);
+            }
+            else if (GameManager.Inst != null && GameManager.Inst.nextBt != null)
+            {
+                Debug.Log("[TurnManager.HandleBattleEnd] 다음 진행 버튼(nextBt) 활성화 시도.");
+                GameManager.Inst.nextBt.SetActive(true);
+            }
+            else
+            {
+                Debug.LogWarning("[TurnManager.HandleBattleEnd] RewardManager 또는 GameManager의 참조가 없어 보상/다음 단계 처리를 못했습니다.");
+            }
+        }
+        else
+        {
+            Debug.Log("[TurnManager.HandleBattleEnd] 플레이어 패배. 게임 오버 처리.");
+            // SceneManager.LoadScene("GameOverScene"); 
+        }
     }
 }

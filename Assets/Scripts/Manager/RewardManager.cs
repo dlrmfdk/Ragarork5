@@ -119,10 +119,8 @@ private void Awake()
                 button.gameObject.SetActive(true);
                 button.onClick.RemoveAllListeners();
                 button.onClick.AddListener(() => {
-                    OnRuneOptionChosen(so);
-                    OnRuneRewardChosen(so.name);
+                    OnRuneOptionChosen(so); //OnRuneRewardChosen(so.name);
                 });
-
             }
             else
             {

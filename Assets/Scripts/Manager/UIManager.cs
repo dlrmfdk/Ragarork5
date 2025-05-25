@@ -7,12 +7,33 @@ using TMPro;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
-    // UIManager.cs
+    public static event Action OnUIManagerReady; // UIManager가 준비되었음을 알리는 static 이벤트
+
     void Awake()
     {
         Debug.Log($"[UIManager.Awake] UIManager 게임 오브젝트 '{this.gameObject.name}'의 Awake 호출됨. Instance 설정 시도. 현재 UIManager.Instance는 {(Instance == null ? "null" : Instance.gameObject.name)}");
+        if (Instance != null && Instance != this)
+        {
+            Debug.LogWarning($"[UIManager.Awake] 다른 UIManager 인스턴스('{Instance.gameObject.name}')가 이미 존재하여 현재 인스턴스('{this.gameObject.name}')를 파괴합니다.");
+            Destroy(gameObject);
+            return;
+        }
         Instance = this;
+        // UIManager는 씬에 종속적이므로 DontDestroyOnLoad를 사용하지 않습니다.
         Debug.Log($"[UIManager.Awake] UIManager.Instance가 '{Instance.gameObject.name}'으로 설정됨.");
+    }
+
+    void Start()
+    {
+        // 초기 UI 상태 설정
+        runeDeckPanel.SetActive(false);
+        centralSlotPanel.SetActive(false);
+        if (drawButton != null) drawButton.interactable = false; // null 체크 추가
+        if (rerollButton != null) rerollButton.interactable = false; // null 체크 추가
+
+        Debug.Log($"[UIManager.Start] UIManager '{this.gameObject.name}' Start() 호출됨. OnUIManagerReady 이벤트 발생 시도. 현재 Instance: {(Instance == null ? "null" : Instance.gameObject.name)}");
+        // UIManager의 모든 설정이 완료된 후 이벤트 발생
+        OnUIManagerReady?.Invoke();
     }
 
     void OnDestroy()
@@ -23,6 +44,9 @@ public class UIManager : MonoBehaviour
             Instance = null;
             Debug.Log("[UIManager.OnDestroy] 현재 Instance가 파괴되는 인스턴스와 동일하여 UIManager.Instance를 null로 설정함.");
         }
+        // 버튼 리스너는 RuneDeckManager가 BindRuneDeck(null, null) 등으로 해제하거나,
+        // UIManager가 자신의 버튼들을 관리한다면 여기서 정리할 수 있지만,
+        // 현재 BindRuneDeck에서 RemoveAllListeners()를 하므로 필수적이지 않을 수 있습니다.
     }
 
     [Header("룬 덱 버튼들")]
@@ -47,120 +71,96 @@ public class UIManager : MonoBehaviour
     public GameObject runeDeckPanel;
     public GameObject centralSlotPanel;
 
-    void Start()
+    public void BindRuneDeck(Action<RuneColor> onDeckClick, Action onDrawClick)
     {
-        // 초기에는 UI 숨기고 버튼 비활성화
-        runeDeckPanel.SetActive(false);
-        centralSlotPanel.SetActive(false);
-        drawButton.interactable = false;
-        rerollButton.interactable = false;
+        // 각 버튼이 null이 아닌지 확인 후 리스너 설정
+        if (redButton != null)
+        {
+            redButton.onClick.RemoveAllListeners();
+            if (onDeckClick != null) redButton.onClick.AddListener(() => onDeckClick(RuneColor.Red));
+        }
+        if (blueButton != null)
+        {
+            blueButton.onClick.RemoveAllListeners();
+            if (onDeckClick != null) blueButton.onClick.AddListener(() => onDeckClick(RuneColor.Blue));
+        }
+        if (whiteButton != null)
+        {
+            whiteButton.onClick.RemoveAllListeners();
+            if (onDeckClick != null) whiteButton.onClick.AddListener(() => onDeckClick(RuneColor.White));
+        }
+        if (yellowButton != null)
+        {
+            yellowButton.onClick.RemoveAllListeners();
+            if (onDeckClick != null) yellowButton.onClick.AddListener(() => onDeckClick(RuneColor.Yellow));
+        }
+
+        if (drawButton != null)
+        {
+            drawButton.onClick.RemoveAllListeners();
+            if (onDrawClick != null) drawButton.onClick.AddListener(() => onDrawClick());
+        }
     }
 
-    /// <summary>
-    /// 덱 버튼, 슬롯 버튼, 뽑기 버튼 콜백 바인딩
-    /// </summary>
-    public void BindRuneDeck(
-        Action<RuneColor> onDeckClick,
-       
-        Action onDrawClick
-    )
-    {
-        redButton.onClick.RemoveAllListeners();
-        redButton.onClick.AddListener(() => onDeckClick(RuneColor.Red));
-
-        blueButton.onClick.RemoveAllListeners();
-        blueButton.onClick.AddListener(() => onDeckClick(RuneColor.Blue));
-
-        whiteButton.onClick.RemoveAllListeners();
-        whiteButton.onClick.AddListener(() => onDeckClick(RuneColor.White));
-
-        yellowButton.onClick.RemoveAllListeners();
-        yellowButton.onClick.AddListener(() => onDeckClick(RuneColor.Yellow));
-
-        // Draw버튼에 해당 콜백 연결
-        drawButton.onClick.RemoveAllListeners();
-        drawButton.onClick.AddListener(() => onDrawClick());
-    }
-
-    /// <summary>
-    /// 리롤 버튼 콜백 바인딩
-    /// </summary>
     public void BindReRoll(Action onReRoll)
     {
-        rerollButton.onClick.RemoveAllListeners();
-        rerollButton.onClick.AddListener(() => onReRoll());
+        if (rerollButton != null)
+        {
+            rerollButton.onClick.RemoveAllListeners();
+            if (onReRoll != null) rerollButton.onClick.AddListener(() => onReRoll());
+        }
     }
 
-    /// <summary>
-    /// 리롤 버튼 활성화/비활성화
-    /// </summary>
     public void SetReRollButton(bool enabled)
     {
-        rerollButton.interactable = enabled;
+        if (rerollButton != null) rerollButton.interactable = enabled;
     }
 
-    /// <summary>
-    /// 확정 버튼 활성화/비활성화
-    /// </summary>
     public void SetDrawButton(bool enabled)
     {
-        drawButton.interactable = enabled;
+        if (drawButton != null) drawButton.interactable = enabled;
     }
 
-    /// <summary>
-    /// 덱/슬롯 패널 보이기
-    /// </summary>
     public void ShowRuneUI()
     {
-        runeDeckPanel.SetActive(true);
-        centralSlotPanel.SetActive(true);
+        if (runeDeckPanel != null) runeDeckPanel.SetActive(true);
+        if (centralSlotPanel != null) centralSlotPanel.SetActive(true);
     }
 
-    /// <summary>
-    /// 덱/슬롯 패널 숨기기
-    /// </summary>
     public void HideRuneUI()
     {
-        runeDeckPanel.SetActive(false);
-        centralSlotPanel.SetActive(false);
+        if (runeDeckPanel != null) runeDeckPanel.SetActive(false);
+        if (centralSlotPanel != null) centralSlotPanel.SetActive(false);
     }
 
-    /// <summary>
-    /// 덱에 남은 각 룬 개수 업데이트
-    /// </summary>
     public void UpdateDeckCounts(Dictionary<RuneColor, int> counts)
     {
-        redCountText.text = counts[RuneColor.Red].ToString();
-        blueCountText.text = counts[RuneColor.Blue].ToString();
-        whiteCountText.text = counts[RuneColor.White].ToString();
-        yellowCountText.text = counts[RuneColor.Yellow].ToString();
-
+        if (redCountText != null && counts.ContainsKey(RuneColor.Red)) redCountText.text = counts[RuneColor.Red].ToString();
+        if (blueCountText != null && counts.ContainsKey(RuneColor.Blue)) blueCountText.text = counts[RuneColor.Blue].ToString();
+        if (whiteCountText != null && counts.ContainsKey(RuneColor.White)) whiteCountText.text = counts[RuneColor.White].ToString();
+        if (yellowCountText != null && counts.ContainsKey(RuneColor.Yellow)) yellowCountText.text = counts[RuneColor.Yellow].ToString();
     }
 
     public void UpdateCentralSlotsWithSO(List<RuneSO> selections)
     {
-        Debug.Log($"[UpdateCentralSlotsWithSO] 슬롯 아이콘 업데이트 시작. selections 개수: {selections.Count}");
-        // 1) slotIconImages는 중앙 슬롯에 배치된 Image 컴포넌트들의 리스트
+        Debug.Log($"[UIManager.UpdateCentralSlotsWithSO] 슬롯 아이콘 업데이트 시작. selections 개수: {(selections == null ? "null" : selections.Count.ToString())}");
+        if (slotIconImages == null) return;
+
         for (int i = 0; i < slotIconImages.Count; i++)
         {
-            // 2) selections 리스트에서 i번째 RuneSO를 꺼냄
-            var so = selections[i];
-            if (so != null)
+            if (slotIconImages[i] == null) continue;
+
+            if (selections != null && i < selections.Count && selections[i] != null)
             {
+                var so = selections[i];
                 Debug.Log($"Slot {i}: 룬 {so.name}, 아이콘 {(so.icon == null ? "NULL" : so.icon.name)}");
-                // 3) 해당 슬롯에 룬이 있으면
-                //   3-1) Image 컴포넌트의 sprite를 RuneSO.icon으로 설정
                 slotIconImages[i].sprite = so.icon;
-                //   3-2) 이미지 표시(enabled) 켜기
                 slotIconImages[i].enabled = true;
             }
             else
             {
-                // 4) so가 null이면(빈 슬롯) 
-                //   이미지 표시(enabled) 끄기 → 빈 칸으로 보이게 함
                 slotIconImages[i].enabled = false;
             }
         }
     }
-
 }
