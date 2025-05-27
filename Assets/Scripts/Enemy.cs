@@ -11,14 +11,18 @@ public class Enemy : MonoBehaviour
     public CharacterIndent CharacterIndent { get; private set; }
 
     private int currentHp; //현재 체력
-
-    // TurnManager 등 외부에서 현재 체력을 읽을 수 있도록 public 속성 추가
-    public int currentHealth => currentHp;
+   
+    public int currentHealth => currentHp; //외부에서 현재 체력을 읽을 수 있도록 public 속성 추가
 
     private HpBarController hpBarController; // HPBarController 참조 변수 추가
 
     // 독 효과를 위한 변수 (현재 독 스택)
     private int poisonStack = 0;
+
+    //화상 효과 관련 변수 추가 
+    private int burnDamagePerTurn = 0;
+    private int burnTurnsRemaining = 0;
+
 
     void Awake()
     {
@@ -29,9 +33,7 @@ public class Enemy : MonoBehaviour
     {
         enemyData = data;
         currentHp = enemyData.HP;
-
-        // 적의 이름을 설정합니다.
-        gameObject.name = enemyData.EnemyName;
+        gameObject.name = enemyData.EnemyName;  // 적의 이름 설정
     }
 
     public void SetHPBarController(HpBarController controller)
@@ -53,6 +55,7 @@ public class Enemy : MonoBehaviour
         Debug.Log("적 방어력:" + enemyData.Defense);
     }
 
+    // 일반 공격으로 피해를 받는 메소드 (방어력 고려)
     public void Hit(int damage, Player player)
     {
         // 방어력을 고려한 실제 피해량 계산
@@ -64,6 +67,19 @@ public class Enemy : MonoBehaviour
             hpBarController.SetCurrentHP(currentHp);
         else
             Debug.LogWarning("HPBarController가 할당되지 않았습니다.");
+
+        if (currentHp <= 0)
+            Die();
+    }
+
+    //방어력을 무시하는 직접적인 피해를 받는 메소드 추가
+    public void TakeDirectDamage(int damageAmount)
+    {
+        currentHp -= damageAmount;
+        Debug.Log($"{enemyData.EnemyName}이(가) {damageAmount}의 직접 피해를 입었습니다. 남은 체력: {currentHp}");
+
+        if (hpBarController != null)
+            hpBarController.SetCurrentHP(currentHp);
 
         if (currentHp <= 0)
             Die();
@@ -93,29 +109,42 @@ public class Enemy : MonoBehaviour
     {
         Debug.Log($"{enemyData.EnemyName}의 턴 시작");
 
-        // 턴 시작 시 독 피해 처리
-        ProcessPoisonAtTurnStart();
+        // 턴 시작 시 상태 이상 처리
+        ProcessPoisonAtTurnStart(); // 기존 독 처리
+        if (currentHp <= 0) yield break; // 독 피해로 사망 시 턴 종료
 
-       
+        ProcessBurnAtTurnStart();   // 화상 피해 처리 추가
+        if (currentHp <= 0) yield break; // 화상 피해로 사망 시 턴 종료
+
+
         // 독 피해로 인해 적의 현재체력이 0 이하라면 턴을 종료
         if (currentHp <= 0)
         {
             yield break;
         }
-        // 공격 패턴 예시: 플레이어에게 적 스탯의 데미지
+        //플레이어에게 적 스탯의 데미지
         yield return StartCoroutine(AttackPlayer(enemyData.Damage));
 
-        // 턴 종료 시 독 스택 감소 처리
-        ProcessPoisonAtTurnEnd();
+        // 턴 종료 시 상태 이상 지속시간 감소 등 처리
+        ProcessPoisonAtTurnEnd(); //독 지속시간 차감
+
 
         Debug.Log($"{enemyData.EnemyName}의 턴 종료");
+        yield return null; // 턴 매니저에게 제어권 넘김
     }
 
     private IEnumerator AttackPlayer(int damage)
     {
         yield return new WaitForSeconds(0.5f);
-        Player.Instance.TakeDamage(damage);
-        Debug.Log($"{enemyData.EnemyName}이 플레이어에게 {damage}의 데미지를 입혔습니다.");
+        if (Player.Instance != null)
+        {
+            Player.Instance.TakeDamage(damage); // Player.cs 에 정의된 TakeDamage 호출
+            Debug.Log($"{enemyData.EnemyName}이 플레이어에게 {damage}의 데미지를 입혔습니다.");
+        }
+        else
+        {
+            Debug.LogError("Player.Instance가 null입니다. 플레이어 공격 불가.");
+        }
     }
 
     // ---------------- 독 효과 관련 메서드들을 Enemy 클래스 내부로 이동 ----------------
@@ -152,7 +181,45 @@ public class Enemy : MonoBehaviour
             Debug.Log($"{enemyData.EnemyName}의 독 수치가 1 감소하여 {poisonStack}이 되었습니다.");
         }
     }
+    // --- 화상 효과 관련 메소드 추가 ---
+    /// <summary>
+    /// 적에게 화상 효과를 적용합니다.
+    /// </summary>
+    /// <param name="damage">턴당 화상 데미지</param>
+    /// <param name="duration">화상 지속 턴 수</param>
+    public void ApplyBurn(int damage, int duration)
+    {
+        burnDamagePerTurn += damage; // 값 갱신 (중첩이 필요하면 로직 변경: +=)
+        burnTurnsRemaining = duration;  // 값 갱신 (중첩이 필요하면 로직 변경: += 또는 Max)
+        Debug.Log($"{enemyData.EnemyName}에게 {duration}턴 동안 매 턴 {damage}의 화상 효과가 부여되었습니다.");
+        // 필요하다면 화상 아이콘 등 UI 표시 로직 추가
+    }
 
+    /// <summary>
+    /// 턴 시작 시 화상 피해를 처리합니다.
+    /// </summary>
+    private void ProcessBurnAtTurnStart()
+    {
+        if (burnTurnsRemaining > 0)
+        {
+            Debug.Log($"{enemyData.EnemyName}이(가) 화상으로 {burnDamagePerTurn}의 직접피해를 입습니다.");
+           
+            TakeDirectDamage(burnDamagePerTurn);  //방어도 무시하고 직접 피해 입힘
+            burnTurnsRemaining--;
+
+            if (burnTurnsRemaining <= 0)
+            {
+                burnDamagePerTurn = 0; // 화상 효과 종료
+                Debug.Log($"{enemyData.EnemyName}의 화상 효과가 종료되었습니다.");
+                // 필요하다면 화상 아이콘 등 UI 제거 로직 추가
+            }
+            else
+            {
+                Debug.Log($"{enemyData.EnemyName}의 화상 효과 남은 턴: {burnTurnsRemaining}");
+            }
+        }
+    }
+    // ---------------------------------
     /// <summary>
     /// 현재 체력 백분율(0~1)을 반환합니다.
     /// </summary>

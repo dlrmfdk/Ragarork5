@@ -1,10 +1,29 @@
 using UnityEngine;
 
+public enum RuneColor
+{
+    Red,
+    Blue,
+    White,
+    Yellow,
+}
+
+public enum RuneRarity
+{
+   Common,
+    Rare,
+    Legend
+}
+
 [CreateAssetMenu(fileName = "RuneSO", menuName = "Runes/RuneSO")]
+
 public class RuneSO : ScriptableObject
 {
     [Header("·é »ö»ó")]
     public RuneColor color;
+
+    [Header("·é Èñ±Íµµ")]
+    public RuneRarity rarity;
 
     [Header("·é ÀÌ¸§")]
     public string displayName;

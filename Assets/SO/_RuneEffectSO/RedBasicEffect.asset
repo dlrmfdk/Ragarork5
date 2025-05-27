@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f6297786fc5cfa43b3d21e46bb6dfec, type: 3}
   m_Name: RedBasicEffect
   m_EditorClassIdentifier: 
-  damage: 10
+  damage: 1

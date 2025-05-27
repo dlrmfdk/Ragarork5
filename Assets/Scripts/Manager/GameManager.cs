@@ -73,7 +73,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-#if UNITY_EDITOR
+#if UNITY_EDITOR // 개발 중에만 작동
         InputCheatKey();
 #endif
 

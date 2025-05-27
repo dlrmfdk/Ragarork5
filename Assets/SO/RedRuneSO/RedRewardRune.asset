@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: RedRewardRune
   m_EditorClassIdentifier: 
   color: 0
+  rarity: 0
   displayName: RedRewardRune
   icon: {fileID: 21300000, guid: 4863e4aab5be8094480a48de49c83625, type: 3}
   isBasicRune: 0

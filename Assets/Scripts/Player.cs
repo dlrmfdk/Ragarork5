@@ -14,7 +14,7 @@ public class Player : MonoBehaviour
     private int currentHealth; //현재체력
 
     [Header("공격 관련")]
-    [SerializeField] private int attackPower = 10; // 기본 공격력
+    [SerializeField] private int attackPower = 0; // 기본 공격력
     // 추가 공격 버프(힘의 축복 등)로 증가시킬 값
 
     [Header("마나 관련")]
@@ -173,19 +173,6 @@ public class Player : MonoBehaviour
     }
 
 
-    // 플레이어의 덱에 카드 추가 (예: 불꽃의 일격 효과)
-    public void AddCardToDeck(string cardName)
-    {
-        // 실제 구현: CardDatabase.Instance.GetCardDataByName(cardName)로 데이터 얻고, Item 생성 후 DeckManager.Instance.AddCardToDeck(newItem) 호출
-        Debug.Log($"{cardName} 카드를 덱에 추가합니다.");
-        // 임시 예시:
-        // Item newCard = new Item();
-        // newCard.name = cardName;
-        // newCard.type = ItemType.Attack; // 또는 적절한 타입
-        // DeckManager.Instance.AddCardToDeck(newCard);
-    }
-
-
     // 방어도 증가
     public void IncreaseDefense(int defense)
     {
@@ -254,52 +241,13 @@ public class Player : MonoBehaviour
         // 추가로 UI 업데이트가 필요하면 구현
     }
 
-    //// 이번 턴 데미지 2배 효과 (예: 선천진기)
-    //public void DoubleDamageThisTurn()
-    //{
-    //    isDoubleDamageTurn = true;
-    //    Debug.Log("이번 턴 공격 데미지가 2배가 됩니다.");
-    //    // 턴 종료 시 초기화 로직 필요
-    //}
 
-    // 무적 상태 (예: 발할라의 방패) 설정
     public void SetInvincibleTurn(int turns)
     {
         invincibleTurnCount = turns;
         Debug.Log($"플레이어가 {turns}턴 동안 무적 상태가 됩니다.");
     }
 
-    //// 덱 내 공격 카드 개수 세기 (예: 타격의 대가 효과)
-    //public int CountAttackCardsInDeck()
-    //{
-    //    int count = 0;
-    //    foreach (var card in deck)
-    //    {
-    //        if (card.type == ItemType.Attack)
-    //            count++;
-    //    }
-    //    Debug.Log($"덱 내 공격 카드 수: {count}");
-    //    return count;
-    //}
-   
-
-
-    //// 덱에 카드 추가 (예: 불꽃의 일격 효과)
-    //public void AddCardToDeck(string cardName)
-    //{
-    //    // 카드 생성 방식은 프로젝트에 따라 달라집니다.
-    //    // 여기선 단순히 로그 출력 및 임시 추가로 구현합니다.
-    //    Debug.Log($"{cardName} 카드를 덱에 추가합니다.");
-    //    // deck.Add(new Item(...));  // 실제로 카드 데이터를 생성하여 추가하는 로직 필요
-    //}
-
-    //// 플레이어에게 화상 효과 적용 (예: 저주 화상)
-    //public void ApplyBurn(int burnDamage)
-    //{
-    //    Debug.Log($"플레이어가 화상으로 {burnDamage}의 피해를 입습니다.");
-    //    TakeDamage(burnDamage);
-    //    // 추가로 화상 지속 효과(턴마다 피해 등) 구현 가능
-    //}
 
 
     public void Die()
