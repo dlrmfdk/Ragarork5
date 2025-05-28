@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Elite Enemy
   m_EditorClassIdentifier: 
   enemyName: Elite
+  enemyPrefab: {fileID: 7200045573534697613, guid: 84721b338d2a8a6418b24d0fd4ac26ab, type: 3}
   hp: 10
   damage: 20
   defense: 0
+  category: 1

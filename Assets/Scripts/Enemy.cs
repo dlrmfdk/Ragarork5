@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
+using Spine.Unity; // Spine 애니메이션 사용을 위해 추가
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private EnemySO enemyData;
@@ -23,10 +23,26 @@ public class Enemy : MonoBehaviour
     private int burnDamagePerTurn = 0;
     private int burnTurnsRemaining = 0;
 
+    private SkeletonAnimation skeletonAnimation; // Spine 애니메이션 컴포넌트 참조
+
+
 
     void Awake()
     {
         CharacterIndent = new CharacterIndent();
+
+        // SkeletonAnimation 컴포넌트 가져오기
+        // 만약 SkeletonAnimation이 자식 오브젝트에 있다면 GetComponentInChildren<SkeletonAnimation>() 사용
+        skeletonAnimation = GetComponent<SkeletonAnimation>();
+        if (skeletonAnimation == null)
+        {
+            // 자식 오브젝트에서도 찾아보기 (구조에 따라 필요할 수 있음)
+            skeletonAnimation = GetComponentInChildren<SkeletonAnimation>();
+            if (skeletonAnimation == null)
+            {
+                Debug.LogError("SkeletonAnimation component not found on " + gameObject.name + " or its children.");
+            }
+        }
     }
 
     public void Initialize(EnemySO data)
@@ -34,6 +50,12 @@ public class Enemy : MonoBehaviour
         enemyData = data;
         currentHp = enemyData.HP;
         gameObject.name = enemyData.EnemyName;  // 적의 이름 설정
+
+        // 초기 애니메이션 상태를 "Idle"로 설정
+        if (skeletonAnimation != null)
+        {
+            skeletonAnimation.AnimationState.SetAnimation(0, "IDLE", true); // 트랙 0번, Idle 애니메이션, 반복 true
+        }
     }
 
     public void SetHPBarController(HpBarController controller)
@@ -135,7 +157,29 @@ public class Enemy : MonoBehaviour
 
     private IEnumerator AttackPlayer(int damage)
     {
-        yield return new WaitForSeconds(0.5f);
+        float attackAnimationDuration = 0.5f; // 기본 대기 시간 (애니메이션 못 찾을 경우 대비)
+
+        if (skeletonAnimation != null)
+        {
+            // "Attack" 애니메이션 재생 (반복 안함)
+            Spine.TrackEntry attackTrackEntry = skeletonAnimation.AnimationState.SetAnimation(0, "ATTACK", false);
+            if (attackTrackEntry != null && attackTrackEntry.Animation != null)
+            {
+                attackAnimationDuration = attackTrackEntry.Animation.Duration;
+            }
+            else
+            {
+                Debug.LogWarning($"'{gameObject.name}'의 SkeletonAnimation에서 'Attack' 애니메이션을 찾을 수 없습니다. 기본 대기 시간을 사용합니다.");
+            }
+            // 애니메이션이 끝날 때까지 또는 특정 타격 지점까지 대기
+            yield return new WaitForSeconds(attackAnimationDuration); // 전체 애니메이션 길이만큼 대기
+        }
+        else
+        {
+            // SkeletonAnimation 컴포넌트가 없으면 기존 방식대로 0.5초 대기
+            yield return new WaitForSeconds(0.5f);
+        }
+        // 실제 공격 (데미지 처리)
         if (Player.Instance != null)
         {
             Player.Instance.TakeDamage(damage); // Player.cs 에 정의된 TakeDamage 호출
@@ -144,6 +188,11 @@ public class Enemy : MonoBehaviour
         else
         {
             Debug.LogError("Player.Instance가 null입니다. 플레이어 공격 불가.");
+        }
+        // 공격 후 "Idle" 애니메이션으로 전환 (반복)
+        if (skeletonAnimation != null)
+        {
+            skeletonAnimation.AnimationState.SetAnimation(0, "IDLE", true);
         }
     }
 

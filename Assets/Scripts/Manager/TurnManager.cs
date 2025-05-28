@@ -46,7 +46,7 @@ public class TurnManager : MonoBehaviour
         // 2. 현재 전투에 맞는 적 스폰
         if (enemySpawner != null)
         {
-            enemySpawner.SpawnRandomEnemies();
+            enemySpawner.SpawnRandomEnemies(); // 적 스폰 메서드 호출
         }
         else
         {

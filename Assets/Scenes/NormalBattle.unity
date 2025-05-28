@@ -1610,15 +1610,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ee1ac87c9cdd954bbec8242a6be7717, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyDatas:
-  - {fileID: 11400000, guid: a06cc595cf5bab548a37a6fb45503a34, type: 2}
+  normalEnemyList: []
+  eliteEnemyList:
   - {fileID: 11400000, guid: 20efe1446ca642945b73cb0223de80d9, type: 2}
-  - {fileID: 11400000, guid: 10a27c766b994714eb62fdb92993fb11, type: 2}
-  enemyPrefab: {fileID: 8024799122772746139, guid: 13dfbc20663252042966c4a1abe21fe5, type: 3}
+  bossEnemyList: []
+  minEnemiesToSpawn: 1
+  maxEnemiesToSpawn: 1
   hpBarPrefab: {fileID: 9125842775792010603, guid: c5094ee12b333234899f42adabfec3bc, type: 3}
-  spawnXPositon: 20
+  initialSpawnXPosition: 20
   spawnYPosition: -4
   spawnZPosition: 0
+  enemySpacingX: -10
 --- !u!4 &291939631
 Transform:
   m_ObjectHideFlags: 0
@@ -6301,37 +6303,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1604796846}
   m_CullTransparentMesh: 1
---- !u!1 &1688308878
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1688308879}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1688308879
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1688308878}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 698.2, y: 116.5773, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1711405797
 GameObject:
   m_ObjectHideFlags: 0
@@ -7574,5 +7545,4 @@ SceneRoots:
   - {fileID: 1434559961}
   - {fileID: 1533538188}
   - {fileID: 1802988019}
-  - {fileID: 1688308879}
   - {fileID: 1241220632}

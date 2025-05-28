@@ -1,25 +1,37 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq; // Linq 사용을 위해 추가 (필요시)
 
-public enum EnemyType { Normal, Elite, Boss }
+// EnemyType enum은 이 파일 또는 다른 공용 파일에 정의되어 있다고 가정합니다.
+// public enum EnemyType { Normal, Elite, Boss }
 
 public class EnemySpawner : MonoBehaviour
 {
-
-    [SerializeField]
-    private List<EnemySO> enemyDatas;
-    [SerializeField]
-    private GameObject enemyPrefab;
-    [SerializeField]
-    private GameObject hpBarPrefab; // HP 바 프리팹을 인스펙터에 할당
-    public float spawnXPositon;
-    public float spawnYPosition;
-    public float spawnZPosition;
-    public List<Enemy> SpawnedEnemies { get; private set; } = new List<Enemy>(); // NEW: 스폰된 적 리스트
+    [Header("적 SO 리스트")]
+    [Tooltip("스폰될 수 있는 일반 적 SO 목록")]
+    [SerializeField] private List<EnemySO> normalEnemyList;
+    [Tooltip("스폰될 수 있는 엘리트 적 SO 목록")]
+    [SerializeField] private List<EnemySO> eliteEnemyList;
+    [Tooltip("스폰될 수 있는 보스 적 SO 목록")]
+    [SerializeField] private List<EnemySO> bossEnemyList;
 
 
-    //싱글톤
+    [Header("랜덤 스폰 설정")]
+    [SerializeField] private int minEnemiesToSpawn = 1;
+    [SerializeField] private int maxEnemiesToSpawn = 3; // 'n'에 해당하는 최대 스폰 수
+
+    [Header("공용 설정")]
+    [SerializeField] private GameObject hpBarPrefab; // HP 바 프리팹
+
+    [Header("스폰 위치 설정")]
+    public float initialSpawnXPosition = 0f; // 초기 스폰 X 위치
+    public float spawnYPosition = 0f;
+    public float spawnZPosition = 0f;
+    public float enemySpacingX = -10f; // 적들 사이의 X 간격
+
+    public List<Enemy> SpawnedEnemies { get; private set; } = new List<Enemy>();
+
     public static EnemySpawner Instance { get; private set; }
 
     void Awake()
@@ -33,119 +45,147 @@ public class EnemySpawner : MonoBehaviour
             Destroy(gameObject);
         }
     }
-    void Start()
+
+    // 요청 1: 1~n 마리의 적을 랜덤하게 스폰
+    public void SpawnRandomEnemies() 
     {
-        // 기존 SpawnAllEnemies 메서드 호출 (필요 시 주석 해제)
-        // SpawnAllEnemies();
+        SpawnedEnemies.Clear();
+        float currentSpawnX = initialSpawnXPosition;
+        int numberOfEnemies = Random.Range(minEnemiesToSpawn, maxEnemiesToSpawn + 1);
 
-        // NEW: 랜덤하게 1~3명의 적 스폰
-       // SpawnRandomEnemies();
-    }
+        // 스폰 가능한 적 카테고리 목록을 만듭니다.
+        List<System.Action> spawnerActions = new List<System.Action>();
 
+        if (normalEnemyList != null && normalEnemyList.Count > 0)
+        {
+            spawnerActions.Add(() => {
+                EnemySO selectedSO = normalEnemyList[Random.Range(0, normalEnemyList.Count)];
+                SpawnAndRegisterEnemy(selectedSO, ref currentSpawnX);
+            });
+        }
+        if (eliteEnemyList != null && eliteEnemyList.Count > 0)
+        {
+            spawnerActions.Add(() => {
+                EnemySO selectedSO = eliteEnemyList[Random.Range(0, eliteEnemyList.Count)];
+                SpawnAndRegisterEnemy(selectedSO, ref currentSpawnX);
+            });
+        }
+        if (bossEnemyList != null && bossEnemyList.Count > 0)
+        {
+            spawnerActions.Add(() => {
+                EnemySO selectedSO = bossEnemyList[Random.Range(0, bossEnemyList.Count)];
+                Debug.LogWarning("[Game Design] Boss enemy spawned via SpawnRandomEnemiesIncludingBosses function.");
+                SpawnAndRegisterEnemy(selectedSO, ref currentSpawnX);
+            });
+        }
 
-
-
-    // NEW: 1~3명의 Normal 또는 Elite 적을 랜덤하게 스폰하는 메서드
-    public void SpawnRandomEnemies()
-    {
-        // 1부터 3까지 랜덤한 수 선택
-        int numberOfEnemies = Random.Range(1,4); // Upper bound is inclusive for int
+        if (spawnerActions.Count == 0)
+        {
+            Debug.LogWarning("스폰할 수 있는 적 SO 리스트가 모두 비어있습니다 (Normal, Elite, Boss).");
+            return;
+        }
 
         for (int i = 0; i < numberOfEnemies; i++)
         {
-            // EnemyType.Normal (0) 또는 EnemyType.Elite (1)을 랜덤하게 선택
-            EnemyType enemyType = (EnemyType)Random.Range(0, 2); // 0 inclusive, 2 exclusive
-
-            // EnemySO 데이터가 존재하는지 확인
-            if ((int)enemyType < enemyDatas.Count)
-            {
-                var enemy = SpawnEnemy(enemyType);
-                enemy.PrintEnemyData(); // 적 정보 출력
-                SpawnedEnemies.Add(enemy); // 스폰된 적 리스트에 추가
-            }
-            else
-            {
-                Debug.LogError($"EnemyType {enemyType} does not have corresponding EnemySO data.");
-            }
+            // 가능한 스폰 액션 중 하나를 랜덤하게 선택하여 실행
+            int randomActionIndex = Random.Range(0, spawnerActions.Count);
+            spawnerActions[randomActionIndex].Invoke();
         }
     }
 
-    // 모든 적에게 독을 부여하는 함수
+    // 내부적으로 사용될 적 스폰 및 등록 헬퍼 함수
+    private void SpawnAndRegisterEnemy(EnemySO soToSpawn, ref float currentX)
+    {
+        if (soToSpawn == null) return;
+
+        Enemy newEnemy = SpawnSpecificEnemy(soToSpawn, new Vector3(currentX, spawnYPosition, spawnZPosition));
+        if (newEnemy != null)
+        {
+            SpawnedEnemies.Add(newEnemy);
+            newEnemy.PrintEnemyData();
+            currentX += enemySpacingX; // 다음 적 스폰 위치 조정
+        }
+    }
+
+
+    // 요청 2: EnemyPrefab을 SO에서 가져오도록 수정된 공용 스폰 메소드
+    /// <summary>
+    /// 특정 EnemySO 데이터를 기반으로 적 하나를 지정된 위치에 스폰합니다.
+    /// </summary>
+    /// <param name="soToSpawn">스폰할 적의 EnemySO</param>
+    /// <param name="position">스폰될 위치</param>
+    /// <returns>스폰된 Enemy 객체</returns>
+    private Enemy SpawnSpecificEnemy(EnemySO soToSpawn, Vector3 position)
+    {
+        if (soToSpawn == null)
+        {
+            Debug.LogError("SpawnSpecificEnemy: soToSpawn 파라미터가 null입니다.");
+            return null;
+        }
+        if (soToSpawn.EnemyPrefab == null)
+        {
+            Debug.LogError($"SpawnSpecificEnemy: {soToSpawn.EnemyName}의 EnemyPrefab이 할당되지 않았습니다.");
+            return null;
+        }
+
+        // SO에 지정된 프리팹으로 적 인스턴스 생성
+        GameObject enemyObject = Instantiate(soToSpawn.EnemyPrefab, position, Quaternion.identity);
+        Enemy newEnemy = enemyObject.GetComponent<Enemy>();
+
+        if (newEnemy == null)
+        {
+            Debug.LogError($"{soToSpawn.EnemyName} 프리팹에 Enemy 컴포넌트가 없습니다.");
+            Destroy(enemyObject); // 불완전한 오브젝트 제거
+            return null;
+        }
+
+        newEnemy.Initialize(soToSpawn); // EnemySO 데이터로 초기화
+
+        // HP 바 생성 및 설정
+        if (hpBarPrefab != null)
+        {
+            Canvas canvas = FindObjectOfType<Canvas>();
+            if (canvas != null)
+            {
+                GameObject hpBarInstance = Instantiate(hpBarPrefab, canvas.transform);
+                HpBarController hpBarController = hpBarInstance.GetComponent<HpBarController>();
+                if (hpBarController != null)
+                {
+                    hpBarController.SetTarget(newEnemy.transform);
+                    hpBarController.SetMaxHP(newEnemy.EnemyData.HP); // EnemyData는 Enemy.cs에서 EnemySO를 가리키는 속성이라고 가정
+                    hpBarController.SetCurrentHP(newEnemy.EnemyData.HP);
+                    hpBarController.SetOffset(new Vector3(0, -155f, 0)); // 오프셋 조정
+                    newEnemy.SetHPBarController(hpBarController); // Enemy 스크립트에 HP 바 컨트롤러 설정 메소드 필요
+                }
+                else Debug.LogError("HPBarController가 HP 바 프리팹에 존재하지 않습니다.");
+            }
+            else Debug.LogError("씬에 Canvas가 존재하지 않습니다.");
+        }
+        else Debug.LogError("HPBarPrefab이 EnemySpawner에 할당되지 않았습니다.");
+
+        return newEnemy;
+    }
+
+
+    // --- 기존 독 관련 함수들은 그대로 유지 ---
     public void ApplyPoisonToAllEnemies(int poisonValue)
     {
         foreach (var enemy in SpawnedEnemies)
         {
-            
-            // 적에게 독을 부여
             if (enemy != null)
                 enemy.ApplyPoison(poisonValue);
         }
     }
-    // 모든 적의 독을 2배로 증가시키고, 즉시 데미지를 주는 함수
+
     public void BoostPoisonOnAllEnemiesAndDamage(int damage)
     {
         foreach (Enemy enemy in SpawnedEnemies)
         {
-            // 예시: 독 수치를 2배로 증가
-            enemy.BoostPoison(2);
-            // 그리고 즉시 데미지를 줍니다.
-            enemy.Hit(damage, null);
-        }
-    }
-
-
-    public Enemy SpawnEnemy(EnemyType type)
-    {
-        // 적 인스턴스
-        var newEnemy = Instantiate(enemyPrefab).GetComponent<Enemy>();
-
-        // EnemySO 데이터 초기화
-        newEnemy.Initialize(enemyDatas[(int)type]);
-        newEnemy.transform.position = new Vector3(spawnXPositon, spawnYPosition, spawnZPosition);
-        spawnXPositon -= 10f; // 다음 적을 위해 y 위치 조정
-
-        // 2. HP 바 생성 및 설정
-        if (hpBarPrefab != null)
-        {
-            // 씬 내 Canvas 찾기
-            Canvas canvas = FindObjectOfType<Canvas>();
-            if (canvas != null)
+            if (enemy != null)
             {
-                // HP 바 인스턴스화
-                GameObject hpBarInstance = Instantiate(hpBarPrefab, canvas.transform);
-
-                // HPBarController 컴포넌트 참조
-                HpBarController hpBarController = hpBarInstance.GetComponent<HpBarController>();
-                if (hpBarController != null)
-                {
-                    // HP 바의 타겟 설정 (생성된 적)
-                    hpBarController.SetTarget(newEnemy.transform);
-
-                    // HP 바의 최대 HP 및 현재 HP 설정
-                    hpBarController.SetMaxHP(newEnemy.EnemyData.HP);
-                    hpBarController.SetCurrentHP(newEnemy.EnemyData.HP);
-                   
-                    // HP 바의 오프셋 설정 (적의 y축 아래로 위치)
-                    hpBarController.SetOffset(new Vector3(0, -155f, 0)); // 필요에 따라 조정
-
-                    newEnemy.SetHPBarController(hpBarController);
-
-                }
-                else
-                {
-                    Debug.LogError("HPBarController가 HP 바 프리팹에 존재하지 않습니다.");
-                }
-            }
-            else
-            {
-                Debug.LogError("씬에 Canvas가 존재하지 않습니다.");
+                enemy.BoostPoison(2);
+                enemy.Hit(damage, null); // Player 참조가 필요 없는 경우 null 전달
             }
         }
-        else
-        {
-            Debug.LogError("HPBarPrefab이 EnemySpawner에 할당되지 않았습니다.");
-        }
-
-        return newEnemy;
     }
 }

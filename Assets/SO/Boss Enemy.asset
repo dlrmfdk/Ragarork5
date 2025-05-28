@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Boss Enemy
   m_EditorClassIdentifier: 
   enemyName: Boss
+  enemyPrefab: {fileID: 8045317353110916379, guid: 2405a93de35c4444c83be6b3be308a5b, type: 3}
   hp: 100
   damage: 10
   defense: 0
+  category: 2
