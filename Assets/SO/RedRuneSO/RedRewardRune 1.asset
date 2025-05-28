@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: RedRewardRune 1
   m_EditorClassIdentifier: 
   color: 0
+  rarity: 0
   displayName: RedRewardRune1
-  icon: {fileID: 21300000, guid: a963d4f88a4010640b8b73ed837ae9eb, type: 3}
+  icon: {fileID: 21300000, guid: 978a8c10a4327924f913340183b413eb, type: 3}
   isBasicRune: 0
   initialDeckCount: 1
   effectSO: {fileID: 11400000, guid: 98527adcb808e4845aa87822255bcf10, type: 2}

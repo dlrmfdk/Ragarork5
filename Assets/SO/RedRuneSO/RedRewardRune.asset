@@ -15,7 +15,7 @@ MonoBehaviour:
   color: 0
   rarity: 0
   displayName: RedRewardRune
-  icon: {fileID: 21300000, guid: 4863e4aab5be8094480a48de49c83625, type: 3}
+  icon: {fileID: 21300000, guid: 714be6c9ab90f884b92eb46ab6769dd4, type: 3}
   isBasicRune: 0
   initialDeckCount: 1
   effectSO: {fileID: 11400000, guid: 98527adcb808e4845aa87822255bcf10, type: 2}
