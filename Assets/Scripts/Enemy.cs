@@ -54,7 +54,7 @@ public class Enemy : MonoBehaviour
         // 초기 애니메이션 상태를 "Idle"로 설정
         if (skeletonAnimation != null)
         {
-            skeletonAnimation.AnimationState.SetAnimation(0, "IDLE", true); // 트랙 0번, Idle 애니메이션, 반복 true
+            skeletonAnimation.AnimationState.SetAnimation(0, "idle", true); // 트랙 0번, Idle 애니메이션, 반복 true
         }
     }
 
@@ -162,7 +162,7 @@ public class Enemy : MonoBehaviour
         if (skeletonAnimation != null)
         {
             // "Attack" 애니메이션 재생 (반복 안함)
-            Spine.TrackEntry attackTrackEntry = skeletonAnimation.AnimationState.SetAnimation(0, "ATTACK", false);
+            Spine.TrackEntry attackTrackEntry = skeletonAnimation.AnimationState.SetAnimation(0, "attack", false);
             if (attackTrackEntry != null && attackTrackEntry.Animation != null)
             {
                 attackAnimationDuration = attackTrackEntry.Animation.Duration;
@@ -192,7 +192,7 @@ public class Enemy : MonoBehaviour
         // 공격 후 "Idle" 애니메이션으로 전환 (반복)
         if (skeletonAnimation != null)
         {
-            skeletonAnimation.AnimationState.SetAnimation(0, "IDLE", true);
+            skeletonAnimation.AnimationState.SetAnimation(0, "idle", true);
         }
     }
 

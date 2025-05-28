@@ -68,13 +68,9 @@ MeshRenderer:
   - {fileID: 2100000, guid: 6c3fb1c91e2d95946b8d26cc00303be5, type: 2}
   - {fileID: 2100000, guid: c6745cb7f15056048b47bc702950e097, type: 2}
   - {fileID: 2100000, guid: 6c3fb1c91e2d95946b8d26cc00303be5, type: 2}
-  - {fileID: 2100000, guid: 21976ec7c3f79004598977952f29f49a, type: 2}
-  - {fileID: 2100000, guid: 6c3fb1c91e2d95946b8d26cc00303be5, type: 2}
   - {fileID: 2100000, guid: c6745cb7f15056048b47bc702950e097, type: 2}
   - {fileID: 2100000, guid: 0813d55ab36e86546ae11d9026244b6d, type: 2}
   - {fileID: 2100000, guid: 6c3fb1c91e2d95946b8d26cc00303be5, type: 2}
-  - {fileID: 2100000, guid: 0813d55ab36e86546ae11d9026244b6d, type: 2}
-  - {fileID: 2100000, guid: c6745cb7f15056048b47bc702950e097, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -136,7 +132,7 @@ MonoBehaviour:
   physicsMovementRelativeTo: {fileID: 0}
   updateTiming: 1
   unscaledTime: 0
-  _animationName: 
+  _animationName: idle
   loop: 1
   timeScale: 1
 --- !u!114 &-8092542298262280832

@@ -1618,7 +1618,7 @@ MonoBehaviour:
   maxEnemiesToSpawn: 1
   hpBarPrefab: {fileID: 9125842775792010603, guid: c5094ee12b333234899f42adabfec3bc, type: 3}
   initialSpawnXPosition: 20
-  spawnYPosition: -4
+  spawnYPosition: 2
   spawnZPosition: 0
   enemySpacingX: -10
 --- !u!4 &291939631
