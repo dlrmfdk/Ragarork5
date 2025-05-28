@@ -166,7 +166,7 @@ public class RewardManager : MonoBehaviour
         RuneDeckManager.Instance.SaveDeckState();
 
         if (RuneRewardPanel != null) RuneRewardPanel.SetActive(false);
-        // if (RewardPanel != null) RewardPanel.SetActive(true); // 메인 보상 패널을 다시 보여줄지 결정
+        if (RewardPanel != null) RewardPanel.SetActive(true); // 메인 보상 패널을 다시 보여줄지 결정
 
         hasClaimedRuneReward = true;
         if (RewardRuneButton != null) RewardRuneButton.interactable = false; // 룬 보상 버튼 비활성화

@@ -6238,9 +6238,8 @@ MonoBehaviour:
   - {fileID: 1432298817}
   - {fileID: 1131358094}
   RewardPool:
-  - {fileID: 11400000, guid: 149caf03e6117bc46a429d687604f77e, type: 2}
-  - {fileID: 11400000, guid: d7d96e9fd7d9bd3468fefef816a3e20d, type: 2}
-  - {fileID: 11400000, guid: 7d4fe99cde3ffa041b0ab13904f4703d, type: 2}
+  - {fileID: 11400000, guid: d7761ab319348ce47a559f2fb896f765, type: 2}
+  - {fileID: 11400000, guid: d7761ab319348ce47a559f2fb896f765, type: 2}
   - {fileID: 11400000, guid: d7761ab319348ce47a559f2fb896f765, type: 2}
 --- !u!4 &1711405799
 Transform:
