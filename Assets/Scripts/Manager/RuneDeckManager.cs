@@ -177,58 +177,114 @@ public class RuneDeckManager : MonoBehaviour
         RefreshUI();
     }
 
-    private void OnDrawClick()
+    private void OnDrawClick() //
     {
         if (!isUIManagerReady)
         {
             Debug.LogWarning("[RDM.OnDrawClick] UIManager가 아직 준비되지 않아 작업을 건너뜁니다.");
             return;
         }
-
         if (Player.Instance == null) { Debug.LogError("[RDM.OnDrawClick] Player.Instance is null!"); return; }
-        // EnemySpawner.Instance 또는 targets에 대한 null 체크도 필요에 따라 추가
-        var user = Player.Instance;
-        var targets = EnemySpawner.Instance != null ? EnemySpawner.Instance.SpawnedEnemies : null;
-        if (targets == null) { Debug.LogWarning("[RDM.OnDrawClick] targets (SpawnedEnemies) is null!"); /* 전투 대상이 없으면 효과 발동이 무의미할 수 있음 */ }
 
+        // 실행할 빨간색 타겟팅 룬이 있는지 확인
+        RuneSO redRuneForTargeting = null;
+        int redRuneIndexInSelection = -1;
 
         for (int i = 0; i < selectionCount; i++)
         {
-            var so = selections[i];
-            if (so != null) // selections에 null이 들어갈 수 있으므로 체크
+            if (selections[i] != null && selections[i].color == RuneColor.Red) // RuneColor enum 사용
             {
-                if (so.effectSO == null)
-                {
-                    Debug.LogError($"[RDM.OnDrawClick] {so.name}의 effectSO가 null입니다! 효과를 실행할 수 없습니다.");
-                    continue;
-                }
-                if (targets != null) // 대상이 있을 때만 효과 실행 (혹은 effectSO 내부에서 처리)
-                {
-                    so.effectSO.Execute(user, targets);
-                }
-                discardPile.Add(so);
+                redRuneForTargeting = selections[i];
+                redRuneIndexInSelection = i;
+                break; // 첫 번째 빨간색 룬을 타겟팅 대상으로 선택
             }
         }
 
-        selections = new List<RuneSO>(new RuneSO[5]); // 새 리스트로 초기화
-        selectionCount = 0;
-        hasRerolledThisTurn = false;
+        if (redRuneForTargeting != null)
+        {
+            // 빨간색 룬이 있으면 타겟팅 시작
+            Debug.Log($"[RDM.OnDrawClick] 빨간색 룬 '{redRuneForTargeting.displayName}' 발견. 타겟팅을 시작합니다.");
+            if (PlayerInputManager.Instance != null)
+            {
+                // PlayerInputManager에게 타겟팅 시작을 요청하고, 어떤 룬을 사용하는지,
+                // 그리고 타겟팅 완료 후 처리할 나머지 선택된 룬 정보를 전달할 수 있습니다 (지금은 첫번째 빨간룬만 처리)
+                PlayerInputManager.Instance.StartEnemyTargeting(redRuneForTargeting);
+                // 타겟팅이 시작되면 PlayerInputManager가 나머지 과정을 처리하고,
+                // 최종적으로 PlayerInputManager.EnemyTargetHit 내에서 RuneDeckManager.ProcessTargetedAttackComplete를 호출합니다.
+            }
+            else
+            {
+                Debug.LogError("[RDM.OnDrawClick] PlayerInputManager 인스턴스가 없습니다!");
+            }
+        }
+        else
+        {
+            // 빨간색 룬이 없으면 기존처럼 모든 선택된 룬 즉시 실행
+            Debug.Log("[RDM.OnDrawClick] 타겟팅할 빨간색 룬이 없습니다. 선택된 모든 룬을 즉시 실행합니다.");
+            ExecuteAllSelectedRunesImmediately();
+        }
+    }
+    // 빨간색 룬이 아닌, 즉시 실행될 룬들을 처리하고 턴을 종료하는 함수
+ 
+    private void ExecuteAllSelectedRunesImmediately()
+    {
+        var user = Player.Instance;
+        if (user == null)
+        {
+            Debug.LogError("[RDM.ExecuteAllSelectedRunesImmediately] Player.Instance is null!");
+            return;
+        }
 
-        SaveDeckState();
+        var targets = EnemySpawner.Instance != null ? EnemySpawner.Instance.SpawnedEnemies : new List<Enemy>(); // null 대신 빈 리스트 전달 고려
+        bool effectWasExecuted = false;
 
-        Debug.Log("[OnDrawClick] EndTurn 호출 전 myTurn=" + (TurnManager.Inst != null ? TurnManager.Inst.myTurn.ToString() : "TurnManager.Inst is NULL"));
+        for (int i = 0; i < selectionCount; i++)
+        {
+            var so = selections[i]; // selections는 RuneSO[] 또는 List<RuneSO>일 수 있음
+            if (so != null)
+            {
+                if (so.effectSO == null)
+                {
+                    Debug.LogError($"[RDM.ExecuteAllSelectedRunesImmediately] {so.name}의 effectSO가 null입니다!");
+                    continue;
+                }
+                Debug.Log($"[RDM.ExecuteAllSelectedRunesImmediately] 룬 '{so.displayName}' 효과 실행.");
+                so.effectSO.Execute(user, targets); // targets가 null이어도 effectSO 내부에서 처리할 수 있도록 설계
+                discardPile.Add(so);
+                effectWasExecuted = true;
+            }
+        }
+
+        // 효과 실행 후 선택 슬롯 정리 및 상태 저장, 턴 종료
+        ClearSelectionsAndPrepareForNextAction(); // 이 함수는 RefreshUI를 호출함
+        SaveDeckState(); // 덱 상태 저장
+
         if (TurnManager.Inst != null)
         {
+            // 효과가 실제로 실행되었거나, "Draw" 액션 자체가 턴을 소모하는 경우 턴 종료
+            // 여기서는 effectWasExecuted 여부와 관계없이 Draw 액션 후 턴을 종료하는 것으로 가정
+            Debug.Log("[RDM.ExecuteAllSelectedRunesImmediately] 모든 비-빨강 룬 실행/처리 완료. 턴을 종료합니다.");
             TurnManager.Inst.EndTurn();
         }
         else
         {
-            Debug.LogError("[RDM.OnDrawClick] TurnManager.Inst is null! EndTurn을 호출할 수 없습니다.");
+            Debug.LogError("[RDM.ExecuteAllSelectedRunesImmediately] TurnManager.Inst is null! 턴을 종료할 수 없습니다.");
         }
-        Debug.Log("[OnDrawClick] EndTurn 호출 후 myTurn=" + (TurnManager.Inst != null ? TurnManager.Inst.myTurn.ToString() : "TurnManager.Inst is NULL"));
+        // RefreshUI()는 ClearSelectionsAndPrepareForNextAction 내부에서 이미 호출되었으므로,
+        // TurnManager.EndTurn() 이후에 특별히 상태 변화를 다시 반영해야 한다면 여기서 또 호출할 수 있습니다.
+        // (일반적으로 EndTurn 후에는 다음 턴 준비가 되므로, 현재 RefreshUI 위치도 괜찮아 보입니다.)
+    }
 
+    // 선택 슬롯을 비우고 다음 행동을 준비하는 (리롤 상태 초기화 등) 함수
+    public void ClearSelectionsAndPrepareForNextAction()
+    {
+        selections = new List<RuneSO>(new RuneSO[5]); // 새 리스트로 초기화 (또는 모든 요소 null로)
+        selectionCount = 0;
+        hasRerolledThisTurn = false;
+        // SaveDeckState(); // 턴이 종료될 때 저장하는 것이 더 적합할 수 있음 (OnDrawClick의 원래 위치 또는 EndTurn에서)
         RefreshUI();
     }
+
 
     private void OnReRoll()
     {
@@ -279,6 +335,7 @@ public class RuneDeckManager : MonoBehaviour
         RefreshUI();
         SaveDeckState();
     }
+
 
     public void RefreshUI()
     {
@@ -505,7 +562,35 @@ public class RuneDeckManager : MonoBehaviour
         // 보상 화면으로 넘어가므로 필수는 아닐 수 있습니다.
         // if (isUIManagerReady && UIManager.Instance != null) RefreshUI();
     }
+    public void ProcessTargetedAttackComplete(RuneSO usedTargetedRune, Enemy targetEnemy)
+    {
+        Debug.Log($"[RDM.ProcessTargetedAttackComplete] 타겟팅된 룬 '{usedTargetedRune.displayName}'이(가) '{targetEnemy.name}'에게 사용 완료됨.");
 
+        Debug.Log($"[RDM.ProcessTargetedAttackComplete] 중앙 슬롯의 모든 룬을 묘지로 이동시킵니다. 현재 selectionCount: {selectionCount}");
+        for (int i = 0; i < selectionCount; i++)
+        {
+            if (selections[i] != null)
+            {
+                // Contains 체크를 제거하여 selections에 있던 모든 룬을 묘지로 보냅니다.
+                // 각 룬은 개별적으로 사용된 것으로 간주합니다.
+                discardPile.Add(selections[i]);
+                Debug.Log($"[RDM.ProcessTargetedAttackComplete] 선택되었던 룬 '{selections[i].displayName}'을(를) 묘지로 이동 처리.");
+            }
+        }
+
+        ClearSelectionsAndPrepareForNextAction();
+        SaveDeckState();
+
+        if (TurnManager.Inst != null)
+        {
+            Debug.Log("[RDM.ProcessTargetedAttackComplete] 타겟팅 공격 완료 후 턴을 종료합니다.");
+            TurnManager.Inst.EndTurn();
+        }
+        else
+        {
+            Debug.LogError("[RDM.ProcessTargetedAttackComplete] TurnManager.Inst is null! 턴을 종료할 수 없습니다.");
+        }
+    }
     public void SaveDeckState()
     {
         var state = new DeckState();

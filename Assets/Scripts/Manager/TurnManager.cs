@@ -114,8 +114,7 @@ public class TurnManager : MonoBehaviour
         isLoading = false;
     }
 
-    // EnemyTurn, EndTurn, IsBattleOver, HandleBattleEnd 메서드는 이전과 동일하게 유지...
-    // (이전에 제공해드린 전체 코드를 참고하세요.)
+    
     private IEnumerator EnemyTurn()
     {
         isLoading = true;

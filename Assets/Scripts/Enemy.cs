@@ -32,15 +32,15 @@ public class Enemy : MonoBehaviour
         CharacterIndent = new CharacterIndent();
 
         // SkeletonAnimation 컴포넌트 가져오기
-        // 만약 SkeletonAnimation이 자식 오브젝트에 있다면 GetComponentInChildren<SkeletonAnimation>() 사용
         skeletonAnimation = GetComponent<SkeletonAnimation>();
         if (skeletonAnimation == null)
         {
-            // 자식 오브젝트에서도 찾아보기 (구조에 따라 필요할 수 있음)
             skeletonAnimation = GetComponentInChildren<SkeletonAnimation>();
+            // SkeletonAnimation 컴포넌트가 없는 것은 에러가 아닐 수 있으므로, LogError 대신 Debug.Log 또는 주석 처리합니다.
+            // 만약 모든 적이 Spine을 가져야 한다면 LogError가 맞지만, 그렇지 않다면 아래 로그는 필요 없거나 LogWarning 수준입니다.
             if (skeletonAnimation == null)
             {
-                Debug.LogError("SkeletonAnimation component not found on " + gameObject.name + " or its children.");
+                // Debug.Log($"SkeletonAnimation component not found on {gameObject.name} or its children. Assuming this enemy does not use Spine animations.");
             }
         }
     }
