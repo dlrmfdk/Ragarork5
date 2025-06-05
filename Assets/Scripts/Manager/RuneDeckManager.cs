@@ -350,20 +350,29 @@ public class RuneDeckManager : MonoBehaviour
 
         foreach (var kv in deckCounts)
         {
-            if (kv.Key != null) // 키가 null이 아닌지 확인
+            if (kv.Key != null)
             {
                 countsByColor[kv.Key.color] += kv.Value;
             }
         }
 
         UIManager.Instance.UpdateDeckCounts(countsByColor);
-        UIManager.Instance.UpdateCentralSlotsWithSO(selections);
+        UIManager.Instance.UpdateCentralSlotsWithSO(selections); //
 
-        bool full = (selectionCount == selections.Count);
-        UIManager.Instance.SetDrawButton(full);
-        UIManager.Instance.SetReRollButton(full && !hasRerolledThisTurn);
+        // ▼▼▼ 버튼 활성화 로직 수정 ▼▼▼
+        bool canInteractWithButtons = true; // 기본적으로는 상호작용 가능
+        if (PlayerInputManager.Instance != null && PlayerInputManager.Instance.IsTargetingMode)
+        {
+            canInteractWithButtons = false; // 타겟팅 중에는 버튼 상호작용 불가
+        }
+
+        bool full = (selectionCount == selections.Count); // selections.Count는 중앙 슬롯의 최대 크기 (예: 5)
+
+        // UIManager의 SetDrawButton과 SetReRollButton은 null 체크를 이미 내부에서 하므로 여기서 Instance null 체크는 생략 가능
+        UIManager.Instance.SetDrawButton(canInteractWithButtons && full); //
+        UIManager.Instance.SetReRollButton(canInteractWithButtons && full && !hasRerolledThisTurn);
     }
-
+                                                                                                   
     public void RefillFlaggedColorsFromDiscard()
     {
         Debug.Log("[RDM.RefillFlaggedColorsFromDiscard] 호출됨 (플레이어 턴 시작 시점)");
