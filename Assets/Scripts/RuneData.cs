@@ -13,7 +13,7 @@ public class RuneData
     public string color;        // 룬 색상 (예: "Red", "Blue")
     public string rarity;         // 룬 희귀도
     public string displayName;  // 화면에 표시할 이름
-    public string iconPath;     // Resources.Load<Sprite>(iconPath) 경로
+    //public string iconPath;     // Resources.Load<Sprite>(iconPath) 경로
     public int initialCount; // 기본 덱에 포함될 개수
     public string effectID;     // BaseRuneEffectSO.name 과 매핑
 }

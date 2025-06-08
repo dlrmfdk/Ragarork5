@@ -4,8 +4,7 @@
             "id": "RedBasicRune",
             "color": "Red",
             "rarity": "Common",
-            "displayName": "기본 빨강 룬",
-            "iconPath": "Icons/RedBasicRune",
+            "displayName": "기본 빨강 룬",       
             "initialCount": 10,
             "effectID": "RedBasicEffect"
         },
@@ -14,20 +13,26 @@
             "color": "Blue",
             "rarity": "Common",
             "displayName": "기본 파랑 룬",
-            "iconPath": "Icons/BlueBasicRune",
             "initialCount": 10,
             "effectID": "BlueBasicEffect"
         },
-     
+
         {
             "id": "RedBurnRune",
             "color": "Red",
             "rarity": "Common",
             "displayName": "화상의 룬",
-            "iconPath": "Art/Icons/2s_1",
             "initialCount": 0,
-            "effectID": "Red_BurnRuneEffect"
+            "effectID": "BurnRuneEffect"
+        },
+
+        {
+            "id": "RedBleedRune", 
+            "color": "Red",
+            "rarity": "Common",
+            "displayName": "출혈의 룬",
+            "initialCount": 0, 
+            "effectID": "BleedRuneEffect"
         }
-     
     ]
 }

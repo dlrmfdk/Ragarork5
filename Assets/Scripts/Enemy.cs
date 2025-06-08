@@ -23,6 +23,11 @@ public class Enemy : MonoBehaviour
     private int burnDamagePerTurn = 0;
     private int burnTurnsRemaining = 0;
 
+    //출혈 효과 관련 변수 추가
+    private int bleedDamagePerTurn = 0;
+    private int bleedTurnsRemaining = 0;
+
+
     private SkeletonAnimation skeletonAnimation; // Spine 애니메이션 컴포넌트 참조
 
 
@@ -78,7 +83,7 @@ public class Enemy : MonoBehaviour
     }
 
     // 일반 공격으로 피해를 받는 메소드 (방어력 고려)
-    public void Hit(int damage, Player player)
+    public int Hit(int damage, Player player)
     {
         // 방어력을 고려한 실제 피해량 계산
         int effectiveDamage = Mathf.Max(damage - enemyData.Defense, 0);
@@ -92,7 +97,11 @@ public class Enemy : MonoBehaviour
 
         if (currentHp <= 0)
             Die();
+
+        //실제 입힌 피해량 반환
+        return effectiveDamage;
     }
+
 
     //방어력을 무시하는 직접적인 피해를 받는 메소드 추가
     public void TakeDirectDamage(int damageAmount)
@@ -137,6 +146,9 @@ public class Enemy : MonoBehaviour
 
         ProcessBurnAtTurnStart();   // 화상 피해 처리 추가
         if (currentHp <= 0) yield break; // 화상 피해로 사망 시 턴 종료
+
+        ProcessBleedAtTurnStart();
+        if (currentHp <= 0) yield break; // 출혈 피해로 사망 시 턴 종료
 
 
         // 독 피해로 인해 적의 현재체력이 0 이하라면 턴을 종료
@@ -268,6 +280,47 @@ public class Enemy : MonoBehaviour
             }
         }
     }
+    // ▼▼▼ 출혈 효과 관련 메소드 추가 ▼▼▼
+    /// <summary>
+    /// 적에게 출혈 효과를 적용합니다.
+    /// </summary>
+    /// <param name="totalDamage">총 출혈 데미지</param>
+    /// <param name="duration">출혈 지속 턴 수</param>
+    public void ApplyBleed(int totalDamage, int duration)
+    {
+        if (duration <= 0) return; // 지속시간이 0 이하면 효과 없음
+
+        // 중첩 방식은 기획에 따라 결정 (현재는 새로 적용된 효과로 덮어쓰기)
+        bleedDamagePerTurn = Mathf.CeilToInt((float)totalDamage / duration); // 턴당 피해량 계산 (나누어 떨어지지 않을 경우 올림 처리)
+        bleedTurnsRemaining = duration;
+        Debug.Log($"{enemyData.EnemyName}에게 {duration}턴 동안 매 턴 {bleedDamagePerTurn}의 출혈 효과가 부여되었습니다. (총 {totalDamage} 피해)");
+    }
+
+    /// <summary>
+    /// 턴 시작 시 출혈 피해를 처리합니다.
+    /// </summary>
+    private void ProcessBleedAtTurnStart()
+    {
+        if (bleedTurnsRemaining > 0)
+        {
+            Debug.Log($"{enemyData.EnemyName}이(가) 출혈로 {bleedDamagePerTurn}의 직접 피해를 입습니다.");
+            TakeDirectDamage(bleedDamagePerTurn); // 방어력 무시 직접 피해
+            bleedTurnsRemaining--;
+
+            if (bleedTurnsRemaining <= 0)
+            {
+                bleedDamagePerTurn = 0; // 출혈 효과 종료
+                Debug.Log($"{enemyData.EnemyName}의 출혈 효과가 종료되었습니다.");
+            }
+            else
+            {
+                Debug.Log($"{enemyData.EnemyName}의 출혈 효과 남은 턴: {bleedTurnsRemaining}");
+            }
+        }
+    }
+    // ▲▲▲ 출혈 효과 관련 메소드 추가 ▲▲▲
+
+
     // ---------------------------------
     /// <summary>
     /// 현재 체력 백분율(0~1)을 반환합니다.

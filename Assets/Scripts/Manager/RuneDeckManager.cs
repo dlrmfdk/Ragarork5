@@ -177,52 +177,58 @@ public class RuneDeckManager : MonoBehaviour
         RefreshUI();
     }
 
-    private void OnDrawClick() //
+      private void OnDrawClick()
     {
-        if (!isUIManagerReady)
-        {
-            Debug.LogWarning("[RDM.OnDrawClick] UIManager가 아직 준비되지 않아 작업을 건너뜁니다.");
-            return;
-        }
-        if (Player.Instance == null) { Debug.LogError("[RDM.OnDrawClick] Player.Instance is null!"); return; }
+        if (!isUIManagerReady || Player.Instance == null) return;
 
-        // 실행할 빨간색 타겟팅 룬이 있는지 확인
-        RuneSO redRuneForTargeting = null;
-        int redRuneIndexInSelection = -1;
+        // ▼▼▼ 핵심 수정 부분 시작 ▼▼▼
+        List<RuneSO> redRunesForTargeting = new List<RuneSO>();
+        List<RuneSO> otherRunesToExecute = new List<RuneSO>();
 
+        // 선택된 룬들을 빨간색과 그 외로 분류
         for (int i = 0; i < selectionCount; i++)
         {
-            if (selections[i] != null && selections[i].color == RuneColor.Red) // RuneColor enum 사용
+            if (selections[i] != null)
             {
-                redRuneForTargeting = selections[i];
-                redRuneIndexInSelection = i;
-                break; // 첫 번째 빨간색 룬을 타겟팅 대상으로 선택
+                if (selections[i].color == RuneColor.Red)
+                {
+                    redRunesForTargeting.Add(selections[i]);
+                }
+                else
+                {
+                    otherRunesToExecute.Add(selections[i]);
+                }
             }
         }
 
-        if (redRuneForTargeting != null)
+        if (redRunesForTargeting.Count > 0)
         {
-            // 빨간색 룬이 있으면 타겟팅 시작
-            Debug.Log($"[RDM.OnDrawClick] 빨간색 룬 '{redRuneForTargeting.displayName}' 발견. 타겟팅을 시작합니다.");
+            // 빨간색 룬이 있으면 타겟팅 시작 (룬 리스트 전체를 전달)
+            Debug.Log($"[RDM.OnDrawClick] {redRunesForTargeting.Count}개의 빨간색 룬 발견. 타겟팅을 시작합니다.");
+            
+            // 만약 다른 룬들도 함께 선택되었다면, 그 룬들은 어떻게 처리할지 결정해야 합니다.
+            // 여기서는 일단 타겟팅 공격 후 다른 룬들은 효과 없이 묘지로 간다고 가정합니다.
+            // PlayerInputManager에게 모든 선택된 룬을 알려주는 것이 나중에 확장하기 좋습니다.
             if (PlayerInputManager.Instance != null)
             {
-                // PlayerInputManager에게 타겟팅 시작을 요청하고, 어떤 룬을 사용하는지,
-                // 그리고 타겟팅 완료 후 처리할 나머지 선택된 룬 정보를 전달할 수 있습니다 (지금은 첫번째 빨간룬만 처리)
-                PlayerInputManager.Instance.StartEnemyTargeting(redRuneForTargeting);
-                // 타겟팅이 시작되면 PlayerInputManager가 나머지 과정을 처리하고,
-                // 최종적으로 PlayerInputManager.EnemyTargetHit 내에서 RuneDeckManager.ProcessTargetedAttackComplete를 호출합니다.
+                PlayerInputManager.Instance.StartEnemyTargeting(redRunesForTargeting);
             }
             else
             {
                 Debug.LogError("[RDM.OnDrawClick] PlayerInputManager 인스턴스가 없습니다!");
             }
         }
-        else
+        else if (otherRunesToExecute.Count > 0)
         {
-            // 빨간색 룬이 없으면 기존처럼 모든 선택된 룬 즉시 실행
-            Debug.Log("[RDM.OnDrawClick] 타겟팅할 빨간색 룬이 없습니다. 선택된 모든 룬을 즉시 실행합니다.");
+            // 빨간색 룬이 없고 다른 룬들만 있으면 즉시 실행
+            Debug.Log("[RDM.OnDrawClick] 타겟팅할 빨간색 룬이 없습니다. 선택된 다른 룬들을 즉시 실행합니다.");
             ExecuteAllSelectedRunesImmediately();
         }
+        else
+        {
+            Debug.Log("[RDM.OnDrawClick] 선택된 룬이 없습니다.");
+        }
+        // ▲▲▲ 핵심 수정 부분 종료 ▲▲▲
     }
     // 빨간색 룬이 아닌, 즉시 실행될 룬들을 처리하고 턴을 종료하는 함수
  
@@ -575,17 +581,52 @@ public class RuneDeckManager : MonoBehaviour
     {
         Debug.Log($"[RDM.ProcessTargetedAttackComplete] 타겟팅된 룬 '{usedTargetedRune.displayName}'이(가) '{targetEnemy.name}'에게 사용 완료됨.");
 
-        Debug.Log($"[RDM.ProcessTargetedAttackComplete] 중앙 슬롯의 모든 룬을 묘지로 이동시킵니다. 현재 selectionCount: {selectionCount}");
+        // ▼▼▼ 핵심 수정 부분 시작 ▼▼▼
+        var user = Player.Instance;
+        if (user == null)
+        {
+            Debug.LogError("[RDM.ProcessTargetedAttackComplete] Player.Instance가 null입니다! 룬 효과를 실행할 수 없습니다.");
+            // 비정상적 상황이지만, 턴을 넘기기 위해 선택창을 정리하고 종료합니다.
+            ClearSelectionsAndPrepareForNextAction();
+            return;
+        }
+
+        // 비-타겟팅 효과(예: 전체 공격, 자가 버프)에 필요한 적 목록을 가져옵니다.
+        var allEnemies = EnemySpawner.Instance != null ? EnemySpawner.Instance.SpawnedEnemies : new List<Enemy>();
+
+        Debug.Log($"[RDM.ProcessTargetedAttackComplete] 중앙 슬롯의 모든 룬 효과를 처리하고 묘지로 이동시킵니다. 현재 selectionCount: {selectionCount}");
+
         for (int i = 0; i < selectionCount; i++)
         {
-            if (selections[i] != null)
+            var so = selections[i];
+            if (so != null)
             {
-                // Contains 체크를 제거하여 selections에 있던 모든 룬을 묘지로 보냅니다.
-                // 각 룬은 개별적으로 사용된 것으로 간주합니다.
-                discardPile.Add(selections[i]);
-                Debug.Log($"[RDM.ProcessTargetedAttackComplete] 선택되었던 룬 '{selections[i].displayName}'을(를) 묘지로 이동 처리.");
+                // 빨간색이 아닌 룬의 효과를 실행합니다.
+                if (so.color != RuneColor.Red)
+                {
+                    if (so.effectSO != null)
+                    {
+                        Debug.Log($"[RDM.ProcessTargetedAttackComplete] 비-빨강 룬 '{so.displayName}'의 효과를 실행합니다.");
+                        // 비-타겟팅 효과는 보통 사용자 자신이나 모든 적 등을 대상으로 합니다.
+                        so.effectSO.Execute(user, allEnemies);
+                    }
+                    else
+                    {
+                        Debug.LogError($"[RDM.ProcessTargetedAttackComplete] {so.name}의 effectSO가 null입니다!");
+                    }
+                }
+                else
+                {
+                    // 빨간 룬의 경우, 이미 usedTargetedRune으로 타겟팅 효과가 적용되었으므로 추가 실행하지 않습니다.
+                    Debug.Log($"[RDM.ProcessTargetedAttackComplete] 빨강 룬 '{so.displayName}'은 타겟팅 공격에 사용되었으므로 효과를 중복 실행하지 않습니다.");
+                }
+
+                // 효과 실행 여부와 관계없이 모든 선택된 룬은 묘지로 이동합니다.
+                discardPile.Add(so);
+                Debug.Log($"[RDM.ProcessTargetedAttackComplete] 선택되었던 룬 '{so.displayName}'을(를) 묘지로 이동 처리.");
             }
         }
+        // ▲▲▲ 핵심 수정 부분 종료 ▲▲▲
 
         ClearSelectionsAndPrepareForNextAction();
         SaveDeckState();

@@ -9,12 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ee6b0eb5d72fd9e42bb86d6b473b312f, type: 3}
-  m_Name: Normal Enemy
+  m_Script: {fileID: 11500000, guid: 26f29b6e05809d74ab8b0f0bea810609, type: 3}
+  m_Name: LifestealAttackEffect
   m_EditorClassIdentifier: 
-  enemyName: Frozen Butterfly
-  enemyPrefab: {fileID: 8024799122772746139, guid: 13dfbc20663252042966c4a1abe21fe5, type: 3}
-  hp: 5
-  damage: 10
-  defense: 0
-  category: 0
+  lifestealPercentage: 0.1

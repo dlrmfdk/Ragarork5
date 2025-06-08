@@ -4184,10 +4184,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1022722c004f76a4187fb690e684f4bc, type: 2}
   - {fileID: 11400000, guid: cd1018af527f9b3489b0ca4385165445, type: 2}
   - {fileID: 11400000, guid: 3d4ddefec1d5c98449b9f85aa571bdc3, type: 2}
-  - {fileID: 11400000, guid: 149caf03e6117bc46a429d687604f77e, type: 2}
-  - {fileID: 11400000, guid: d7d96e9fd7d9bd3468fefef816a3e20d, type: 2}
-  - {fileID: 11400000, guid: 7d4fe99cde3ffa041b0ab13904f4703d, type: 2}
+  - {fileID: 11400000, guid: 643d762ea48d3d04fb7505103d9065f6, type: 2}
+  - {fileID: 11400000, guid: 2043cb756ad1e8046b119e61a3df90e5, type: 2}
   - {fileID: 11400000, guid: d7761ab319348ce47a559f2fb896f765, type: 2}
+  - {fileID: 11400000, guid: 3a485e040736c4a4da0cbba87163b52e, type: 2}
 --- !u!1 &1099484328
 GameObject:
   m_ObjectHideFlags: 0
@@ -4920,7 +4920,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9dde57327bb4b5f41b3de0cf6b25b7f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  effectToTestOnAlpha1: {fileID: 11400000, guid: 01156f3104361fc4bb7b0ee2d46aa229, type: 2}
+  effectToTestOnAlpha1: {fileID: 11400000, guid: 9d4e48b1130d92d40aa32f4475efb9c3, type: 2}
 --- !u!4 &1241220632
 Transform:
   m_ObjectHideFlags: 0
@@ -6095,8 +6095,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetingUIManager: {fileID: 1207511927}
-  runeDeckManager: {fileID: 1086702939}
-  player: {fileID: 189897805}
   enemyLayerMask:
     serializedVersion: 2
     m_Bits: 64
@@ -6411,8 +6409,9 @@ MonoBehaviour:
   - {fileID: 1131358094}
   RewardPool:
   - {fileID: 11400000, guid: d7761ab319348ce47a559f2fb896f765, type: 2}
-  - {fileID: 11400000, guid: d7761ab319348ce47a559f2fb896f765, type: 2}
-  - {fileID: 11400000, guid: d7761ab319348ce47a559f2fb896f765, type: 2}
+  - {fileID: 11400000, guid: 3a485e040736c4a4da0cbba87163b52e, type: 2}
+  - {fileID: 11400000, guid: 643d762ea48d3d04fb7505103d9065f6, type: 2}
+  - {fileID: 11400000, guid: 2043cb756ad1e8046b119e61a3df90e5, type: 2}
 --- !u!4 &1711405799
 Transform:
   m_ObjectHideFlags: 0

@@ -1,6 +1,8 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
-
 public class Player : MonoBehaviour
 {
     public static Player Instance { get; private set; }
@@ -15,6 +17,7 @@ public class Player : MonoBehaviour
 
     [Header("공격 관련")]
     [SerializeField] private int attackPower = 0; // 기본 공격력
+    public int AttackPower => attackPower;
     // 추가 공격 버프(힘의 축복 등)로 증가시킬 값
 
     [Header("마나 관련")]
@@ -249,6 +252,45 @@ public class Player : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// MultiHitEffectSO로부터 요청받아 연속타 코루틴을 시작합니다.
+    /// </summary>
+    public void PerformMultiHit(IEnumerable<Enemy> targets, int damagePerHit, int numberOfHits, float delay)
+    {
+        // StartCoroutine은 MonoBehaviour 클래스에 내장된 함수입니다.
+        StartCoroutine(MultiHitCoroutine(targets, damagePerHit, numberOfHits, delay));
+    }
+
+    /// <summary>
+    /// 타격 사이에 딜레이를 주며 연속 공격을 실행하는 코루틴입니다.
+    /// </summary>
+    private IEnumerator MultiHitCoroutine(IEnumerable<Enemy> targets, int damagePerHit, int numberOfHits, float delay)
+    {
+        // 코루틴 실행 중에 targets 리스트가 변경될 수 있으므로, 복사본을 만들어 사용합니다.
+        List<Enemy> targetList = targets.ToList();
+
+        for (int i = 0; i < numberOfHits; i++)
+        {
+            Debug.Log($"연속타 공격! ({i + 1}/{numberOfHits})");
+            // AtkAni(); // 플레이어 공격 애니메이션이 있다면 여기서 재생할 수 있습니다.
+
+            foreach (Enemy target in targetList)
+            {
+                // 공격 시점에 타겟이 여전히 유효한지(null이 아니고 살아있는지) 확인
+                if (target != null && target.currentHealth > 0)
+                {
+                    target.Hit(damagePerHit, this);
+                }
+            }
+
+            // 마지막 타격 후에는 추가로 기다릴 필요가 없습니다.
+            if (i < numberOfHits - 1)
+            {
+                yield return new WaitForSeconds(delay); // 설정된 딜레이만큼 대기
+            }
+        }
+        Debug.Log("연속타 코루틴 종료.");
+    }
 
     public void Die()
     {
