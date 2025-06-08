@@ -28,6 +28,8 @@ public class Player : MonoBehaviour
 
     [Header("골드 관련")]
     [SerializeField] private int gold = 0; // 초기 골드
+
+    public int Gold { get { return gold; } } // 골드 프로퍼티
     //골드 관련 텍스트 매쉬 프로
     [SerializeField] private TextMeshProUGUI goldText; // 골드 UI 텍스트 (필요 시 사용)
 

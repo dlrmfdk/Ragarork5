@@ -18,6 +18,8 @@ public class RuneDeckManager : MonoBehaviour
     [Header("룬 정의 SO 리스트")]
     public List<RuneSO> runeDefinitions;
 
+    [SerializeField] private List<RuneSO> allRunesList;
+
     // 덱 상태: 각 RuneSO별 보유 개수
     private Dictionary<RuneSO, int> deckCounts;
     // 사용된 룬(묘지)
@@ -725,6 +727,29 @@ public class RuneDeckManager : MonoBehaviour
         else
         {
             Debug.Log("[RuneDeckManager] DeckState.json 파일이 없어 삭제할 수 없습니다.");
+        }
+    }
+
+    // 상점에서 룬 구매 시 호출될 범용 함수
+    public void AddRuneToDeck(string runeIdentifier)
+    {
+        // 1. 모든 룬 목록(allRunesList)에서 ID나 이름에 맞는 RuneSO 찾기
+        // 여기서는 runeIdentifier가 displayName과 일치한다고 가정합니다.
+        RuneSO runeToAdd = allRunesList.FirstOrDefault(r => r.displayName == runeIdentifier);
+
+        if (runeToAdd != null)
+        {
+            // 2. 플레이어의 덱(playerDeck)에 추가
+            // 가지고 계신 덱 리스트 변수명에 맞게 'playerDeck'을 수정하세요.
+            runeDefinitions.Add(runeToAdd);
+            Debug.Log($"[RuneDeckManager] {runeToAdd.displayName}을(를) 덱에 추가했습니다.");
+
+            // 3. 변경된 덱 상태 저장 (필요 시)
+            // SaveDeckState(); 
+        }
+        else
+        {
+            Debug.LogError($"[RuneDeckManager] ID(이름) '{runeIdentifier}'에 해당하는 룬을 찾을 수 없습니다.");
         }
     }
 }

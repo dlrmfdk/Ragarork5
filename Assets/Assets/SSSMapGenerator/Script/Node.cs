@@ -209,7 +209,7 @@ namespace S3MG{
 		void handleShop(){
 			Debug.Log("Open a shop");
             MapGenerator.instance.inactiveMap();  // ∏  ∫Ò»∞º∫»≠
-            SceneManager.LoadScene("sampleScene");
+            SceneManager.LoadScene("ShopScene");
         }
 
 		void handleEvent(){

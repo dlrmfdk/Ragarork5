@@ -4188,6 +4188,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2043cb756ad1e8046b119e61a3df90e5, type: 2}
   - {fileID: 11400000, guid: d7761ab319348ce47a559f2fb896f765, type: 2}
   - {fileID: 11400000, guid: 3a485e040736c4a4da0cbba87163b52e, type: 2}
+  allRunesList: []
 --- !u!1 &1099484328
 GameObject:
   m_ObjectHideFlags: 0
@@ -4246,7 +4247,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -100
-  m_Sprite: {fileID: 21300000, guid: 98b93249d3d69904b83fdffcffc43baf, type: 3}
+  m_Sprite: {fileID: 21300000, guid: dac14b543b5d28d44a5a934a344f367b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -4266,8 +4267,8 @@ Transform:
   m_GameObject: {fileID: 1099484328}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5154, y: 0.3033, z: 0}
-  m_LocalScale: {x: 2.5359812, y: 2.4495275, z: 0.42851996}
+  m_LocalPosition: {x: 0.5154, y: 7.1, z: 0}
+  m_LocalScale: {x: 1.9980235, y: 1.9299092, z: 0.33761802}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
