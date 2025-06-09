@@ -18,6 +18,14 @@ public class RuneDeckManager : MonoBehaviour
     [Header("룬 정의 SO 리스트")]
     public List<RuneSO> runeDefinitions;
 
+    [Header("특별 룬 SO")]
+    [Tooltip("광역 공격 규칙을 발동시키는 '광역의 룬' SO를 여기에 할당하세요.")]
+    [SerializeField] private RuneSO aoeRuneSO;
+    [Tooltip("피해 흡혈 규칙을 발동시키는 '피해 흡혈의 룬' SO를 여기에 할당하세요.")]
+    [SerializeField] private RuneSO lifestealRuneSO;
+    [Tooltip("흡혈 비율 (예: 1.0은 100%, 0.5는 50%)")]
+    [SerializeField] private float lifestealRatio = 1.0f;
+
     // 덱 상태: 각 RuneSO별 보유 개수
     private Dictionary<RuneSO, int> deckCounts;
     // 사용된 룬(묘지)
@@ -177,61 +185,150 @@ public class RuneDeckManager : MonoBehaviour
         RefreshUI();
     }
 
-      private void OnDrawClick()
+    private void OnDrawClick()
     {
         if (!isUIManagerReady || Player.Instance == null) return;
 
-        // ▼▼▼ 핵심 수정 부분 시작 ▼▼▼
-        List<RuneSO> redRunesForTargeting = new List<RuneSO>();
-        List<RuneSO> otherRunesToExecute = new List<RuneSO>();
+        BattleContext.Reset(); // 행동 시작 시 피해량 카운터 초기화
 
-        // 선택된 룬들을 빨간색과 그 외로 분류
+        bool isAoeAttack = (aoeRuneSO != null && selections.Contains(aoeRuneSO));
+
+        if (isAoeAttack)
+        {
+            Debug.Log("[RDM.OnDrawClick] '광역의 룬' 발견! 광역 공격을 실행합니다.");
+            ExecuteAoeRuneLogic();
+        }
+        else
+        {
+            List<RuneSO> redRunes = selections.Where(so => so != null && so.color == RuneColor.Red).ToList();
+            if (redRunes.Any())
+            {
+                Debug.Log($"[RDM.OnDrawClick] {redRunes.Count}개의 빨간색 룬 발견. 타겟팅을 시작합니다.");
+                if (PlayerInputManager.Instance != null)
+                {
+                    PlayerInputManager.Instance.StartEnemyTargeting(redRunes);
+                }
+            }
+            else
+            {
+                Debug.Log("[RDM.OnDrawClick] 타겟팅할 빨간색 룬이 없습니다. 선택된 모든 룬을 즉시 실행합니다.");
+                ExecuteAllSelectedRunesImmediately();
+            }
+        
+    
+    }
+}
+    /// <summary>
+    /// "광역의 룬" 효과를 처리하는 새로운 함수
+    /// </summary>
+    private void ExecuteAoeRuneLogic()
+    {
+        var user = Player.Instance;
+        var allEnemies = EnemySpawner.Instance?.SpawnedEnemies;
+
+        if (user == null || allEnemies == null) return;
+
+        // 1. 함께 선택된 빨간색 룬들의 효과를 모든 적에게 적용
+        List<RuneSO> redRunes = selections.Where(so => so != null && so.color == RuneColor.Red).ToList();
+        if (redRunes.Any())
+        {
+            Debug.Log($"{redRunes.Count}개의 빨간 룬 효과를 모든 적에게 광역으로 적용합니다.");
+            foreach (var redRune in redRunes)
+            {
+                if (redRune.effectSO != null)
+                {
+                    redRune.effectSO.Execute(user, allEnemies);
+                }
+            }
+        }
+        else
+        {
+            Debug.Log("광역의 룬과 함께 사용된 빨간 룬이 없어 광역 공격 효과가 발동되지 않았습니다.");
+        }
+
+        // 2. 함께 선택된 다른 색(비-빨강, 비-광역룬) 룬들의 효과도 실행
+        List<RuneSO> otherRunes = selections.Where(so => so != null && so.color != RuneColor.Red && so != aoeRuneSO).ToList();
+        if (otherRunes.Any())
+        {
+            Debug.Log($"{otherRunes.Count}개의 다른 색 룬 효과를 실행합니다.");
+            foreach (var otherRune in otherRunes)
+            {
+                if (otherRune.effectSO != null)
+                {
+                    otherRune.effectSO.Execute(user, allEnemies);
+                }
+            }
+        }
+
+        // 3. 모든 룬 사용 후 턴 종료 처리
+        FinalizeTurnAfterAction();
+    }
+    /// <summary>
+    /// 턴 종료 처리를 위한 공용 헬퍼 함수 (중복 제거)
+    /// </summary>
+    private void FinalizeTurnAfterAction()
+    {
+        Debug.Log("모든 룬 효과 처리 완료. 후처리 효과 및 턴 정리를 시작합니다.");
+
+        // ▼▼▼ 피해 흡혈 효과 처리 로직 추가 ▼▼▼
+        if (lifestealRuneSO != null && selections.Contains(lifestealRuneSO))
+        {
+            int totalDamage = BattleContext.TotalDamageDealtThisAction;
+            if (totalDamage > 0)
+            {
+                int healAmount = Mathf.FloorToInt(totalDamage * lifestealRatio);
+                if (healAmount > 0 && Player.Instance != null)
+                {
+                    Debug.Log($"[피해 흡혈 룬] 총 피해량 {totalDamage}의 {lifestealRatio * 100}%인 {healAmount}만큼 체력을 회복합니다.");
+                    Player.Instance.Heal(healAmount);
+                }
+            }
+        }
+        // ▲▲▲ 로직 추가 완료 ▲▲▲
+
+        // 사용된 룬 묘지로 보내기
         for (int i = 0; i < selectionCount; i++)
         {
             if (selections[i] != null)
             {
-                if (selections[i].color == RuneColor.Red)
+                discardPile.Add(selections[i]);
+            }
+        }
+
+        ClearSelectionsAndPrepareForNextAction();
+        SaveDeckState();
+
+        if (TurnManager.Inst != null)
+        {
+            TurnManager.Inst.EndTurn();
+        }
+    }
+
+    public void ProcessTargetedAttackComplete(RuneSO usedRepresentativeRune, Enemy targetEnemy)
+    {
+        Debug.Log($"[RDM.ProcessTargetedAttackComplete] 타겟팅 공격 완료. 남은 룬 효과 및 턴 정리를 시작합니다.");
+
+        var user = Player.Instance;
+        var allEnemies = EnemySpawner.Instance?.SpawnedEnemies;
+
+        // 타겟팅 공격 후, 빨간색이 아닌 다른 룬들의 효과를 실행
+        for (int i = 0; i < selectionCount; i++)
+        {
+            var so = selections[i];
+            if (so != null && so.color != RuneColor.Red)
+            {
+                if (so.effectSO != null)
                 {
-                    redRunesForTargeting.Add(selections[i]);
-                }
-                else
-                {
-                    otherRunesToExecute.Add(selections[i]);
+                    so.effectSO.Execute(user, allEnemies);
                 }
             }
         }
 
-        if (redRunesForTargeting.Count > 0)
-        {
-            // 빨간색 룬이 있으면 타겟팅 시작 (룬 리스트 전체를 전달)
-            Debug.Log($"[RDM.OnDrawClick] {redRunesForTargeting.Count}개의 빨간색 룬 발견. 타겟팅을 시작합니다.");
-            
-            // 만약 다른 룬들도 함께 선택되었다면, 그 룬들은 어떻게 처리할지 결정해야 합니다.
-            // 여기서는 일단 타겟팅 공격 후 다른 룬들은 효과 없이 묘지로 간다고 가정합니다.
-            // PlayerInputManager에게 모든 선택된 룬을 알려주는 것이 나중에 확장하기 좋습니다.
-            if (PlayerInputManager.Instance != null)
-            {
-                PlayerInputManager.Instance.StartEnemyTargeting(redRunesForTargeting);
-            }
-            else
-            {
-                Debug.LogError("[RDM.OnDrawClick] PlayerInputManager 인스턴스가 없습니다!");
-            }
-        }
-        else if (otherRunesToExecute.Count > 0)
-        {
-            // 빨간색 룬이 없고 다른 룬들만 있으면 즉시 실행
-            Debug.Log("[RDM.OnDrawClick] 타겟팅할 빨간색 룬이 없습니다. 선택된 다른 룬들을 즉시 실행합니다.");
-            ExecuteAllSelectedRunesImmediately();
-        }
-        else
-        {
-            Debug.Log("[RDM.OnDrawClick] 선택된 룬이 없습니다.");
-        }
-        // ▲▲▲ 핵심 수정 부분 종료 ▲▲▲
+        // 턴 종료 처리
+        FinalizeTurnAfterAction();
     }
     // 빨간색 룬이 아닌, 즉시 실행될 룬들을 처리하고 턴을 종료하는 함수
- 
+
     private void ExecuteAllSelectedRunesImmediately()
     {
         var user = Player.Instance;
@@ -471,6 +568,17 @@ public class RuneDeckManager : MonoBehaviour
     {
         Debug.Log("[RDM.PrepareDeckForNewBattle] 새 전투를 위해 덱을 준비합니다.");
 
+        //플레이어 상태 초기화 호출 추가
+        if (Player.Instance != null)
+        {
+            Player.Instance.PrepareForNewBattle();
+        }
+        else
+        {
+            Debug.LogError("[RDM.PrepareDeckForNewBattle] Player.Instance가 null이라 플레이어 상태를 초기화할 수 없습니다.");
+        }
+   
+
         // 1. 묘지에 있는 룬들을 다시 deckCounts로 옮기기
         if (discardPile != null && discardPile.Any())
         {
@@ -577,70 +685,7 @@ public class RuneDeckManager : MonoBehaviour
         // 보상 화면으로 넘어가므로 필수는 아닐 수 있습니다.
         // if (isUIManagerReady && UIManager.Instance != null) RefreshUI();
     }
-    public void ProcessTargetedAttackComplete(RuneSO usedTargetedRune, Enemy targetEnemy)
-    {
-        Debug.Log($"[RDM.ProcessTargetedAttackComplete] 타겟팅된 룬 '{usedTargetedRune.displayName}'이(가) '{targetEnemy.name}'에게 사용 완료됨.");
-
-        // ▼▼▼ 핵심 수정 부분 시작 ▼▼▼
-        var user = Player.Instance;
-        if (user == null)
-        {
-            Debug.LogError("[RDM.ProcessTargetedAttackComplete] Player.Instance가 null입니다! 룬 효과를 실행할 수 없습니다.");
-            // 비정상적 상황이지만, 턴을 넘기기 위해 선택창을 정리하고 종료합니다.
-            ClearSelectionsAndPrepareForNextAction();
-            return;
-        }
-
-        // 비-타겟팅 효과(예: 전체 공격, 자가 버프)에 필요한 적 목록을 가져옵니다.
-        var allEnemies = EnemySpawner.Instance != null ? EnemySpawner.Instance.SpawnedEnemies : new List<Enemy>();
-
-        Debug.Log($"[RDM.ProcessTargetedAttackComplete] 중앙 슬롯의 모든 룬 효과를 처리하고 묘지로 이동시킵니다. 현재 selectionCount: {selectionCount}");
-
-        for (int i = 0; i < selectionCount; i++)
-        {
-            var so = selections[i];
-            if (so != null)
-            {
-                // 빨간색이 아닌 룬의 효과를 실행합니다.
-                if (so.color != RuneColor.Red)
-                {
-                    if (so.effectSO != null)
-                    {
-                        Debug.Log($"[RDM.ProcessTargetedAttackComplete] 비-빨강 룬 '{so.displayName}'의 효과를 실행합니다.");
-                        // 비-타겟팅 효과는 보통 사용자 자신이나 모든 적 등을 대상으로 합니다.
-                        so.effectSO.Execute(user, allEnemies);
-                    }
-                    else
-                    {
-                        Debug.LogError($"[RDM.ProcessTargetedAttackComplete] {so.name}의 effectSO가 null입니다!");
-                    }
-                }
-                else
-                {
-                    // 빨간 룬의 경우, 이미 usedTargetedRune으로 타겟팅 효과가 적용되었으므로 추가 실행하지 않습니다.
-                    Debug.Log($"[RDM.ProcessTargetedAttackComplete] 빨강 룬 '{so.displayName}'은 타겟팅 공격에 사용되었으므로 효과를 중복 실행하지 않습니다.");
-                }
-
-                // 효과 실행 여부와 관계없이 모든 선택된 룬은 묘지로 이동합니다.
-                discardPile.Add(so);
-                Debug.Log($"[RDM.ProcessTargetedAttackComplete] 선택되었던 룬 '{so.displayName}'을(를) 묘지로 이동 처리.");
-            }
-        }
-        // ▲▲▲ 핵심 수정 부분 종료 ▲▲▲
-
-        ClearSelectionsAndPrepareForNextAction();
-        SaveDeckState();
-
-        if (TurnManager.Inst != null)
-        {
-            Debug.Log("[RDM.ProcessTargetedAttackComplete] 타겟팅 공격 완료 후 턴을 종료합니다.");
-            TurnManager.Inst.EndTurn();
-        }
-        else
-        {
-            Debug.LogError("[RDM.ProcessTargetedAttackComplete] TurnManager.Inst is null! 턴을 종료할 수 없습니다.");
-        }
-    }
+   
     public void SaveDeckState()
     {
         var state = new DeckState();

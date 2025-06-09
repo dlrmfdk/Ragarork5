@@ -9,6 +9,10 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance { get; private set; }
     public static event Action OnUIManagerReady; // UIManager가 준비되었음을 알리는 static 이벤트
 
+    [Header("툴팁 설정")]
+    [Tooltip("기준 UI(룬 버튼) 위치에서 툴팁이 얼마나 떨어져 표시될지 설정합니다.")]
+    public Vector2 tooltipOffset = new Vector2(0, 80); // Y값을 조절하여 버튼 위/아래 간격 설정
+
     void Awake()
     {
         Debug.Log($"[UIManager.Awake] UIManager 게임 오브젝트 '{this.gameObject.name}'의 Awake 호출됨. Instance 설정 시도. 현재 UIManager.Instance는 {(Instance == null ? "null" : Instance.gameObject.name)}");
@@ -74,19 +78,47 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI tooltipText; // 1번에서 만든 TooltipText 오브젝트의 TextMeshProUGUI 컴포넌트를 할당
 
 
+    [Header("플레이어 상태 UI")]
+    public TextMeshProUGUI goldText; // Player.cs 대신 UIManager가 직접 참조
+
+  
+    /// <summary>
+    /// 골드 표시 UI를 업데이트합니다. Player 등 외부에서 호출됩니다.
+    /// </summary>
+    /// <param name="amount">표시할 골드의 양</param>
+    public void UpdateGoldDisplay(int amount)
+    {
+        if (goldText != null)
+        {
+            goldText.text = amount.ToString();
+        }
+        else
+        {
+            // 이 경고는 골드 UI가 없는 씬(예: 메인 메뉴)에서 정상적으로 나타날 수 있습니다.
+            Debug.LogWarning("[UIManager] Gold Text UI가 할당되지 않았습니다.");
+        }
+    }
+  
 
     /// <summary>
     /// 룬 설명 툴팁을 보여줍니다.
     /// </summary>
     /// <param name="runeSO">표시할 룬의 데이터</param>
-    public void ShowRuneTooltip(RuneSO runeSO)
+    /// <param name="anchorTransform">툴팁 위치의 기준이 될 UI의 RectTransform</param>
+    public void ShowRuneTooltip(RuneSO runeSO, RectTransform anchorTransform)
     {
-        if (runeTooltipPanel == null || tooltipText == null || runeSO == null) return;
+        if (runeTooltipPanel == null || tooltipText == null || runeSO == null || anchorTransform == null) return;
 
         // 1. 툴팁 내용 설정
         tooltipText.text = $"<b>{runeSO.displayName}</b>\n\n{runeSO.description}";
 
-        // 2. 툴팁 활성화
+        // 2. 툴팁 위치를 마우스를 올린 룬(버튼)의 위치 기준으로 설정
+        //    (Canvas가 Screen Space - Overlay 모드라고 가정)
+        runeTooltipPanel.transform.position = (Vector2)anchorTransform.position + tooltipOffset;
+
+        // (선택적) 툴팁이 화면 밖으로 나가지 않도록 보정하는 로직을 여기에 추가할 수 있습니다.
+
+        // 3. 툴팁 활성화
         runeTooltipPanel.SetActive(true);
     }
 
@@ -98,7 +130,7 @@ public class UIManager : MonoBehaviour
         if (runeTooltipPanel == null) return;
         runeTooltipPanel.SetActive(false);
     }
-  
+
 
     public void BindRuneDeck(Action<RuneColor> onDeckClick, Action onDrawClick)
     {
@@ -173,23 +205,35 @@ public class UIManager : MonoBehaviour
     public void UpdateCentralSlotsWithSO(List<RuneSO> selections)
     {
         Debug.Log($"[UIManager.UpdateCentralSlotsWithSO] 슬롯 아이콘 업데이트 시작. selections 개수: {(selections == null ? "null" : selections.Count.ToString())}");
-        if (slotIconImages == null) return;
+        if (slotIconImages == null || slotButtons == null) return;
 
-        for (int i = 0; i < slotIconImages.Count; i++)
+        for (int i = 0; i < slotButtons.Count; i++)
         {
-            if (slotIconImages[i] == null) continue;
+            if (slotButtons[i] == null) continue;
 
-            if (selections != null && i < selections.Count && selections[i] != null)
+            RuneSO currentRune = (selections != null && i < selections.Count) ? selections[i] : null;
+
+            // 툴팁 핸들러에 룬 데이터 설정
+            RuneTooltipHandler handler = slotButtons[i].GetComponent<RuneTooltipHandler>();
+            if (handler != null)
             {
-                var so = selections[i];
-                Debug.Log($"Slot {i}: 룬 {so.name}, 아이콘 {(so.icon == null ? "NULL" : so.icon.name)}");
-                slotIconImages[i].sprite = so.icon;
-                slotIconImages[i].enabled = true;
+                handler.runeSO = currentRune; // 현재 슬롯의 룬 정보를 핸들러에 전달
             }
-            else
+
+            // 아이콘 이미지 업데이트
+            if (slotIconImages[i] != null)
             {
-                slotIconImages[i].enabled = false;
+                if (currentRune != null)
+                {
+                    slotIconImages[i].sprite = currentRune.icon;
+                    slotIconImages[i].enabled = true;
+                }
+                else
+                {
+                    slotIconImages[i].enabled = false;
+                }
             }
         }
     }
 }
+    

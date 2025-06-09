@@ -90,6 +90,10 @@ public class Enemy : MonoBehaviour
         currentHp -= effectiveDamage;
         Debug.Log($"{enemyData.EnemyName}에게 {effectiveDamage}의 피해를 입혔습니다. 남은 체력: {currentHp}");
 
+        // 현재 행동의 총 피해량을 기록하기 위해 BattleContext에 보고
+        BattleContext.AddDamage(effectiveDamage);
+
+        // HPBarController가 할당되어 있다면 현재 체력 업데이트
         if (hpBarController != null)
             hpBarController.SetCurrentHP(currentHp);
         else
@@ -214,7 +218,7 @@ public class Enemy : MonoBehaviour
     /// 독 효과를 부여하는 메서드: 독 수치를 증가시킵니다.
     /// </summary>
     public void ApplyPoison(int amount)
-    {
+    {  
         poisonStack += amount;
         Debug.Log($"{enemyData.EnemyName}에게 {amount}의 독이 부여되었습니다. 총 독 수치: {poisonStack}");
     }
@@ -368,4 +372,4 @@ public enum EIndent
     Weak,
     Weakening,
     // 추가 인덴트 타입...
-}
+} 

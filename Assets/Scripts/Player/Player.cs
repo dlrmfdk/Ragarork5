@@ -1,316 +1,273 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using TMPro;
+
 public class Player : MonoBehaviour
 {
     public static Player Instance { get; private set; }
 
-    [Header("방어도(Defense) 관련")]
-    [SerializeField] private int currentDefense = 0;
-
     [Header("체력 관련")]
-    [SerializeField]
-    private int maxHealth = 100; //최대체력 100
-    private int currentHealth; //현재체력
+    [SerializeField] private int maxHealth = 100;
+    private int currentHealth;
+    public int CurrentHealth => currentHealth;
+
+    [Header("방어도 관련")]
+    private int currentDefense = 0;
 
     [Header("공격 관련")]
-    [SerializeField] private int attackPower = 0; // 기본 공격력
+    [SerializeField] private int baseAttackPower = 10; // '기본' 공격력
+    private int attackPower; // 현재 공격력 (버프 등으로 변동 가능)
     public int AttackPower => attackPower;
-    // 추가 공격 버프(힘의 축복 등)로 증가시킬 값
 
     [Header("마나 관련")]
-    [SerializeField] private int maxMana = 4; // 최대 마나 4
+    [SerializeField] private int maxMana = 4;
     private int currentMana = 4;
-    public int CurrentMana { get { return currentMana; } }
-
+    public int CurrentMana => currentMana;
 
     [Header("골드 관련")]
-    [SerializeField] private int gold = 0; // 초기 골드
-
-    public int Gold { get { return gold; } } // 골드 프로퍼티
-    //골드 관련 텍스트 매쉬 프로
-    [SerializeField] private TextMeshProUGUI goldText; // 골드 UI 텍스트 (필요 시 사용)
+    [SerializeField] private int gold = 0;
+    public int Gold => gold;
 
     // 추가 효과를 위한 변수들
-    private bool isDoubleDamageTurn = false; // 이번 턴에 공격 데미지 2배 효과
-    private int invincibleTurnCount = 0;       // 무적 턴 카운트 (턴 종료마다 감소)
+    private bool isDoubleDamageTurn = false;
+    private int invincibleTurnCount = 0;
 
-
-    [Header("UI 관련")]
+    [Header("오디오 및 UI 프리팹")]
     [SerializeField] private AudioClip atksound;
     [SerializeField] private AudioClip defsound;
     [SerializeField] private AudioClip diesound;
-    [SerializeField] private HpBarController playerHpBarPrefab; // [SerializeField]으로 프리팹 할당
+    [SerializeField] private HpBarController playerHpBarPrefab;
+    [SerializeField] private Vector3 hpBarOffset = new Vector3(0, -250f, 0);
 
+    // 내부 참조 변수들
     private HpBarController hpBarController;
     private Animator animator;
     private AudioSource audioSource;
 
     void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            Debug.Log("[Player.Awake] Player 인스턴스 설정 및 DontDestroyOnLoad 적용됨.");
+
+            // 최초 실행 시 현재 공격력을 기본 공격력으로 설정
+            attackPower = baseAttackPower;
+        }
+        else if (Instance != this)
+        {
+            Debug.LogWarning($"[Player.Awake] 다른 Player 인스턴스가 이미 존재하여 이 인스턴스('{this.gameObject.name}')를 파괴합니다.");
+            Destroy(gameObject);
+            return;
+        }
 
         audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
+        if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
+    }
+
+    void OnEnable()
+    {
+        UIManager.OnUIManagerReady += UpdateAllUI;
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        UIManager.OnUIManagerReady -= UpdateAllUI;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        Debug.Log($"[Player.OnSceneLoaded] 새로운 씬 '{scene.name}' 로드됨. HP 바 재생성 여부 확인.");
+        if (scene.name.Contains("Battle"))
+        {
+            CreateHpBar();
+        }
     }
 
     void Start()
     {
         animator = GetComponent<Animator>();
+        // 체력은 Start에서 한 번만 초기화하여 유지되도록 함
         currentHealth = maxHealth;
+
+        // 새 전투마다 초기화될 스탯들
+        PrepareForNewBattle();
+
+        if (SceneManager.GetActiveScene().name.Contains("Battle"))
+        {
+            CreateHpBar();
+        }
+        UpdateAllUI();
+    }
+
+    /// <summary>
+    /// 새로운 전투 시작을 위해 플레이어의 상태를 초기화합니다.
+    /// 체력(currentHealth)과 골드(gold)는 유지됩니다.
+    /// </summary>
+    public void PrepareForNewBattle()
+    {
+        Debug.Log("[Player] 새 전투를 위해 스탯을 초기화합니다.");
+
+        currentDefense = 0;
+        attackPower = baseAttackPower;
         currentMana = maxMana;
 
-        // playerHpBarPrefab을 Canvas 밑에 생성
+        isDoubleDamageTurn = false;
+        invincibleTurnCount = 0;
+
+        UpdateAllUI();
+    }
+
+    private void UpdateAllUI()
+    {
+        if (UIManager.Instance != null)
+        {
+            Debug.Log($"[Player] UIManager에 UI 업데이트 요청. Gold: {gold}, HP: {currentHealth}, DEF: {currentDefense}");
+            UIManager.Instance.UpdateGoldDisplay(gold);
+
+            if (hpBarController != null)
+            {
+                hpBarController.SetMaxHP(maxHealth);
+                hpBarController.SetCurrentHP(currentHealth);
+                hpBarController.SetCurrentDefense(currentDefense);
+            }
+        }
+    }
+
+    private void CreateHpBar()
+    {
+        if (hpBarController != null)
+        {
+            Destroy(hpBarController.gameObject);
+        }
+
         if (playerHpBarPrefab != null)
         {
             Canvas canvas = FindObjectOfType<Canvas>();
             if (canvas != null)
             {
                 GameObject hpBarInstance = Instantiate(playerHpBarPrefab.gameObject, canvas.transform);
-                hpBarInstance.SetActive(true);
-
                 hpBarController = hpBarInstance.GetComponent<HpBarController>();
                 if (hpBarController != null)
                 {
-                    // 타겟(플레이어)를 HPBarController가 따라가도록 설정
                     hpBarController.SetTarget(transform);
-
-                    // 체력 최대/현재값 초기화
-                    hpBarController.SetMaxHP(maxHealth);
-                    hpBarController.SetCurrentHP(currentHealth);
-
-                    // 방어도 최대/현재값 초기화 (현재는 필요 시)
-                    // hpBarController.SetMaxDefense(원하는값);
-
-                    // HP바가 캐릭터 머리 위에 뜨도록 오프셋 조절 (원하는 위치로)
-                    hpBarController.SetOffset(new Vector3(0, -230f, 0));
-                }
-                else
-                {
-                    Debug.LogError("Player: PlayerHpBarPrefab에 HpBarController가 없습니다.");
+                    hpBarController.SetOffset(hpBarOffset);
+                    UpdateAllUI();
                 }
             }
-            else
-            {
-                Debug.LogError("Player: 씬에 Canvas가 존재하지 않습니다.");
-            }
         }
-        else
-        {
-            Debug.LogError("Player: PlayerHpBarPrefab이 할당되지 않았습니다.");
-        }
-    }
-    // 마나 사용: 사용하려는 비용보다 충분한지 검사 후 차감
-    public bool TryUseMana(int cost)
-    {
-        if (currentMana >= cost)
-        {
-            currentMana -= cost;
-            Debug.Log($"마나 {cost} 사용. 남은 마나: {currentMana}");
-            // UI 업데이트 호출 (예: manaBarController.SetCurrentMana(currentMana))
-            return true;
-        }
-        else
-        {
-            Debug.Log("마나가 부족합니다!");
-            return false;
-        }
-    }
-    //턴 시작시 마나 최대치 만큼 충전
-    public void RefillMana()
-    {
-        currentMana = maxMana;
-        Debug.Log($"플레이어의 마나가 {maxMana}로 충전되었습니다.");
-       
     }
 
-
-    // 마나 회복 (필요 시)
-    public void RecoverMana(int amount)
-    {
-        currentMana = Mathf.Min(currentMana + amount, maxMana);
-        Debug.Log($"마나 {amount} 회복. 현재 마나: {currentMana}");
-        // UI 업데이트
-    }
-    // 플레이어의 최대 마나 증가 메서드
-    public void IncreaseMaxMana(int amount)
-    {
-        maxMana += amount;
-        currentMana = Mathf.Min(currentMana, maxMana);
-        Debug.Log($"플레이어의 최대 마나가 {amount}만큼 증가하여 현재 최대 마나: {maxMana}");
-        // 필요 시 UI 업데이트
-    }
-
-    // 플레이어가 카드를 뽑는 메서드 (덱 관리 시스템과 연동)
-    public void DrawCards(int count)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            // CardManager의 AddCard(true)를 호출하면, 손패에 카드가 추가됩니다.
-            //CardManager.Inst.AddCard(true);
-        }
-        Debug.Log($"플레이어가 {count}장의 카드를 뽑습니다.");
-    }
-
-    // 플레이어에게 골드를 추가하는 메서드 (골드 시스템 추가)
     public void AddGold(int amount)
     {
+        if (amount <= 0) return;
         gold += amount;
-        Debug.Log($"플레이어의 골드가 {amount}만큼 증가하였습니다. 현재 골드: {gold}");
-        //골드 텍스트 업데이트
-        if (goldText != null)
-        {
-            goldText.text = $"{gold}";
-        }
-        else
-        {
-            Debug.LogError("골드 텍스트 UI가 할당되지 않았습니다.");
-        }
-
-        // 필요 시 골드 UI 업데이트 호출
+        UpdateAllUI();
     }
 
-
-    // 방어도 증가
-    public void IncreaseDefense(int defense)
-    {
-        audioSource.PlayOneShot(defsound);
-        currentDefense += defense;
-        Debug.Log($"플레이어가 {defense}만큼 방어도를 얻었습니다. 현재 방어도: {currentDefense}");
-
-        if (hpBarController != null)
-        {
-            hpBarController.SetCurrentDefense(currentDefense);
-        }
-    }
-
-    // 체력 피해 처리 (방어도 먼저 소모)
-    public void TakeDamage(int damage)
-    {
-        int finalDamage = damage;
-
-        // 방어도 먼저 감소
-        if (currentDefense > 0)
-        {
-            int usedDef = Mathf.Min(currentDefense, damage);
-            currentDefense -= usedDef;
-            finalDamage -= usedDef;
-            Debug.Log($"방어도가 {usedDef}만큼의 피해를 막아줬습니다. 남은 방어도: {currentDefense}");
-
-            if (hpBarController != null)
-            {
-                hpBarController.SetCurrentDefense(currentDefense);
-            }
-        }
-
-        // 만약 무적 턴이 남아있으면 피해를 받지 않음
-        if (invincibleTurnCount > 0)
-        {
-            Debug.Log("무적 상태로 인해 피해를 받지 않습니다.");
-            finalDamage = 0;
-        }
-
-
-
-        currentHealth -= finalDamage;
-        Debug.Log($"플레이어가 {finalDamage}의 피해를 입었습니다. 남은 체력: {currentHealth}");
-
-        // HP 바 갱신
-        if (hpBarController != null)
-            hpBarController.SetCurrentHP(currentHealth);
-
-        if (currentHealth <= 0)
-            Die();
-    }
-    //회복
     public void Heal(int amount)
     {
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
-        Debug.Log($"플레이어가 {amount}만큼 회복했습니다. 현재 체력: {currentHealth}");
-        if (hpBarController != null)
-            hpBarController.SetCurrentHP(currentHealth);
+        UpdateAllUI();
     }
 
-    // 공격력 증가 (예: 힘의 축복 효과)
+    public void TakeDamage(int damage)
+    {
+        if (invincibleTurnCount > 0)
+        {
+            Debug.Log("무적 상태로 인해 피해를 받지 않습니다.");
+            return;
+        }
+
+        int damageToShield = Mathf.Min(currentDefense, damage);
+        currentDefense -= damageToShield;
+        int damageToHealth = damage - damageToShield;
+        currentHealth -= damageToHealth;
+
+        if (damageToShield > 0) Debug.Log($"방어도가 {damageToShield}만큼의 피해를 막아줬습니다. 남은 방어도: {currentDefense}");
+        if (damageToHealth > 0) Debug.Log($"플레이어가 {damageToHealth}의 피해를 입었습니다. 남은 체력: {currentHealth}");
+
+        UpdateAllUI();
+
+        if (currentHealth <= 0) Die();
+    }
+
+    public void IncreaseDefense(int defense)
+    {
+        if (defsound != null) audioSource.PlayOneShot(defsound);
+        currentDefense += defense;
+        UpdateAllUI();
+    }
+
     public void IncreaseAttack(float amount)
     {
         attackPower += (int)amount;
-        Debug.Log($"플레이어의 공격력이 {amount}만큼 증가했습니다. 현재 공격력: {attackPower}");
-        // 추가로 UI 업데이트가 필요하면 구현
     }
 
-
-    public void SetInvincibleTurn(int turns)
+    public void RefillMana()
     {
-        invincibleTurnCount = turns;
-        Debug.Log($"플레이어가 {turns}턴 동안 무적 상태가 됩니다.");
+        currentMana = maxMana;
+        UpdateAllUI();
     }
 
-
-    /// <summary>
-    /// MultiHitEffectSO로부터 요청받아 연속타 코루틴을 시작합니다.
-    /// </summary>
     public void PerformMultiHit(IEnumerable<Enemy> targets, int damagePerHit, int numberOfHits, float delay)
     {
-        // StartCoroutine은 MonoBehaviour 클래스에 내장된 함수입니다.
         StartCoroutine(MultiHitCoroutine(targets, damagePerHit, numberOfHits, delay));
     }
 
-    /// <summary>
-    /// 타격 사이에 딜레이를 주며 연속 공격을 실행하는 코루틴입니다.
-    /// </summary>
     private IEnumerator MultiHitCoroutine(IEnumerable<Enemy> targets, int damagePerHit, int numberOfHits, float delay)
     {
-        // 코루틴 실행 중에 targets 리스트가 변경될 수 있으므로, 복사본을 만들어 사용합니다.
         List<Enemy> targetList = targets.ToList();
-
         for (int i = 0; i < numberOfHits; i++)
         {
-            Debug.Log($"연속타 공격! ({i + 1}/{numberOfHits})");
-            // AtkAni(); // 플레이어 공격 애니메이션이 있다면 여기서 재생할 수 있습니다.
-
+            AtkAni();
             foreach (Enemy target in targetList)
             {
-                // 공격 시점에 타겟이 여전히 유효한지(null이 아니고 살아있는지) 확인
                 if (target != null && target.currentHealth > 0)
                 {
                     target.Hit(damagePerHit, this);
                 }
             }
-
-            // 마지막 타격 후에는 추가로 기다릴 필요가 없습니다.
             if (i < numberOfHits - 1)
             {
-                yield return new WaitForSeconds(delay); // 설정된 딜레이만큼 대기
+                yield return new WaitForSeconds(delay);
             }
         }
-        Debug.Log("연속타 코루틴 종료.");
+    }
+
+    public void SetInvincibleTurn(int turns)
+    {
+        invincibleTurnCount = turns;
     }
 
     public void Die()
     {
-        audioSource.PlayOneShot(diesound);
+        if (diesound != null) audioSource.PlayOneShot(diesound);
         Debug.Log("플레이어가 사망했습니다.");
-        // 게임 오버 처리
     }
 
-    // 공격 애니메이션 예시
     public void AtkAni()
     {
-        audioSource.PlayOneShot(atksound);
-        animator.SetBool("Attack", true);
-        Invoke("ResetAttack", 0.1f);
+        if (atksound != null) audioSource.PlayOneShot(atksound);
+        if (animator != null)
+        {
+            animator.SetBool("Attack", true);
+            Invoke("ResetAttack", 0.1f);
+        }
     }
 
     private void ResetAttack()
     {
-        animator.SetBool("Attack", false);
+        if (animator != null)
+        {
+            animator.SetBool("Attack", false);
+        }
     }
 }
