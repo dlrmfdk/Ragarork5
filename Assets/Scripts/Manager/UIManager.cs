@@ -70,6 +70,35 @@ public class UIManager : MonoBehaviour
     [Header("패널들")]
     public GameObject runeDeckPanel;
     public GameObject centralSlotPanel;
+    public GameObject runeTooltipPanel; // 1번에서 만든 RuneTooltipPanel 오브젝트를 할당
+    public TextMeshProUGUI tooltipText; // 1번에서 만든 TooltipText 오브젝트의 TextMeshProUGUI 컴포넌트를 할당
+
+
+
+    /// <summary>
+    /// 룬 설명 툴팁을 보여줍니다.
+    /// </summary>
+    /// <param name="runeSO">표시할 룬의 데이터</param>
+    public void ShowRuneTooltip(RuneSO runeSO)
+    {
+        if (runeTooltipPanel == null || tooltipText == null || runeSO == null) return;
+
+        // 1. 툴팁 내용 설정
+        tooltipText.text = $"<b>{runeSO.displayName}</b>\n\n{runeSO.description}";
+
+        // 2. 툴팁 활성화
+        runeTooltipPanel.SetActive(true);
+    }
+
+    /// <summary>
+    /// 룬 설명 툴팁을 숨깁니다.
+    /// </summary>
+    public void HideRuneTooltip()
+    {
+        if (runeTooltipPanel == null) return;
+        runeTooltipPanel.SetActive(false);
+    }
+  
 
     public void BindRuneDeck(Action<RuneColor> onDeckClick, Action onDrawClick)
     {

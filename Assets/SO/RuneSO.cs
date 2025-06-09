@@ -28,6 +28,10 @@ public class RuneSO : ScriptableObject
     [Header("룬 이름")]
     public string displayName;
 
+    [Header("룬 설명")]
+    [TextArea(3, 10)] // Inspector에서 여러 줄로 편하게 입력할 수 있게 해줍니다.
+    public string description;
+
     [Header("룬 아이콘")]
     public Sprite icon;
 

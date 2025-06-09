@@ -18,8 +18,6 @@ public class RuneDeckManager : MonoBehaviour
     [Header("룬 정의 SO 리스트")]
     public List<RuneSO> runeDefinitions;
 
-    [SerializeField] private List<RuneSO> allRunesList;
-
     // 덱 상태: 각 RuneSO별 보유 개수
     private Dictionary<RuneSO, int> deckCounts;
     // 사용된 룬(묘지)
@@ -735,7 +733,7 @@ public class RuneDeckManager : MonoBehaviour
     {
         // 1. 모든 룬 목록(allRunesList)에서 ID나 이름에 맞는 RuneSO 찾기
         // 여기서는 runeIdentifier가 displayName과 일치한다고 가정합니다.
-        RuneSO runeToAdd = allRunesList.FirstOrDefault(r => r.displayName == runeIdentifier);
+        RuneSO runeToAdd = runeDefinitions.FirstOrDefault(r => r.displayName == runeIdentifier);
 
         if (runeToAdd != null)
         {
@@ -752,5 +750,19 @@ public class RuneDeckManager : MonoBehaviour
             Debug.LogError($"[RuneDeckManager] ID(이름) '{runeIdentifier}'에 해당하는 룬을 찾을 수 없습니다.");
         }
     }
+
+    // ▼▼▼ 슬롯 정보 접근 함수 추가 ▼▼▼
+    /// <summary>
+    /// 지정된 인덱스의 중앙 슬롯에 있는 RuneSO를 반환합니다.
+    /// </summary>
+    public RuneSO GetRuneInSelection(int index)
+    {
+        if (selections != null && index >= 0 && index < selectionCount)
+        {
+            return selections[index];
+        }
+        return null;
+    }
+    // ▲▲▲ 슬롯 정보 접근 함수 추가 ▲▲▲
 }
 
