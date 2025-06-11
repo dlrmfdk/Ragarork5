@@ -48,7 +48,8 @@ public class HpBarController : MonoBehaviour
         if (defenseSlider != null)
         {
             defenseSlider.value = 0;
-            defenseSlider.maxValue = hpSlider != null ? hpSlider.maxValue : 100;
+            defenseSlider.maxValue = 100; // HP와 상관없이 넉넉한 고정값으로 설정
+    
         }
         else
         {

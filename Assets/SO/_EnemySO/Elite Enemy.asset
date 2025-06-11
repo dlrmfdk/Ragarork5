@@ -16,7 +16,9 @@ MonoBehaviour:
   enemyPrefab: {fileID: 8045317353110916379, guid: 2405a93de35c4444c83be6b3be308a5b, type: 3}
   hp: 10
   damage: 20
-  defense: 1
+  defense: 2
   category: 1
   actionPatterns:
   - {fileID: 11400000, guid: b58a2d9814d50b148a22ed19387829da, type: 2}
+  - {fileID: 11400000, guid: b58a2d9814d50b148a22ed19387829da, type: 2}
+  penaltyRune: {fileID: 11400000, guid: 1bacbf137e1368d438b2a4c86025d3b3, type: 2}

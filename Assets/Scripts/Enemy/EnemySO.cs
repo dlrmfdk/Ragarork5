@@ -43,6 +43,7 @@ public class EnemySO : ScriptableObject
     [Header("행동 패턴")]
     public List<EnemyActionSO> actionPatterns; //적이 사용할 수 있는 행동들의 목록
 
-
+    [Header("특수 패턴")]
+    public RuneSO penaltyRune; // 이 적이 부여할 패널티 룬
 
 }

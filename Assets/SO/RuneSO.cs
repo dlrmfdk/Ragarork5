@@ -6,6 +6,7 @@ public enum RuneColor
     Blue,
     White,
     Yellow,
+    Gray // 디버프 룬을 위한 색상
 }
 
 public enum RuneRarity
@@ -15,10 +16,20 @@ public enum RuneRarity
     Legend
 }
 
+public enum RuneType
+{
+    Normal, // 일반 룬
+    Penalty // 패널티 룬
+}
+
+
 [CreateAssetMenu(fileName = "RuneSO", menuName = "Runes/RuneSO")]
 
 public class RuneSO : ScriptableObject
 {
+    [Header("룬 타입")]
+    public RuneType runeType = RuneType.Normal; // 기본값은 Normal로 설정
+
     [Header("룬 색상")]
     public RuneColor color;
 

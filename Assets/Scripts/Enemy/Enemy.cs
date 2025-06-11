@@ -10,11 +10,15 @@ public enum EnemyActionType { Attack, Defend, Buff, Debuff }
 
 public class Enemy : MonoBehaviour
 {
-    [SerializeField] private EnemySO enemyData;
+    private EnemySO enemyData;
     public EnemySO EnemyData => enemyData; // 공개 읽기 전용 속성
+
 
     //다음 행동 저장을 위한 변수 추가
     private EnemyActionSO nextAction;
+
+    //턴 카운터 변수 추가
+    private int turnCounter = 0;
 
     public CharacterIndent CharacterIndent { get; private set; }
 
@@ -195,6 +199,30 @@ public class Enemy : MonoBehaviour
 
     public IEnumerator PerformTurn()
     {
+        Debug.Log($"{enemyData.EnemyName}의 턴 시작. 현재 턴 카운트: {turnCounter}");
+
+        // ▼▼▼ "Elite" 카테고리인지 확인하는 조건문 추가 ▼▼▼
+        if (enemyData.Category == EnemyType.Elite) // EnemySO의 Category가 "Elite"일 때만 실행
+        {
+            // 3턴마다 패널티 룬을 부여하는 로직
+            if (turnCounter > 0 && turnCounter % 3 == 0)
+            {
+                Debug.Log($"{enemyData.EnemyName}이(가) 3턴 패턴 발동! 패널티 룬을 부여합니다.");
+
+                if (enemyData.penaltyRune != null && RuneDeckManager.Instance != null)
+                {
+                    RuneDeckManager.Instance.AddRuneToHand(enemyData.penaltyRune);
+                }
+                else
+                {
+                    Debug.LogWarning($"{enemyData.EnemyName}의 EnemySO에 패널티 룬이 설정되지 않았거나, RuneDeckManager를 찾을 수 없습니다.");
+                }
+
+                // 특수 행동 후 일반 행동은 건너뛰고 턴 종료
+                yield break;
+            }
+        }
+
         Debug.Log($"{enemyData.EnemyName}의 턴 시작");
 
         // 턴 시작 시, 이번 턴에 얻었던 방어도는 초기화합니다 (Slay the Spire 규칙 유사)
@@ -254,16 +282,15 @@ public class Enemy : MonoBehaviour
 
         //턴 종료 직전에 다음 행동을 미리 결정합니다.
         ChooseNextAction();
-        
 
+        //턴 카운터 증가
+        turnCounter++;
 
         Debug.Log($"{enemyData.EnemyName}의 턴 종료");
         yield return null; // 턴 매니저에게 제어권 넘김
     }
 
-    // Enemy.cs
-
-    // ... (다른 함수들은 그대로 유지) ...
+   
 
     // ▼▼▼ 이 함수를 아래의 새 코드로 교체해주세요 ▼▼▼
     private IEnumerator AttackPlayer(int damage, int hitCount)

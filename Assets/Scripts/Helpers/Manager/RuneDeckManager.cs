@@ -24,7 +24,7 @@ public class RuneDeckManager : MonoBehaviour
     [Tooltip("피해 흡혈 규칙을 발동시키는 '피해 흡혈의 룬' SO를 여기에 할당하세요.")]
     [SerializeField] private RuneSO lifestealRuneSO;
     [Tooltip("흡혈 비율 (예: 1.0은 100%, 0.5는 50%)")]
-    [SerializeField] private float lifestealRatio = 1.0f;
+    private float lifestealRatio = 1.0f;
 
     // 덱 상태: 각 RuneSO별 보유 개수
     private Dictionary<RuneSO, int> deckCounts;
@@ -304,28 +304,51 @@ public class RuneDeckManager : MonoBehaviour
         }
     }
 
+    // RuneDeckManager.cs
+
+    // 기존의 비어있던 함수를 아래 내용으로 교체합니다.
     public void ProcessTargetedAttackComplete(RuneSO usedRepresentativeRune, Enemy targetEnemy)
     {
-        Debug.Log($"[RDM.ProcessTargetedAttackComplete] 타겟팅 공격 완료. 남은 룬 효과 및 턴 정리를 시작합니다.");
+        Debug.Log($"[RDM.ProcessTargetedAttackComplete] 타겟팅 공격 완료. 룬 효과를 '{targetEnemy.EnemyData.EnemyName}'에게 적용합니다.");
 
         var user = Player.Instance;
-        var allEnemies = EnemySpawner.Instance?.SpawnedEnemies;
 
-        // 타겟팅 공격 후, 빨간색이 아닌 다른 룬들의 효과를 실행
-        for (int i = 0; i < selectionCount; i++)
+        // 1. 현재 패(selections)에서 모든 빨간 룬을 찾습니다.
+        List<RuneSO> redRunes = selections.Where(so => so != null && so.color == RuneColor.Red).ToList();
+
+        // 2. 찾은 모든 빨간 룬의 효과를 선택된 타겟(targetEnemy)에게 실행합니다.
+        if (redRunes.Any())
         {
-            var so = selections[i];
-            if (so != null && so.color != RuneColor.Red)
+            // effectSO.Execute의 두 번째 인자는 List<Enemy> 타입이므로, 단일 타겟을 리스트로 만들어 전달합니다.
+            List<Enemy> singleTargetList = new List<Enemy> { targetEnemy };
+
+            foreach (var redRune in redRunes)
             {
-                if (so.effectSO != null)
+                if (redRune.effectSO != null)
                 {
-                    so.effectSO.Execute(user, allEnemies);
+                    redRune.effectSO.Execute(user, singleTargetList);
                 }
             }
         }
 
-        // 턴 종료 처리
+        // 3. 공격 후, 빨간색이 아닌 다른 룬들의 효과를 실행합니다.
+        List<RuneSO> otherRunes = selections.Where(so => so != null && so.color != RuneColor.Red).ToList();
+        if (otherRunes.Any())
+        {
+            var allEnemies = EnemySpawner.Instance?.SpawnedEnemies;
+            foreach (var otherRune in otherRunes)
+            {
+                if (otherRune.effectSO != null)
+                {
+                    // 다른 룬들은 모든 적을 대상으로 할 수 있으므로 allEnemies를 전달합니다.
+                    otherRune.effectSO.Execute(user, allEnemies);
+                }
+            }
+        }
+
+        // 4. 모든 룬 효과 처리 후 턴을 종료하는 공용 함수를 호출합니다.
         FinalizeTurnAfterAction();
+
     }
     // 빨간색 룬이 아닌, 즉시 실행될 룬들을 처리하고 턴을 종료하는 함수
 
@@ -389,6 +412,8 @@ public class RuneDeckManager : MonoBehaviour
     }
 
 
+    // RuneDeckManager.cs
+
     private void OnReRoll()
     {
         if (!isUIManagerReady)
@@ -399,17 +424,51 @@ public class RuneDeckManager : MonoBehaviour
 
         if (hasRerolledThisTurn) return;
 
+   
+
+        // 1. 패에 남겨둘 패널티 룬을 저장할 임시 리스트를 만듭니다.
+        List<RuneSO> penaltyRunesToKeep = new List<RuneSO>();
+
+        // 2. 현재 패(selections)에 있는 룬들을 하나씩 확인합니다.
         for (int i = 0; i < selectionCount; i++)
         {
-            if (selections[i] != null) // null 체크
-                discardPile.Add(selections[i]);
+            RuneSO currentRune = selections[i];
+            if (currentRune == null) continue;
+
+            // 3. 룬의 타입을 확인합니다.
+            if (currentRune.runeType == RuneType.Penalty)
+            {
+                // 패널티 룬이면, 나중에 패에 다시 넣기 위해 임시 리스트에 추가합니다.
+                penaltyRunesToKeep.Add(currentRune);
+                Debug.Log($"[RDM.OnReRoll] 패널티 룬 '{currentRune.displayName}'은 패에 남깁니다.");
+            }
+            else
+            {
+                // 일반 룬이면, 묘지(discardPile)로 보냅니다.
+                discardPile.Add(currentRune);
+            }
         }
 
-        selections = new List<RuneSO>(new RuneSO[5]); // 새 리스트로 초기화
-        selectionCount = 0;
+        // 4. 패를 완전히 새로 구성합니다.
+        // 먼저, 최대 크기(5)만큼 빈 슬롯으로 채워진 새 리스트를 만듭니다.
+        selections = new List<RuneSO>(new RuneSO[5]);
+
+        // 5. 남겨두었던 패널티 룬들을 새 리스트의 앞쪽부터 다시 채워 넣습니다.
+        for (int i = 0; i < penaltyRunesToKeep.Count; i++)
+        {
+            selections[i] = penaltyRunesToKeep[i];
+        }
+
+        // 6. 현재 패에 있는 룬의 수를 업데이트합니다.
+        selectionCount = penaltyRunesToKeep.Count;
+
+        // 7. 이번 턴에 리롤을 사용했음을 기록합니다.
         hasRerolledThisTurn = true;
 
+        // 8. 변경된 패의 상태를 UI에 즉시 반영합니다.
         RefreshUI();
+
+
     }
 
     public void ReplaceBasicWithReward(string rewardRuneID)
@@ -460,9 +519,9 @@ public class RuneDeckManager : MonoBehaviour
         }
 
         UIManager.Instance.UpdateDeckCounts(countsByColor);
-        UIManager.Instance.UpdateCentralSlotsWithSO(selections); //
+        UIManager.Instance.UpdateCentralSlotsWithSO(selections); 
 
-        // ▼▼▼ 버튼 활성화 로직 수정 ▼▼▼
+        // 버튼 활성화 로직 
         bool canInteractWithButtons = true; // 기본적으로는 상호작용 가능
         if (PlayerInputManager.Instance != null && PlayerInputManager.Instance.IsTargetingMode)
         {
@@ -796,7 +855,7 @@ public class RuneDeckManager : MonoBehaviour
         }
     }
 
-    // ▼▼▼ 슬롯 정보 접근 함수 추가 ▼▼▼
+    //슬롯 정보 접근 함수 추가
     /// <summary>
     /// 지정된 인덱스의 중앙 슬롯에 있는 RuneSO를 반환합니다.
     /// </summary>
@@ -808,6 +867,86 @@ public class RuneDeckManager : MonoBehaviour
         }
         return null;
     }
-    // ▲▲▲ 슬롯 정보 접근 함수 추가 ▲▲▲
+
+
+    /// <summary>
+    /// 외부에서 플레이어의 패(selections)에 특정 룬을 강제로 추가합니다.
+    /// 패가 가득 차 있으면 실패합니다.
+    /// </summary>
+    /// <param name="runeToAdd">패에 추가할 룬의 ScriptableObject</param>
+    /// <returns>추가 성공 시 true, 실패 시 false</returns>
+    public bool AddRuneToHand(RuneSO runeToAdd)
+    {
+        // 패가 가득 찼는지 확인
+        if (selectionCount >= selections.Count)
+        {
+            Debug.LogWarning("[RDM.AddRuneToHand] 패가 가득 차 있어 룬을 추가할 수 없습니다.");
+            return false;
+        }
+
+        // 추가할 룬이 유효한지 확인
+        if (runeToAdd == null)
+        {
+            Debug.LogError("[RDM.AddRuneToHand] 추가하려는 룬(runeToAdd)이 null입니다.");
+            return false;
+        }
+
+        // 패의 다음 빈 자리에 룬을 추가
+        selections[selectionCount] = runeToAdd;
+        // 패에 들어온 룬의 수를 1 증가
+        selectionCount++;
+
+        Debug.Log($"[RDM.AddRuneToHand] '{runeToAdd.displayName}' 룬이 패에 강제로 추가되었습니다.");
+
+        // UI를 새로고침하여 화면에 즉시 반영
+        RefreshUI();
+
+        return true;
+    }
+    /// <summary>
+    /// 플레이어의 패(selections)에 있는 모든 패널티 룬을 즉시 제거(파괴)합니다.
+    /// 이 룬들은 묘지로 가지 않습니다.
+    /// </summary>
+    public void RemoveAllPenaltyRunesFromHand()
+    {
+        if (selectionCount == 0) return; // 패가 비어있으면 실행 안함
+
+        // 1. 패널티 룬이 아닌 일반 룬만 담을 새 리스트를 만듭니다.
+        List<RuneSO> newSelections = new List<RuneSO>();
+        int removedCount = 0;
+
+        // 2. 현재 패를 순회하며 일반 룬만 새 리스트에 추가합니다.
+        for (int i = 0; i < selectionCount; i++)
+        {
+            RuneSO currentRune = selections[i];
+            if (currentRune != null && currentRune.runeType != RuneType.Penalty)
+            {
+                newSelections.Add(currentRune);
+            }
+            else if (currentRune != null)
+            {
+                removedCount++;
+            }
+        }
+
+        // 3. 패널티 룬이 1개 이상 제거되었다면 패를 업데이트합니다.
+        if (removedCount > 0)
+        {
+            Debug.Log($"[RDM.RemoveAllPenaltyRunesFromHand] 패에서 {removedCount}개의 패널티 룬을 파괴했습니다.");
+
+            // 4. 새 리스트를 최대 크기(5)에 맞게 빈 슬롯으로 채웁니다.
+            while (newSelections.Count < 5)
+            {
+                newSelections.Add(null);
+            }
+
+            // 5. 기존 패(selections)를 새로운 패로 교체하고, 룬 개수도 업데이트합니다.
+            selections = newSelections;
+            selectionCount -= removedCount;
+
+            // 6. 변경 사항을 UI에 반영합니다.
+            RefreshUI();
+        }
+    }
 }
 
