@@ -54,7 +54,16 @@ public class TurnManager : MonoBehaviour
             yield break;
         }
 
-        // 3. ★★★ 전투 시작 직전 UI 갱신 추가 ★★★
+        //3.적 스폰 직후, 각 적의 첫 행동을 결정
+        if (enemySpawner != null && enemySpawner.SpawnedEnemies != null)
+        {
+            foreach (var enemy in enemySpawner.SpawnedEnemies)
+            {
+                enemy.ChooseNextAction();
+            }
+        }
+
+        // 4.전투 시작 직전 UI 갱신
         // 이 시점에는 해당 씬의 UIManager가 준비되어 OnUIManagerReady 이벤트가 발생했고,
         // RuneDeckManager.HandleUIManagerReady가 호출되어 isUIManagerReady가 true로 설정되었을 것으로 기대합니다.
         if (RuneDeckManager.Instance != null && RuneDeckManager.Instance.isUIManagerReady && UIManager.Instance != null)
@@ -68,7 +77,7 @@ public class TurnManager : MonoBehaviour
             Debug.LogWarning("[TurnManager.GameLoop] 전투 시작 전 RefreshUI 호출 시도 실패: RuneDeckManager.Instance가 null이거나 UIManager가 아직 준비되지 않음.");
         }
 
-        // 4. 전투 내 턴 반복
+        // 5. 전투 내 턴 반복
         while (true)
         {
             yield return StartCoroutine(PlayerTurn());

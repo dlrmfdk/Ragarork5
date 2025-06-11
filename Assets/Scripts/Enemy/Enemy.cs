@@ -3,16 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Spine.Unity; // Spine 애니메이션 사용을 위해 추가
+
+
+//적 행동 타입 enum 정의
+public enum EnemyActionType { Attack, Defend, Buff, Debuff } 
+
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private EnemySO enemyData;
     public EnemySO EnemyData => enemyData; // 공개 읽기 전용 속성
 
+    //다음 행동 저장을 위한 변수 추가
+    private EnemyActionSO nextAction;
+
     public CharacterIndent CharacterIndent { get; private set; }
 
     private int currentHp; //현재 체력
-   
     public int currentHealth => currentHp; //외부에서 현재 체력을 읽을 수 있도록 public 속성 추가
+
+    //방어도 관련 변수                                
+    private int currentArmor = 0;
 
     private HpBarController hpBarController; // HPBarController 참조 변수 추가
 
@@ -71,6 +81,7 @@ public class Enemy : MonoBehaviour
             hpBarController.SetTarget(transform);
             hpBarController.SetMaxHP(enemyData.HP);
             hpBarController.SetCurrentHP(currentHp);
+            hpBarController.SetCurrentDefense(currentArmor);
         }
     }
 
@@ -85,25 +96,46 @@ public class Enemy : MonoBehaviour
     // 일반 공격으로 피해를 받는 메소드 (방어력 고려)
     public int Hit(int damage, Player player)
     {
-        // 방어력을 고려한 실제 피해량 계산
-        int effectiveDamage = Mathf.Max(damage - enemyData.Defense, 0);
+        int finalDamage = damage;
+
+        // 방어도가 있다면 먼저 피해량에서 차감
+        if (currentArmor > 0)
+        {
+            int damageToArmor = Mathf.Min(currentArmor, finalDamage);
+            currentArmor -= damageToArmor;
+            finalDamage -= damageToArmor;
+            Debug.Log($"{enemyData.EnemyName}의 방어도가 {damageToArmor}만큼의 피해를 막았습니다. 남은 방어도: {currentArmor}");
+            if (hpBarController != null) hpBarController.SetCurrentDefense(currentArmor);
+        }
+
+        // 고정 방어력(Defense)을 고려한 실제 체력 피해량 계산
+        int effectiveDamage = Mathf.Max(finalDamage - enemyData.Defense, 0);
         currentHp -= effectiveDamage;
-        Debug.Log($"{enemyData.EnemyName}에게 {effectiveDamage}의 피해를 입혔습니다. 남은 체력: {currentHp}");
+        if (effectiveDamage > 0) Debug.Log($"{enemyData.EnemyName}에게 {effectiveDamage}의 체력 피해를 입혔습니다. 남은 체력: {currentHp}");
 
-        // 현재 행동의 총 피해량을 기록하기 위해 BattleContext에 보고
-        BattleContext.AddDamage(effectiveDamage);
-
-        // HPBarController가 할당되어 있다면 현재 체력 업데이트
         if (hpBarController != null)
             hpBarController.SetCurrentHP(currentHp);
-        else
-            Debug.LogWarning("HPBarController가 할당되지 않았습니다.");
 
         if (currentHp <= 0)
             Die();
 
-        //실제 입힌 피해량 반환
+        // 실제 입힌 체력 피해량을 반환
         return effectiveDamage;
+    }
+
+    //방어도 획득 함수 추가
+    public void GainArmor(int amount)
+    {
+        currentArmor += amount;
+        Debug.Log($"{enemyData.EnemyName}이(가) 방어도를 {amount}만큼 얻었습니다. 현재 방어도: {currentArmor}");
+        if (hpBarController != null)
+        {
+            hpBarController.SetCurrentDefense(currentArmor);
+        }
+        else
+        {
+            Debug.LogError("[Enemy.GainArmor] hpBarController가 NULL입니다! HP바가 Enemy에 제대로 연결되지 않았습니다.");
+        }
     }
 
 
@@ -140,9 +172,35 @@ public class Enemy : MonoBehaviour
         Destroy(gameObject);
     }
 
+    /// <summary>
+    /// 다음 턴에 할 행동을 자신의 패턴 목록에서 랜덤하게 결정합니다.
+    /// </summary>
+    public void ChooseNextAction()
+    {
+        if (enemyData == null || enemyData.actionPatterns == null || enemyData.actionPatterns.Count == 0)
+        {
+            Debug.LogError($"{gameObject.name}에게 설정된 행동 패턴이 없습니다.");
+            nextAction = null;
+            return;
+        }
+
+        // 행동 패턴 리스트에서 무작위로 하나를 선택
+        int randomIndex = Random.Range(0, enemyData.actionPatterns.Count);
+        nextAction = enemyData.actionPatterns[randomIndex];
+        Debug.Log($"{gameObject.name}의 다음 행동 결정: {nextAction.name}");
+
+        // ★★★ 나중에 UI 시스템이 만들어지면 여기서 UI 업데이트를 요청합니다. ★★★
+        // 예: intentUIManager.ShowIntent(this, nextAction);
+    }
+
     public IEnumerator PerformTurn()
     {
         Debug.Log($"{enemyData.EnemyName}의 턴 시작");
+
+        // 턴 시작 시, 이번 턴에 얻었던 방어도는 초기화합니다 (Slay the Spire 규칙 유사)
+        currentArmor = 0;
+        if (hpBarController != null) hpBarController.SetCurrentDefense(currentArmor);
+
 
         // 턴 시작 시 상태 이상 처리
         ProcessPoisonAtTurnStart(); // 기존 독 처리
@@ -160,59 +218,97 @@ public class Enemy : MonoBehaviour
         {
             yield break;
         }
-        //플레이어에게 적 스탯의 데미지
-        yield return StartCoroutine(AttackPlayer(enemyData.Damage));
+
+        // ▼▼▼ 미리 결정된 행동을 실행하도록 수정 ▼▼▼
+        if (nextAction != null)
+        {
+            Debug.Log($"{gameObject.name}이(가) '{nextAction.name}' 행동을 실행합니다.");
+            // 행동 타입에 따라 다른 코루틴 호출
+            switch (nextAction.actionType)
+            {
+                case EnemyActionType.Attack:
+                    // (1 ~ 몬스터의 공격력) 사이의 랜덤 데미지 계산
+                    int randomDamage = Random.Range(1, enemyData.Damage + 1);
+                    yield return StartCoroutine(AttackPlayer(randomDamage, nextAction.hitCount));
+                    break;
+
+                case EnemyActionType.Defend:
+                    // (몬스터의 방어력 * 3) 만큼 방어도 획득
+                    int armorToGain = enemyData.Defense * 3;
+                    GainArmor(armorToGain);
+                    // 방어 행동에 대한 애니메이션이나 딜레이가 필요하다면 여기에 추가
+                    yield return new WaitForSeconds(1f);
+                    break;
+
+                    // 추후 다른 행동 타입 추가 가능
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"{gameObject.name}에게 실행할 행동(nextAction)이 결정되지 않았습니다.");
+            yield return new WaitForSeconds(1f); // 아무것도 안하고 1초 대기
+        }
 
         // 턴 종료 시 상태 이상 지속시간 감소 등 처리
         ProcessPoisonAtTurnEnd(); //독 지속시간 차감
+
+        //턴 종료 직전에 다음 행동을 미리 결정합니다.
+        ChooseNextAction();
+        
 
 
         Debug.Log($"{enemyData.EnemyName}의 턴 종료");
         yield return null; // 턴 매니저에게 제어권 넘김
     }
 
-    private IEnumerator AttackPlayer(int damage)
-    {
-        float attackAnimationDuration = 0.5f; // 기본 대기 시간 (애니메이션 못 찾을 경우 대비)
+    // Enemy.cs
 
+    // ... (다른 함수들은 그대로 유지) ...
+
+    // ▼▼▼ 이 함수를 아래의 새 코드로 교체해주세요 ▼▼▼
+    private IEnumerator AttackPlayer(int damage, int hitCount)
+    {
+        // 1. 공격 애니메이션을 한 번만 재생합니다. (애니메이션 자체가 여러 번 때리는 모션일 수 있음)
         if (skeletonAnimation != null)
         {
-            // "Attack" 애니메이션 재생 (반복 안함)
-            Spine.TrackEntry attackTrackEntry = skeletonAnimation.AnimationState.SetAnimation(0, "attack", false);
-            if (attackTrackEntry != null && attackTrackEntry.Animation != null)
+            // "attack" 애니메이션을 반복 없이 재생합니다.
+            skeletonAnimation.AnimationState.SetAnimation(0, "attack", false);
+        }
+
+        // 약간의 선딜레이 후 실제 타격이 시작되도록 합니다.
+        yield return new WaitForSeconds(0.3f); // 이 시간은 애니메이션에 맞춰 조절 가능
+
+        // 2. hitCount 만큼 반복하여 피해를 줍니다.
+        for (int i = 0; i < hitCount; i++)
+        {
+            // 플레이어가 살아있는지 확인
+            if (Player.Instance == null || Player.Instance.CurrentHealth <= 0)
             {
-                attackAnimationDuration = attackTrackEntry.Animation.Duration;
+                Debug.Log("플레이어가 사망하여 공격을 중단합니다.");
+                break; // 플레이어가 죽었으면 반복 중단
             }
-            else
+
+            // 실제 공격 (데미지 처리)
+            Player.Instance.TakeDamage(damage);
+            Debug.Log($"{enemyData.EnemyName}이(가) 플레이어에게 {damage}의 데미지를 입혔습니다. ({i + 1}/{hitCount})");
+
+            // 마지막 타격이 아니라면, 다음 타격 전까지 잠시 대기하여 타격감을 줍니다.
+            if (i < hitCount - 1)
             {
-                Debug.LogWarning($"'{gameObject.name}'의 SkeletonAnimation에서 'Attack' 애니메이션을 찾을 수 없습니다. 기본 대기 시간을 사용합니다.");
+                yield return new WaitForSeconds(0.2f); // 연속 타격 사이의 간격
             }
-            // 애니메이션이 끝날 때까지 또는 특정 타격 지점까지 대기
-            yield return new WaitForSeconds(attackAnimationDuration); // 전체 애니메이션 길이만큼 대기
         }
-        else
-        {
-            // SkeletonAnimation 컴포넌트가 없으면 기존 방식대로 0.5초 대기
-            yield return new WaitForSeconds(0.5f);
-        }
-        // 실제 공격 (데미지 처리)
-        if (Player.Instance != null)
-        {
-            Player.Instance.TakeDamage(damage); // Player.cs 에 정의된 TakeDamage 호출
-            Debug.Log($"{enemyData.EnemyName}이 플레이어에게 {damage}의 데미지를 입혔습니다.");
-        }
-        else
-        {
-            Debug.LogError("Player.Instance가 null입니다. 플레이어 공격 불가.");
-        }
-        // 공격 후 "Idle" 애니메이션으로 전환 (반복)
+
+        // 모든 타격이 끝난 후, 애니메이션이 끝날 때까지 잠시 더 기다려 자연스럽게 만듭니다.
+        yield return new WaitForSeconds(0.3f); // 애니메이션 후딜레이
+
+        // 3. 공격 후 "idle" 애니메이션으로 전환합니다.
         if (skeletonAnimation != null)
         {
             skeletonAnimation.AnimationState.SetAnimation(0, "idle", true);
         }
     }
 
-    // ---------------- 독 효과 관련 메서드들을 Enemy 클래스 내부로 이동 ----------------
 
     /// <summary>
     /// 독 효과를 부여하는 메서드: 독 수치를 증가시킵니다.

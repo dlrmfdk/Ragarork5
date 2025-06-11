@@ -40,6 +40,9 @@ public class EnemySO : ScriptableObject
     private EnemyType category;
     public EnemyType Category => category;
 
+    [Header("행동 패턴")]
+    public List<EnemyActionSO> actionPatterns; //적이 사용할 수 있는 행동들의 목록
+
 
 
 }

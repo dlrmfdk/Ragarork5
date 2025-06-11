@@ -9,12 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ee6b0eb5d72fd9e42bb86d6b473b312f, type: 3}
-  m_Name: Elite Enemy
+  m_Script: {fileID: 11500000, guid: 86d73e7acfa8fcb468a34f74661c6234, type: 3}
+  m_Name: GainArmor_Action
   m_EditorClassIdentifier: 
-  enemyName: Elite
-  enemyPrefab: {fileID: 8045317353110916379, guid: 2405a93de35c4444c83be6b3be308a5b, type: 3}
-  hp: 10
-  damage: 20
-  defense: 0
-  category: 1
+  actionType: 1
+  value: 0
+  hitCount: 1
+  intentIcon: {fileID: 21300000, guid: 4048028f0da989d479a74e552bd92f5f, type: 3}
+  intentFormat: '{0}'
