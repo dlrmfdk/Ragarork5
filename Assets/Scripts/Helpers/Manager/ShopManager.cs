@@ -72,25 +72,30 @@ public class ShopManager : MonoBehaviour
 
     public bool AttemptPurchase(RuneSO rune, int price)
     {
-        if (Player.Instance.Gold < price)
+        // Player의 SpendGold 메서드를 호출하여 구매를 시도합니다.
+        if (Player.Instance.SpendGold(price))
         {
+            // SpendGold가 true를 반환하면 구매 성공
+            RuneDeckManager.Instance.AddRuneToDeck(rune.displayName);
+            Debug.Log($"{rune.displayName} 구매 완료!");
+
+            // UpdatePlayerGoldUI는 SpendGold 내부의 UpdateAllUI 호출로 인해 자동으로 처리되므로
+            // 여기서 또 호출할 필요가 없습니다.
+            return true;
+        }
+        else
+        {
+            // SpendGold가 false를 반환하면 구매 실패 (골드 부족)
             Debug.Log("골드가 부족합니다!");
             return false;
         }
-
-        Player.Instance.AddGold(-price);
-        RuneDeckManager.Instance.AddRuneToDeck(rune.displayName); // ID 대신 displayName을 사용하거나, RuneSO에 runeID 필드를 추가하여 사용하세요.
-
-        Debug.Log($"{rune.displayName} 구매 완료!");
-        UpdatePlayerGoldUI();
-        return true;
     }
 
     public void UpdatePlayerGoldUI()
     {
         if (playerGoldText != null && Player.Instance != null)
         {
-            playerGoldText.text = $"소지 골드: {Player.Instance.Gold}";
+            playerGoldText.text = $"{Player.Instance.Gold}";
         }
     }
 }

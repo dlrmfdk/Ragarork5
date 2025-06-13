@@ -30,8 +30,19 @@ public class UIManager : MonoBehaviour
     void Start()
     {
         // 초기 UI 상태 설정
-        runeDeckPanel.SetActive(false);
-        centralSlotPanel.SetActive(false);
+
+        if (runeDeckPanel != null)
+        {
+            runeDeckPanel.SetActive(false);
+        }
+
+        // ▼▼▼ 바로 이 부분입니다! if문으로 감싸주세요 ▼▼▼
+        if (centralSlotPanel != null)
+        {
+            centralSlotPanel.SetActive(false);
+        }
+        // ▲▲▲ 수정 완료 ▲▲▲
+
         if (drawButton != null) drawButton.interactable = false; // null 체크 추가
         if (rerollButton != null) rerollButton.interactable = false; // null 체크 추가
 

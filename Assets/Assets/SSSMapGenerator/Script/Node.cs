@@ -203,7 +203,7 @@ namespace S3MG{
 		void handleCamp(){
 			Debug.Log("Open a camp");
             MapGenerator.instance.inactiveMap();  // ∏  ∫Ò»∞º∫»≠
-            SceneManager.LoadScene("sampleScene");
+            SceneManager.LoadScene("RestScene");
         }
 
 		void handleShop(){

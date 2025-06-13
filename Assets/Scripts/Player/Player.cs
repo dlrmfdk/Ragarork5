@@ -13,7 +13,7 @@ public class Player : MonoBehaviour
     [SerializeField] private int maxHealth = 100;
     private int currentHealth;
     public int CurrentHealth => currentHealth;
-
+    public int MaxHealth => maxHealth;
     [Header("방어도 관련")]
     private int currentDefense = 0;
 
@@ -172,6 +172,21 @@ public class Player : MonoBehaviour
         UpdateAllUI();
     }
 
+    public bool SpendGold(int amount)
+    {
+        if (gold >= amount)
+        {
+            gold -= amount;
+            UpdateAllUI(); // 골드 UI 업데이트를 위해 호출
+            Debug.Log($"{amount} 골드 사용. 남은 골드: {gold}");
+            return true; // 성공
+        }
+        else
+        {
+            Debug.Log("골드가 부족하여 사용할 수 없습니다.");
+            return false; // 실패
+        }
+    }
     public void Heal(int amount)
     {
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);

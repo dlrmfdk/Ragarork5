@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4675947802589068766}
   - component: {fileID: 7403609509188025153}
   - component: {fileID: 50648554962523474}
+  - component: {fileID: 4052095077807344398}
   m_Layer: 5
   m_Name: ShopItemUI
   m_TagString: Untagged
@@ -95,6 +96,19 @@ MonoBehaviour:
   runeNameText: {fileID: 3850807630150978556}
   priceText: {fileID: 4072405272386361649}
   buyButton: {fileID: 6325697831902092950}
+--- !u!114 &4052095077807344398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2150274323120636809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bce7deb2534daee43801842742439cd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  runeSO: {fileID: 0}
 --- !u!1 &4034693169273907330
 GameObject:
   m_ObjectHideFlags: 0
