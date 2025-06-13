@@ -3827,17 +3827,17 @@ MonoBehaviour:
   isUIManagerReady: 0
   runeDefinitions:
   - {fileID: 11400000, guid: 432ec8dca1b56a446a5d6db591591187, type: 2}
-  - {fileID: 11400000, guid: 1022722c004f76a4187fb690e684f4bc, type: 2}
-  - {fileID: 11400000, guid: 3d4ddefec1d5c98449b9f85aa571bdc3, type: 2}
   - {fileID: 11400000, guid: 643d762ea48d3d04fb7505103d9065f6, type: 2}
   - {fileID: 11400000, guid: 2043cb756ad1e8046b119e61a3df90e5, type: 2}
   - {fileID: 11400000, guid: d7761ab319348ce47a559f2fb896f765, type: 2}
   - {fileID: 11400000, guid: 3a485e040736c4a4da0cbba87163b52e, type: 2}
+  - {fileID: 11400000, guid: 360e6a6df2cffb24a925415cf8ebd82e, type: 2}
+  - {fileID: 11400000, guid: 1022722c004f76a4187fb690e684f4bc, type: 2}
   - {fileID: 11400000, guid: 2873881036d0fb440a3fe42f6eeab574, type: 2}
   - {fileID: 11400000, guid: 7bd3f3f9dc2e5534fb4fb2546d2ecde5, type: 2}
+  - {fileID: 11400000, guid: 3d4ddefec1d5c98449b9f85aa571bdc3, type: 2}
   aoeRuneSO: {fileID: 11400000, guid: 2873881036d0fb440a3fe42f6eeab574, type: 2}
   lifestealRuneSO: {fileID: 11400000, guid: 7bd3f3f9dc2e5534fb4fb2546d2ecde5, type: 2}
-  lifestealRatio: 1
 --- !u!1 &1099484328
 GameObject:
   m_ObjectHideFlags: 0
@@ -4704,7 +4704,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9dde57327bb4b5f41b3de0cf6b25b7f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  effectToTestOnAlpha1: {fileID: 11400000, guid: 9d4e48b1130d92d40aa32f4475efb9c3, type: 2}
+  effectToTestOnAlpha1: {fileID: 11400000, guid: 4e7e6b2a6767b444cbd8d76186526412, type: 2}
+  effectToTestOnAlpha2: {fileID: 11400000, guid: 01156f3104361fc4bb7b0ee2d46aa229, type: 2}
 --- !u!4 &1241220632
 Transform:
   m_ObjectHideFlags: 0
@@ -6190,6 +6191,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3a485e040736c4a4da0cbba87163b52e, type: 2}
   - {fileID: 11400000, guid: 643d762ea48d3d04fb7505103d9065f6, type: 2}
   - {fileID: 11400000, guid: 2043cb756ad1e8046b119e61a3df90e5, type: 2}
+  - {fileID: 11400000, guid: 360e6a6df2cffb24a925415cf8ebd82e, type: 2}
 --- !u!4 &1711405799
 Transform:
   m_ObjectHideFlags: 0
@@ -7494,7 +7496,7 @@ SceneRoots:
   - {fileID: 189897807}
   - {fileID: 127811976}
   - {fileID: 1802988019}
-  - {fileID: 1241220632}
   - {fileID: 1207511928}
   - {fileID: 1564072186}
   - {fileID: 43886817}
+  - {fileID: 1241220632}

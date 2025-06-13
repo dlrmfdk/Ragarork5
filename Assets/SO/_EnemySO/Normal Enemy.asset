@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: Frozen Butterfly
   enemyPrefab: {fileID: 8024799122772746139, guid: 13dfbc20663252042966c4a1abe21fe5, type: 3}
-  hp: 5
+  hp: 10
   damage: 10
-  defense: 5
+  defense: 0
   category: 0
   actionPatterns:
   - {fileID: 11400000, guid: b58a2d9814d50b148a22ed19387829da, type: 2}
-  - {fileID: 11400000, guid: 873515a8aa027014497d8e83d1bb7a46, type: 2}
+  penaltyRune: {fileID: 0}

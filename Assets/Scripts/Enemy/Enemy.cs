@@ -41,6 +41,10 @@ public class Enemy : MonoBehaviour
     private int bleedDamagePerTurn = 0;
     private int bleedTurnsRemaining = 0;
 
+    /// <summary>
+    /// 이 적이 현재 화상 상태인지 여부를 반환합니다. (읽기 전용)
+    /// </summary>
+    public bool IsBurning => burnTurnsRemaining > 0;
 
     private SkeletonAnimation skeletonAnimation; // Spine 애니메이션 컴포넌트 참조
 

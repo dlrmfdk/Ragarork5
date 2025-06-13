@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a7f609cf4ce8afc4f8e8cfa894e58f39, type: 3}
-  m_Name: Red_MultiHitEffectRune
+  m_Name: Red_LifestealRune_common
   m_EditorClassIdentifier: 
   color: 0
   rarity: 0
-  displayName: 
-  icon: {fileID: 21300000, guid: 78a6770591233b745b74fcd49582ea0d, type: 3}
+  displayName: "\uD761\uD608\uC758 \uB8EC"
+  icon: {fileID: 21300000, guid: 621777c321a14b1419bdb91f01f705ab, type: 3}
   isBasicRune: 0
   initialDeckCount: 0
-  effectSO: {fileID: 11400000, guid: 9d4e48b1130d92d40aa32f4475efb9c3, type: 2}
+  effectSO: {fileID: 11400000, guid: 258747836c01fc347b571f1fd4fdb685, type: 2}

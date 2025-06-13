@@ -74,7 +74,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1779723515714594870, guid: 497813d847bda174eb8d5a35a8b796e4, type: 3}
       propertyPath: m_MaxValue
-      value: 50
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 5101519595889946091, guid: 497813d847bda174eb8d5a35a8b796e4, type: 3}
       propertyPath: m_Pivot.x
