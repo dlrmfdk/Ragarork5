@@ -11,7 +11,7 @@ public abstract class BaseRuneEffectSO : ScriptableObject
     /// <param name="targets">효과 대상(들) (적 목록 등)</param>
 
 
-    public abstract void Execute(Player user, IEnumerable<Enemy> targets);
-    
+    public abstract void Execute(Player user, IEnumerable<Enemy> targets, int runeValue);
+
 
 }

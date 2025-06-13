@@ -122,8 +122,14 @@ public class Enemy : MonoBehaviour
         // 고정 방어력(Defense)을 고려한 실제 체력 피해량 계산
         int effectiveDamage = Mathf.Max(finalDamage - enemyData.Defense, 0);
         currentHp -= effectiveDamage;
-        if (effectiveDamage > 0) Debug.Log($"{enemyData.EnemyName}에게 {effectiveDamage}의 체력 피해를 입혔습니다. 남은 체력: {currentHp}");
+        if (effectiveDamage > 0)
+        {
+            Debug.Log($"{enemyData.EnemyName}에게 {effectiveDamage}의 체력 피해를 입혔습니다. 남은 체력: {currentHp}");
 
+           
+            // 실제 입힌 체력 피해량을 BattleContext에 기록합니다.
+            BattleContext.TotalDamageDealtThisAction += effectiveDamage;
+        }
         if (hpBarController != null)
             hpBarController.SetCurrentHP(currentHp);
 
@@ -204,100 +210,83 @@ public class Enemy : MonoBehaviour
         // 예: intentUIManager.ShowIntent(this, nextAction);
     }
 
+ 
+
     public IEnumerator PerformTurn()
     {
-        Debug.Log($"{enemyData.EnemyName}의 턴 시작. 현재 턴 카운트: {turnCounter}");
+        Debug.Log($"{enemyData.EnemyName}의 턴 시작. (이전 턴: {turnCounter})");
 
-        // ▼▼▼ "Elite" 카테고리인지 확인하는 조건문 추가 ▼▼▼
-        if (enemyData.Category == EnemyType.Elite) // EnemySO의 Category가 "Elite"일 때만 실행
+        // ▼▼▼ 턴 카운터 증가를 맨 위로 이동 ▼▼▼
+        // 턴이 시작되면 어떤 행동을 하든 먼저 카운트를 올립니다.
+        turnCounter++;
+        Debug.Log($"현재 턴 카운트: {turnCounter}");
+
+        // 1. 이 적이 Elite 타입인지 확인
+        if (enemyData.Category == EnemyType.Elite)
         {
-            // 3턴마다 패널티 룬을 부여하는 로직
+            // 2. 3턴 주기로 특수 패턴을 발동
             if (turnCounter > 0 && turnCounter % 3 == 0)
             {
-                Debug.Log($"{enemyData.EnemyName}이(가) 3턴 패턴 발동! 패널티 룬을 부여합니다.");
+                Debug.Log($"{enemyData.EnemyName}이(가) 3턴 패턴 발동! '손실의 룬'을 부여합니다.");
 
                 if (enemyData.penaltyRune != null && RuneDeckManager.Instance != null)
                 {
                     RuneDeckManager.Instance.AddRuneToHand(enemyData.penaltyRune);
                 }
-                else
-                {
-                    Debug.LogWarning($"{enemyData.EnemyName}의 EnemySO에 패널티 룬이 설정되지 않았거나, RuneDeckManager를 찾을 수 없습니다.");
-                }
 
-                // 특수 행동 후 일반 행동은 건너뛰고 턴 종료
+                // 특수 패턴 후 턴 종료 (이제 turnCounter는 이미 증가했으므로 안전합니다)
                 yield break;
             }
         }
 
-        Debug.Log($"{enemyData.EnemyName}의 턴 시작");
+        // --- 이하 일반 행동 로직 ---
 
-        // 턴 시작 시, 이번 턴에 얻었던 방어도는 초기화합니다 (Slay the Spire 규칙 유사)
+        // 턴 시작 시 방어도 초기화
         currentArmor = 0;
         if (hpBarController != null) hpBarController.SetCurrentDefense(currentArmor);
 
-
         // 턴 시작 시 상태 이상 처리
-        ProcessPoisonAtTurnStart(); // 기존 독 처리
-        if (currentHp <= 0) yield break; // 독 피해로 사망 시 턴 종료
+        ProcessPoisonAtTurnStart();
+        if (currentHp <= 0) yield break;
 
-        ProcessBurnAtTurnStart();   // 화상 피해 처리 추가
-        if (currentHp <= 0) yield break; // 화상 피해로 사망 시 턴 종료
+        ProcessBurnAtTurnStart();
+        if (currentHp <= 0) yield break;
 
         ProcessBleedAtTurnStart();
-        if (currentHp <= 0) yield break; // 출혈 피해로 사망 시 턴 종료
+        if (currentHp <= 0) yield break;
 
-
-        // 독 피해로 인해 적의 현재체력이 0 이하라면 턴을 종료
-        if (currentHp <= 0)
-        {
-            yield break;
-        }
-
-        // ▼▼▼ 미리 결정된 행동을 실행하도록 수정 ▼▼▼
+        // 일반 행동 실행
         if (nextAction != null)
         {
             Debug.Log($"{gameObject.name}이(가) '{nextAction.name}' 행동을 실행합니다.");
-            // 행동 타입에 따라 다른 코루틴 호출
             switch (nextAction.actionType)
             {
                 case EnemyActionType.Attack:
-                    // (1 ~ 몬스터의 공격력) 사이의 랜덤 데미지 계산
                     int randomDamage = Random.Range(1, enemyData.Damage + 1);
                     yield return StartCoroutine(AttackPlayer(randomDamage, nextAction.hitCount));
                     break;
-
                 case EnemyActionType.Defend:
-                    // (몬스터의 방어력 * 3) 만큼 방어도 획득
                     int armorToGain = enemyData.Defense * 3;
                     GainArmor(armorToGain);
-                    // 방어 행동에 대한 애니메이션이나 딜레이가 필요하다면 여기에 추가
                     yield return new WaitForSeconds(1f);
                     break;
-
-                    // 추후 다른 행동 타입 추가 가능
             }
         }
         else
         {
             Debug.LogWarning($"{gameObject.name}에게 실행할 행동(nextAction)이 결정되지 않았습니다.");
-            yield return new WaitForSeconds(1f); // 아무것도 안하고 1초 대기
+            yield return new WaitForSeconds(1f);
         }
 
-        // 턴 종료 시 상태 이상 지속시간 감소 등 처리
-        ProcessPoisonAtTurnEnd(); //독 지속시간 차감
-
-        //턴 종료 직전에 다음 행동을 미리 결정합니다.
+        // 턴 종료 시 처리
+        ProcessPoisonAtTurnEnd();
         ChooseNextAction();
 
-        //턴 카운터 증가
-        turnCounter++;
-
         Debug.Log($"{enemyData.EnemyName}의 턴 종료");
-        yield return null; // 턴 매니저에게 제어권 넘김
+        yield return null;
     }
 
-   
+
 
     // ▼▼▼ 이 함수를 아래의 새 코드로 교체해주세요 ▼▼▼
     private IEnumerator AttackPlayer(int damage, int hitCount)

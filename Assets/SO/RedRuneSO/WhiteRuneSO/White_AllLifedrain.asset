@@ -10,8 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a7f609cf4ce8afc4f8e8cfa894e58f39, type: 3}
-  m_Name: White_Lifedrain
+  m_Name: White_AllLifedrain
   m_EditorClassIdentifier: 
+  runeType: 0
   color: 2
   rarity: 0
   displayName: "\uCC29\uCDE8\uC758 \uB8EC"

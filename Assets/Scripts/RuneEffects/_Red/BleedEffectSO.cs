@@ -1,32 +1,23 @@
+
 using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "BleedEffect", menuName = "Runes/Effects/BleedEffect")]
 public class BleedEffectSO : BaseRuneEffectSO
 {
-    [Header("출혈 설정")]
-    [SerializeField] private int totalBleedDamage = 6; // 총 피해량
-    [SerializeField] private int bleedDuration = 3;    // 지속 턴 수
+    [SerializeField] private int bleedDuration = 3; // 지속 턴 수는 유지
 
-    /// <summary>
-    /// 대상에게 설정된 값으로 출혈 효과를 부여합니다.
-    /// </summary>
-    public override void Execute(Player user, IEnumerable<Enemy> targets)
+    // MODIFIED: runeValue 파라미터를 추가합니다.
+    public override void Execute(Player user, IEnumerable<Enemy> targets, int runeValue)
     {
-        Debug.Log("출혈 부여 효과 발동!");
-
-        if (targets == null)
-        {
-            Debug.LogWarning("BleedEffectSO: 대상(targets)이 null입니다.");
-            return;
-        }
+        if (targets == null) return;
 
         foreach (Enemy target in targets)
         {
             if (target != null)
             {
-                Debug.Log($"{target.name}에게 {bleedDuration}턴 동안 총 {totalBleedDamage}의 출혈을 부여합니다.");
-                target.ApplyBleed(this.totalBleedDamage, this.bleedDuration);
+                // CHANGED: 고정된 totalBleedDamage 대신 runeValue를 사용합니다.
+                target.ApplyBleed(runeValue, this.bleedDuration);
             }
         }
     }

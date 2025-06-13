@@ -151,11 +151,6 @@ public class TurnManager : MonoBehaviour
 
     public void EndTurn()
     {
-        //플레이어 턴 종료 시 패널티 룬 제거 로직 호출
-        if (RuneDeckManager.Instance != null)
-        {
-            RuneDeckManager.Instance.RemoveAllPenaltyRunesFromHand();
-        }
 
         Debug.Log("[TurnManager] EndTurn() 호출됨, myTurn 이전값=" + myTurn);
         if (!myTurn) return;

@@ -11,7 +11,7 @@ public class BurnEffectSO : BaseRuneEffectSO
     /// <summary>
     /// 대상에게 설정된 값으로 화상 효과를 부여합니다.
     /// </summary>
-    public override void Execute(Player user, IEnumerable<Enemy> targets)
+    public override void Execute(Player user, IEnumerable<Enemy> targets, int runeValue)
     {
         Debug.Log("화상 부여 효과 발동!");
 

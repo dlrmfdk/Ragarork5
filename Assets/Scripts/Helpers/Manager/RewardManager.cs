@@ -169,8 +169,10 @@ public class RewardManager : MonoBehaviour
         }
 
         Debug.Log($"[RewardManager] OnRuneOptionChosen 호출됨: {chosenRune.name}. 덱 변경 및 저장 시도.");
-        RuneDeckManager.Instance.ReplaceBasicWithReward(chosenRune.name);
-        RuneDeckManager.Instance.SaveDeckState();
+           // ▼▼▼ 이 부분을 수정합니다 ▼▼▼
+    // 교체할 룬의 '색상'과 'SO 데이터'를 모두 전달합니다.
+    RuneDeckManager.Instance.ReplaceBasicWithReward(chosenRune.color, chosenRune);
+    // ▲▲▲ 수정 완료 ▲▲▲
 
         if (RuneRewardPanel != null) RuneRewardPanel.SetActive(false);
         if (RewardPanel != null) RewardPanel.SetActive(true);

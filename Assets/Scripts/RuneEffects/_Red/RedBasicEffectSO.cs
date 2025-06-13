@@ -1,17 +1,20 @@
+
 using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "RedBasicEffect", menuName = "Runes/Effects/RedBasic")]
 public class RedBasicEffectSO : BaseRuneEffectSO
 {
-    [Header("피해량")]
-    public int damage = 3;
+   
 
-    public override void Execute(Player user, IEnumerable<Enemy> targets)
+    // runeValue 매개변수를 추가하여 override 합니다.
+    public override void Execute(Player user, IEnumerable<Enemy> targets, int runeValue)
     {
-        // targets 가 변경돼도 안전하도록 사본 사용
         List<Enemy> snapshot = new List<Enemy>(targets);
         foreach (var e in snapshot)
-            e.Hit(damage, user);
+        {
+            // 고정된 damage 대신, 매개변수로 받은 runeValue를 사용합니다.
+            e.Hit(runeValue, user);
+        }
     }
 }

@@ -36,12 +36,12 @@ public class UIManager : MonoBehaviour
             runeDeckPanel.SetActive(false);
         }
 
-        // ▼▼▼ 바로 이 부분입니다! if문으로 감싸주세요 ▼▼▼
+
         if (centralSlotPanel != null)
         {
             centralSlotPanel.SetActive(false);
         }
-        // ▲▲▲ 수정 완료 ▲▲▲
+
 
         if (drawButton != null) drawButton.interactable = false; // null 체크 추가
         if (rerollButton != null) rerollButton.interactable = false; // null 체크 추가
@@ -75,8 +75,7 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI yellowCountText;
 
     [Header("중앙 슬롯")]
-    public List<Button> slotButtons;      // 5개 슬롯 버튼
-    public List<Image> slotIconImages;   // 슬롯 아이콘 표시용
+    public List<RuneSlotUI> centralRuneSlots;
 
     [Header("뽑기/리롤 버튼")]
     public Button drawButton;
@@ -92,7 +91,7 @@ public class UIManager : MonoBehaviour
     [Header("플레이어 상태 UI")]
     public TextMeshProUGUI goldText; // Player.cs 대신 UIManager가 직접 참조
 
-  
+
     /// <summary>
     /// 골드 표시 UI를 업데이트합니다. Player 등 외부에서 호출됩니다.
     /// </summary>
@@ -109,27 +108,46 @@ public class UIManager : MonoBehaviour
             Debug.LogWarning("[UIManager] Gold Text UI가 할당되지 않았습니다.");
         }
     }
-  
+
 
     /// <summary>
     /// 룬 설명 툴팁을 보여줍니다.
     /// </summary>
     /// <param name="runeSO">표시할 룬의 데이터</param>
     /// <param name="anchorTransform">툴팁 위치의 기준이 될 UI의 RectTransform</param>
+    // UIManager.cs의 ShowRuneTooltip 메서드 수정
+
+    /// <summary>
+    /// 룬 인스턴스 정보를 받아 동적인 설명으로 툴팁을 보여줍니다.
+    /// </summary>
+
+
+
+    /// <summary>
+    /// (보상 화면용) RuneSO를 받아 정적인 설명으로 툴팁을 보여줍니다.
+    /// </summary>
     public void ShowRuneTooltip(RuneSO runeSO, RectTransform anchorTransform)
     {
         if (runeTooltipPanel == null || tooltipText == null || runeSO == null || anchorTransform == null) return;
 
-        // 1. 툴팁 내용 설정
+        // "n"을 바꾸지 않고 SO의 설명 그대로 표시합니다.
         tooltipText.text = $"<b>{runeSO.displayName}</b>\n\n{runeSO.description}";
 
-        // 2. 툴팁 위치를 마우스를 올린 룬(버튼)의 위치 기준으로 설정
-        //    (Canvas가 Screen Space - Overlay 모드라고 가정)
         runeTooltipPanel.transform.position = (Vector2)anchorTransform.position + tooltipOffset;
+        runeTooltipPanel.SetActive(true);
+    }
 
-        // (선택적) 툴팁이 화면 밖으로 나가지 않도록 보정하는 로직을 여기에 추가할 수 있습니다.
+    /// <summary>
+    /// (핸드 슬롯용) RuneInstance를 받아 동적인 설명으로 툴팁을 보여줍니다.
+    /// </summary>
+    public void ShowRuneTooltip(RuneInstance runeInstance)
+    {
+        if (runeTooltipPanel == null || tooltipText == null || runeInstance?.SO == null) return;
 
-        // 3. 툴팁 활성화
+        string formattedDesc = runeInstance.SO.description.Replace("n", runeInstance.value.ToString());
+        tooltipText.text = $"<b>{runeInstance.SO.displayName}</b>\n\n{formattedDesc}";
+
+        runeTooltipPanel.transform.position = Input.mousePosition + (Vector3)tooltipOffset;
         runeTooltipPanel.SetActive(true);
     }
 
@@ -213,38 +231,31 @@ public class UIManager : MonoBehaviour
         if (yellowCountText != null && counts.ContainsKey(RuneColor.Yellow)) yellowCountText.text = counts[RuneColor.Yellow].ToString();
     }
 
-    public void UpdateCentralSlotsWithSO(List<RuneSO> selections)
+    // UIManager.cs
+
+    // UIManager.cs
+
+    public void UpdateCentralSlotsWithInstances(List<RuneInstance> selectedInstances)
     {
-        Debug.Log($"[UIManager.UpdateCentralSlotsWithSO] 슬롯 아이콘 업데이트 시작. selections 개수: {(selections == null ? "null" : selections.Count.ToString())}");
-        if (slotIconImages == null || slotButtons == null) return;
-
-        for (int i = 0; i < slotButtons.Count; i++)
+        // centralRuneSlots 리스트는 RuneTooltipHandler 타입의 리스트여야 합니다.
+        for (int i = 0; i < centralRuneSlots.Count; i++)
         {
-            if (slotButtons[i] == null) continue;
-
-            RuneSO currentRune = (selections != null && i < selections.Count) ? selections[i] : null;
-
-            // 툴팁 핸들러에 룬 데이터 설정
-            RuneTooltipHandler handler = slotButtons[i].GetComponent<RuneTooltipHandler>();
-            if (handler != null)
+            if (i < selectedInstances.Count && selectedInstances[i] != null)
             {
-                handler.runeSO = currentRune; // 현재 슬롯의 룬 정보를 핸들러에 전달
+                // 각 슬롯의 핸들러에 RuneInstance 정보를 전달하여 스스로 설정하도록 합니다.
+                centralRuneSlots[i].Setup(selectedInstances[i]);
+                centralRuneSlots[i].gameObject.SetActive(true);
             }
-
-            // 아이콘 이미지 업데이트
-            if (slotIconImages[i] != null)
+            else
             {
-                if (currentRune != null)
-                {
-                    slotIconImages[i].sprite = currentRune.icon;
-                    slotIconImages[i].enabled = true;
-                }
-                else
-                {
-                    slotIconImages[i].enabled = false;
-                }
+                // 빈 슬롯은 비활성화합니다.
+                centralRuneSlots[i].gameObject.SetActive(false);
             }
         }
-    }
+    
+}
+
+
+     
 }
     

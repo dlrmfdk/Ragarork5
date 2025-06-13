@@ -971,6 +971,7 @@ GameObject:
   - component: {fileID: 233002396}
   - component: {fileID: 233002395}
   - component: {fileID: 233002398}
+  - component: {fileID: 233002399}
   m_Layer: 5
   m_Name: Slot_5
   m_TagString: Untagged
@@ -1093,6 +1094,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   runeSO: {fileID: 0}
+--- !u!114 &233002399
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 233002393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 757ec0b8f06e37a4bb0383da092f24ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iconImage: {fileID: 233002396}
 --- !u!1 &240066194
 GameObject:
   m_ObjectHideFlags: 0
@@ -1390,9 +1404,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ee1ac87c9cdd954bbec8242a6be7717, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  normalEnemyList:
-  - {fileID: 11400000, guid: a06cc595cf5bab548a37a6fb45503a34, type: 2}
-  eliteEnemyList: []
+  normalEnemyList: []
+  eliteEnemyList:
+  - {fileID: 11400000, guid: 20efe1446ca642945b73cb0223de80d9, type: 2}
   bossEnemyList: []
   minEnemiesToSpawn: 1
   maxEnemiesToSpawn: 1
@@ -2425,18 +2439,12 @@ MonoBehaviour:
   whiteCountText: {fileID: 566545267}
   yellowButton: {fileID: 1149978753}
   yellowCountText: {fileID: 782986334}
-  slotButtons:
-  - {fileID: 1604796848}
-  - {fileID: 1973296454}
-  - {fileID: 1066901868}
-  - {fileID: 1321418986}
-  - {fileID: 233002395}
-  slotIconImages:
-  - {fileID: 1604796849}
-  - {fileID: 1973296455}
-  - {fileID: 1066901869}
-  - {fileID: 1321418987}
-  - {fileID: 233002396}
+  centralRuneSlots:
+  - {fileID: 1604796852}
+  - {fileID: 1973296458}
+  - {fileID: 1066901872}
+  - {fileID: 1321418990}
+  - {fileID: 233002399}
   drawButton: {fileID: 1265973405}
   rerollButton: {fileID: 2135259542}
   runeDeckPanel: {fileID: 2125074113}
@@ -3658,6 +3666,7 @@ GameObject:
   - component: {fileID: 1066901869}
   - component: {fileID: 1066901868}
   - component: {fileID: 1066901871}
+  - component: {fileID: 1066901872}
   m_Layer: 5
   m_Name: Slot_3
   m_TagString: Untagged
@@ -3780,6 +3789,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   runeSO: {fileID: 0}
+--- !u!114 &1066901872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1066901866}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 757ec0b8f06e37a4bb0383da092f24ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iconImage: {fileID: 1066901869}
 --- !u!1 &1086702937
 GameObject:
   m_ObjectHideFlags: 0
@@ -3824,7 +3846,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3bb0699326e8e7418000f0edc550096, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isUIManagerReady: 0
   runeDefinitions:
   - {fileID: 11400000, guid: 432ec8dca1b56a446a5d6db591591187, type: 2}
   - {fileID: 11400000, guid: 643d762ea48d3d04fb7505103d9065f6, type: 2}
@@ -3836,8 +3857,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2873881036d0fb440a3fe42f6eeab574, type: 2}
   - {fileID: 11400000, guid: 7bd3f3f9dc2e5534fb4fb2546d2ecde5, type: 2}
   - {fileID: 11400000, guid: 3d4ddefec1d5c98449b9f85aa571bdc3, type: 2}
+  - {fileID: 11400000, guid: 1bacbf137e1368d438b2a4c86025d3b3, type: 2}
   aoeRuneSO: {fileID: 11400000, guid: 2873881036d0fb440a3fe42f6eeab574, type: 2}
   lifestealRuneSO: {fileID: 11400000, guid: 7bd3f3f9dc2e5534fb4fb2546d2ecde5, type: 2}
+  isUIManagerReady: 0
 --- !u!1 &1099484328
 GameObject:
   m_ObjectHideFlags: 0
@@ -3934,6 +3957,7 @@ GameObject:
   - component: {fileID: 1131358096}
   - component: {fileID: 1131358095}
   - component: {fileID: 1131358094}
+  - component: {fileID: 1131358097}
   m_Layer: 5
   m_Name: RewardRune3
   m_TagString: Untagged
@@ -4043,6 +4067,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1131358092}
   m_CullTransparentMesh: 1
+--- !u!114 &1131358097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1131358092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bce7deb2534daee43801842742439cd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  runeSO: {fileID: 0}
 --- !u!1 &1149978751
 GameObject:
   m_ObjectHideFlags: 0
@@ -4566,6 +4603,7 @@ GameObject:
   - component: {fileID: 1234103846}
   - component: {fileID: 1234103845}
   - component: {fileID: 1234103844}
+  - component: {fileID: 1234103847}
   m_Layer: 5
   m_Name: RewardRune1
   m_TagString: Untagged
@@ -4675,6 +4713,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1234103842}
   m_CullTransparentMesh: 1
+--- !u!114 &1234103847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1234103842}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bce7deb2534daee43801842742439cd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  runeSO: {fileID: 0}
 --- !u!1 &1241220630
 GameObject:
   m_ObjectHideFlags: 0
@@ -5060,6 +5111,7 @@ GameObject:
   - component: {fileID: 1321418987}
   - component: {fileID: 1321418986}
   - component: {fileID: 1321418989}
+  - component: {fileID: 1321418990}
   m_Layer: 5
   m_Name: Slot_4
   m_TagString: Untagged
@@ -5182,6 +5234,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   runeSO: {fileID: 0}
+--- !u!114 &1321418990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1321418984}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 757ec0b8f06e37a4bb0383da092f24ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iconImage: {fileID: 1321418987}
 --- !u!1 &1432298815
 GameObject:
   m_ObjectHideFlags: 0
@@ -5194,6 +5259,7 @@ GameObject:
   - component: {fileID: 1432298819}
   - component: {fileID: 1432298818}
   - component: {fileID: 1432298817}
+  - component: {fileID: 1432298820}
   m_Layer: 5
   m_Name: RewardRune2
   m_TagString: Untagged
@@ -5303,6 +5369,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1432298815}
   m_CullTransparentMesh: 1
+--- !u!114 &1432298820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1432298815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bce7deb2534daee43801842742439cd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  runeSO: {fileID: 0}
 --- !u!1 &1434559960
 GameObject:
   m_ObjectHideFlags: 0
@@ -6026,6 +6105,7 @@ GameObject:
   - component: {fileID: 1604796849}
   - component: {fileID: 1604796848}
   - component: {fileID: 1604796851}
+  - component: {fileID: 1604796852}
   m_Layer: 5
   m_Name: Slot_1
   m_TagString: Untagged
@@ -6148,6 +6228,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   runeSO: {fileID: 0}
+--- !u!114 &1604796852
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1604796846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 757ec0b8f06e37a4bb0383da092f24ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iconImage: {fileID: 1604796849}
 --- !u!1 &1711405797
 GameObject:
   m_ObjectHideFlags: 0
@@ -7073,6 +7166,7 @@ GameObject:
   - component: {fileID: 1973296455}
   - component: {fileID: 1973296454}
   - component: {fileID: 1973296457}
+  - component: {fileID: 1973296458}
   m_Layer: 5
   m_Name: Slot_2
   m_TagString: Untagged
@@ -7195,6 +7289,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   runeSO: {fileID: 0}
+--- !u!114 &1973296458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1973296452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 757ec0b8f06e37a4bb0383da092f24ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iconImage: {fileID: 1973296455}
 --- !u!1 &2003952684
 GameObject:
   m_ObjectHideFlags: 0

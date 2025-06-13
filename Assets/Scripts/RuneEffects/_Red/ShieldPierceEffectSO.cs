@@ -14,7 +14,7 @@ public class ShieldPierceEffectSO : BaseRuneEffectSO
     [Tooltip("적이 방어도가 없을 때 입힐 기본 피해량")]
     public int baseDamage = 2;
 
-    public override void Execute(Player user, IEnumerable<Enemy> targets)
+    public override void Execute(Player user, IEnumerable<Enemy> targets, int runeValue)
     {
         if (targets == null || !targets.Any())
         {
@@ -30,12 +30,12 @@ public class ShieldPierceEffectSO : BaseRuneEffectSO
             if (target.CurrentArmor > 0)
             {
                 Debug.Log($"{target.EnemyData.EnemyName}은(는) 방어도가 있으므로 {pierceDamage}의 관통 피해를 입습니다.");
-                target.Hit(pierceDamage, user);
+                target.Hit(runeValue, user);
             }
             else
             {
                 Debug.Log($"{target.EnemyData.EnemyName}은(는) 방어도가 없으므로 {baseDamage}의 기본 피해를 입습니다.");
-                target.Hit(baseDamage, user);
+                target.Hit(runeValue, user);
             }
         }
     }
