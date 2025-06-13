@@ -4704,7 +4704,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9dde57327bb4b5f41b3de0cf6b25b7f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  effectToTestOnAlpha1: {fileID: 11400000, guid: 4e7e6b2a6767b444cbd8d76186526412, type: 2}
+  effectToTestOnAlpha1: {fileID: 11400000, guid: 0759566acc48be249828c976d0f5d43e, type: 2}
   effectToTestOnAlpha2: {fileID: 11400000, guid: 01156f3104361fc4bb7b0ee2d46aa229, type: 2}
 --- !u!4 &1241220632
 Transform:

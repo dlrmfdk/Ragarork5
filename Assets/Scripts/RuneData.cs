@@ -40,3 +40,4 @@ public class DeckState
 {
     public List<DeckEntry> entries = new List<DeckEntry>();
 }
+

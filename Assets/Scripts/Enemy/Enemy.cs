@@ -48,7 +48,10 @@ public class Enemy : MonoBehaviour
 
     private SkeletonAnimation skeletonAnimation; // Spine 애니메이션 컴포넌트 참조
 
-
+    /// <summary>
+    /// 이 적의 현재 방어도를 반환합니다. (읽기 전용)
+    /// </summary>
+    public int CurrentArmor => currentArmor;
 
     void Awake()
     {
