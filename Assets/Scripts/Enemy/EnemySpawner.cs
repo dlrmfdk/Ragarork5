@@ -154,7 +154,7 @@ public class EnemySpawner : MonoBehaviour
                     hpBarController.SetTarget(newEnemy.transform);
                     hpBarController.SetMaxHP(newEnemy.EnemyData.HP); // EnemyData는 Enemy.cs에서 EnemySO를 가리키는 속성이라고 가정
                     hpBarController.SetCurrentHP(newEnemy.EnemyData.HP);
-                    hpBarController.SetOffset(new Vector3(0, -200f, 0)); // 오프셋 조정
+                    hpBarController.SetOffset(new Vector3(0, -150f, 0)); // 오프셋 조정
                     newEnemy.SetHPBarController(hpBarController); // Enemy 스크립트에 HP 바 컨트롤러 설정 메소드 필요
                 }
                 else Debug.LogError("HPBarController가 HP 바 프리팹에 존재하지 않습니다.");

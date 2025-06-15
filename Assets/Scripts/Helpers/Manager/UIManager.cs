@@ -13,6 +13,7 @@ public class UIManager : MonoBehaviour
     [Tooltip("기준 UI(룬 버튼) 위치에서 툴팁이 얼마나 떨어져 표시될지 설정합니다.")]
     public Vector2 tooltipOffset = new Vector2(0, 80); // Y값을 조절하여 버튼 위/아래 간격 설정
 
+    private RectTransform tooltipRect;
     void Awake()
     {
         Debug.Log($"[UIManager.Awake] UIManager 게임 오브젝트 '{this.gameObject.name}'의 Awake 호출됨. Instance 설정 시도. 현재 UIManager.Instance는 {(Instance == null ? "null" : Instance.gameObject.name)}");
@@ -23,6 +24,12 @@ public class UIManager : MonoBehaviour
             return;
         }
         Instance = this;
+
+        // ▼▼▼ 추가: 시작할 때 툴팁 RectTransform을 미리 가져오기 ▼▼▼
+        if (runeTooltipPanel != null)
+        {
+            tooltipRect = runeTooltipPanel.GetComponent<RectTransform>();
+        }
         // UIManager는 씬에 종속적이므로 DontDestroyOnLoad를 사용하지 않습니다.
         Debug.Log($"[UIManager.Awake] UIManager.Instance가 '{Instance.gameObject.name}'으로 설정됨.");
     }
@@ -45,6 +52,9 @@ public class UIManager : MonoBehaviour
 
         if (drawButton != null) drawButton.interactable = false; // null 체크 추가
         if (rerollButton != null) rerollButton.interactable = false; // null 체크 추가
+
+        // ▼▼▼ 수정: 시작할 때 툴팁 숨기기 ▼▼▼
+        HideRuneTooltip();
 
         Debug.Log($"[UIManager.Start] UIManager '{this.gameObject.name}' Start() 호출됨. OnUIManagerReady 이벤트 발생 시도. 현재 Instance: {(Instance == null ? "null" : Instance.gameObject.name)}");
         // UIManager의 모든 설정이 완료된 후 이벤트 발생
@@ -128,13 +138,21 @@ public class UIManager : MonoBehaviour
     /// </summary>
     public void ShowRuneTooltip(RuneSO runeSO, RectTransform anchorTransform)
     {
-        if (runeTooltipPanel == null || tooltipText == null || runeSO == null || anchorTransform == null) return;
+        if (tooltipRect == null || tooltipText == null || runeSO == null || anchorTransform == null) return;
 
-        // "n"을 바꾸지 않고 SO의 설명 그대로 표시합니다.
+        // 1. 툴팁 내용 설정
         tooltipText.text = $"<b>{runeSO.displayName}</b>\n\n{runeSO.description}";
 
-        runeTooltipPanel.transform.position = (Vector2)anchorTransform.position + tooltipOffset;
+        // 2. 툴팁 활성화 (크기 계산을 위해 먼저 활성화)
         runeTooltipPanel.SetActive(true);
+
+        // 3. 앵커를 기준으로 이상적인 위치 계산
+        Vector3 desiredPosition = anchorTransform.position;
+        // 필요하다면 오프셋을 여기에 더할 수 있습니다.
+        // desiredPosition += (Vector3)tooltipOffset;
+
+        // 4. 위치 보정 및 최종 위치 설정
+        tooltipRect.position = GetCorrectedTooltipPosition(desiredPosition);
     }
 
     /// <summary>
@@ -142,13 +160,20 @@ public class UIManager : MonoBehaviour
     /// </summary>
     public void ShowRuneTooltip(RuneInstance runeInstance)
     {
-        if (runeTooltipPanel == null || tooltipText == null || runeInstance?.SO == null) return;
+        if (tooltipRect == null || tooltipText == null || runeInstance?.SO == null) return;
 
+        // 1. 툴팁 내용 설정
         string formattedDesc = runeInstance.SO.description.Replace("n", runeInstance.value.ToString());
         tooltipText.text = $"<b>{runeInstance.SO.displayName}</b>\n\n{formattedDesc}";
 
-        runeTooltipPanel.transform.position = Input.mousePosition + (Vector3)tooltipOffset;
+        // 2. 툴팁 활성화
         runeTooltipPanel.SetActive(true);
+
+        // 3. 마우스 위치를 기준으로 이상적인 위치 계산
+        Vector3 desiredPosition = Input.mousePosition + (Vector3)tooltipOffset;
+
+        // 4. 위치 보정 및 최종 위치 설정
+        tooltipRect.position = GetCorrectedTooltipPosition(desiredPosition);
     }
 
     /// <summary>
@@ -158,6 +183,39 @@ public class UIManager : MonoBehaviour
     {
         if (runeTooltipPanel == null) return;
         runeTooltipPanel.SetActive(false);
+    }
+    /// <summary>
+    /// (추가된 함수) 툴팁의 위치를 받아 화면 밖으로 나가지 않도록 보정한 위치를 반환합니다.
+    /// </summary>
+    private Vector3 GetCorrectedTooltipPosition(Vector3 desiredPosition)
+    {
+        // 툴팁의 피봇(pivot)과 크기를 가져옴
+        // (툴팁 UI의 Pivot을 (0, 1) - 좌측 상단으로 설정하면 계산이 더 정확합니다.)
+        Vector2 tooltipPivot = tooltipRect.pivot;
+        Vector2 tooltipSize = tooltipRect.sizeDelta;
+
+        // 오른쪽 경계 체크
+        if (desiredPosition.x + (tooltipSize.x * (1 - tooltipPivot.x)) > Screen.width)
+        {
+            desiredPosition.x = Screen.width - (tooltipSize.x * (1 - tooltipPivot.x));
+        }
+        // 왼쪽 경계 체크
+        if (desiredPosition.x - (tooltipSize.x * tooltipPivot.x) < 0)
+        {
+            desiredPosition.x = (tooltipSize.x * tooltipPivot.x);
+        }
+        // 위쪽 경계 체크
+        if (desiredPosition.y + (tooltipSize.y * (1 - tooltipPivot.y)) > Screen.height)
+        {
+            desiredPosition.y = Screen.height - (tooltipSize.y * (1 - tooltipPivot.y));
+        }
+        // 아래쪽 경계 체크
+        if (desiredPosition.y - (tooltipSize.y * tooltipPivot.y) < 0)
+        {
+            desiredPosition.y = (tooltipSize.y * tooltipPivot.y);
+        }
+
+        return desiredPosition;
     }
 
 

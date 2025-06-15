@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   numberOfHits: 2
   damageMultiplierPerHit: 0.5
+  delayBetweenHits: 0.3
