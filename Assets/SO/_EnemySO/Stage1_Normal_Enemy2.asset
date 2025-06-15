@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ee6b0eb5d72fd9e42bb86d6b473b312f, type: 3}
-  m_Name: Elite Enemy
+  m_Name: Stage1_Normal_Enemy2
   m_EditorClassIdentifier: 
-  enemyName: Elite
-  enemyPrefab: {fileID: 4438356569790596326, guid: 9dcc337edb579d24daed9647d51ef5df, type: 3}
-  hp: 10
-  damage: 20
-  defense: 2
-  category: 1
+  enemyName: asdasd
+  enemyPrefab: {fileID: 4296835893799551385, guid: caa53625cfe311449aa8efdd76aebb89, type: 3}
+  hp: 50
+  damage: 3
+  defense: 0
+  category: 0
   actionPatterns:
   - {fileID: 11400000, guid: b58a2d9814d50b148a22ed19387829da, type: 2}
   - {fileID: 11400000, guid: b58a2d9814d50b148a22ed19387829da, type: 2}
-  penaltyRune: {fileID: 11400000, guid: 1bacbf137e1368d438b2a4c86025d3b3, type: 2}
+  penaltyRune: {fileID: 0}

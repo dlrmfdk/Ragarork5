@@ -186,7 +186,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   intentIconImage: {fileID: 2333694376238748723}
   valueText: {fileID: 3808934479830056142}
-  offset: {x: -600, y: 10, z: 0}
+  offset: {x: -600, y: 20, z: 0}
 --- !u!1 &8291439204185773435
 GameObject:
   m_ObjectHideFlags: 0

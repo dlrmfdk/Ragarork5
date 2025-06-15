@@ -4,6 +4,9 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using Spine.Unity;
+using Spine;
+
 
 public class Player : MonoBehaviour
 {
@@ -44,7 +47,7 @@ public class Player : MonoBehaviour
 
     // 내부 참조 변수들
     private HpBarController hpBarController;
-    private Animator animator;
+    private SkeletonAnimation skeletonAnimation;
     private AudioSource audioSource;
 
     void Awake()
@@ -93,7 +96,16 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        animator = GetComponent<Animator>();
+        skeletonAnimation = GetComponent<SkeletonAnimation>();
+        if (skeletonAnimation == null)
+        {
+            Debug.LogError("Player 오브젝트에 SkeletonAnimation 컴포넌트가 없습니다!");
+        }
+        else
+        {
+            // 게임 시작 시 기본 상태를 'idle' 애니메이션으로 설정 (무한 반복)
+            skeletonAnimation.AnimationState.SetAnimation(0, "idle", true);
+        }
         // 체력은 Start에서 한 번만 초기화하여 유지되도록 함
         currentHealth = maxHealth;
 
@@ -239,6 +251,7 @@ public class Player : MonoBehaviour
 
     private IEnumerator MultiHitCoroutine(IEnumerable<Enemy> targets, int damagePerHit, int numberOfHits, float delay)
     {
+        AtkAni();
         List<Enemy> targetList = targets.ToList();
         for (int i = 0; i < numberOfHits; i++)
         {
@@ -266,23 +279,31 @@ public class Player : MonoBehaviour
     {
         if (diesound != null) audioSource.PlayOneShot(diesound);
         Debug.Log("플레이어가 사망했습니다.");
+
+        // 죽음 애니메이션 재생 (반복 안 함)
+        if (skeletonAnimation != null)
+        {
+            skeletonAnimation.AnimationState.SetAnimation(0, "dead", false);
+        }
+
+        // 여기에 게임 오버 처리 로직 추가 (예: 결과창 표시)
     }
 
     public void AtkAni()
     {
+        Debug.Log("### AtkAni 함수 호출됨! ###"); // <<< 확인용 로그 추가
+        // SkeletonAnimation 컴포넌트가 없으면 아무것도 하지 않음
+        if (skeletonAnimation == null) return;
+
+        // 공격 사운드 재생
         if (atksound != null) audioSource.PlayOneShot(atksound);
-        if (animator != null)
-        {
-            animator.SetBool("Attack", true);
-            Invoke("ResetAttack", 0.1f);
-        }
+
+        // 1. "attack1" 애니메이션을 1번만 재생합니다 (반복 안 함: false).
+        skeletonAnimation.AnimationState.SetAnimation(0, "attack01", false);
+
+        // 2. "attack1"이 끝난 후에 이어서 "idle" 애니메이션을 재생하도록 예약(큐에 추가)합니다 (무한 반복: true).
+        skeletonAnimation.AnimationState.AddAnimation(0, "idle", true, 0);
     }
 
-    private void ResetAttack()
-    {
-        if (animator != null)
-        {
-            animator.SetBool("Attack", false);
-        }
-    }
+
 }

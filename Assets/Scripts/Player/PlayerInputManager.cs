@@ -102,8 +102,11 @@ public class PlayerInputManager : MonoBehaviour
     /// </summary>
     private void EnemyTargetHit(Enemy target)
     {
-  
 
+        if (Player.Instance != null)
+        {
+            Player.Instance.AtkAni();
+        }
         // RuneDeckManager에게 공격이 완료되었음을 알리고, 후처리를 위임합니다.
         // ProcessTargetedAttackComplete 내부에서 실제 공격이 이루어집니다.
         if (RuneDeckManager.Instance != null)

@@ -51,6 +51,7 @@ public class Enemy : MonoBehaviour
     public bool IsBurning => burnTurnsRemaining > 0;
 
     private SkeletonAnimation skeletonAnimation; // Spine 애니메이션 컴포넌트 참조
+    private bool isDying = false; // <<< 죽는 중인지 확인하는 변수 추가
 
     /// <summary>
     /// 이 적의 현재 방어도를 반환합니다. (읽기 전용)
@@ -191,27 +192,53 @@ public class Enemy : MonoBehaviour
             Die();
     }
 
+    // 수정된 Die() 함수: 죽음 시퀀스 코루틴을 시작하는 역할만 합니다.
     void Die()
     {
+        // 이미 죽는 중이라면 다시 실행하지 않음
+        if (isDying) return;
+        isDying = true;
+
+        // 실제 죽음 처리는 코루틴에 맡깁니다.
+        StartCoroutine(DieSequence());
+    }
+
+    // 새로 추가된 DieSequence() 코루틴: 애니메이션 재생 후 오브젝트를 파괴합니다.
+    private IEnumerator DieSequence()
+    {
         Debug.Log($"{enemyData.EnemyName}이(가) 사망했습니다.");
+
+        // 1. "dead" 애니메이션을 한 번 재생합니다.
+        if (skeletonAnimation != null)
+        {
+            var trackEntry = skeletonAnimation.AnimationState.SetAnimation(0, "dead", false);
+            // 애니메이션이 끝날 때까지 기다립니다.
+            yield return new WaitForSeconds(trackEntry.Animation.Duration);
+        }
+        else
+        {
+            // Spine 애니메이션이 없다면 잠시 기다립니다.
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        // --- 이하 기존 Die() 함수의 내용 ---
 
         if (hpBarController != null)
             Destroy(hpBarController.gameObject);
 
-        // EnemySpawner의 SpawnedEnemies 리스트에서 이 적 제거
         EnemySpawner.Instance.SpawnedEnemies.Remove(this);
 
-        // ─── 여기에 보상 패널 띄우기 추가 ───
         if (EnemySpawner.Instance.SpawnedEnemies.Count == 0)
         {
-            // 마지막 적이 죽었을 때
             RewardManager.Instance.ShowRewardPanel();
         }
-        // 적 패턴 UI 파괴 로직 추가
+
         if (intentUIInstance != null)
         {
             Destroy(intentUIInstance.gameObject);
         }
+
+        // 모든 처리가 끝난 후 마지막에 오브젝트를 파괴합니다.
         Destroy(gameObject);
     }
 
