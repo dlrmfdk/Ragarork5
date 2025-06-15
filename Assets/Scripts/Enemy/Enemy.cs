@@ -459,16 +459,13 @@ public class Enemy : MonoBehaviour
     /// </summary>
     /// <param name="totalDamage">총 출혈 데미지</param>
     /// <param name="duration">출혈 지속 턴 수</param>
-    public void ApplyBleed(int totalDamage, int duration)
+    public void ApplyBleed(int damagePerTurn, int duration)
     {
-        if (duration <= 0) return; // 지속시간이 0 이하면 효과 없음
-
-        // 중첩 방식은 기획에 따라 결정 (현재는 새로 적용된 효과로 덮어쓰기)
-        bleedDamagePerTurn = Mathf.CeilToInt((float)totalDamage / duration); // 턴당 피해량 계산 (나누어 떨어지지 않을 경우 올림 처리)
-        bleedTurnsRemaining = duration;
-        Debug.Log($"{enemyData.EnemyName}에게 {duration}턴 동안 매 턴 {bleedDamagePerTurn}의 출혈 효과가 부여되었습니다. (총 {totalDamage} 피해)");
+        if (duration <= 0) return;
+        this.bleedDamagePerTurn = damagePerTurn; // 계산된 값을 그대로 받음
+        this.bleedTurnsRemaining = duration;
+        Debug.Log($"{enemyData.EnemyName}에게 {duration}턴 동안 매 턴 {bleedDamagePerTurn}의 출혈 효과가 부여되었습니다.");
     }
-
     /// <summary>
     /// 턴 시작 시 출혈 피해를 처리합니다.
     /// </summary>

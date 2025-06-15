@@ -437,5 +437,35 @@ public class RuneDeckManager : MonoBehaviour
         SaveDeckState();
         Debug.Log($"새로운 덱 생성 완료. 총 {playerDeck.Count}개의 룬이 추가되었습니다.");
     }
+    /// <summary>
+    /// 현재 덱에서 특정 색상의 '기본 룬' 인스턴스 목록만 가져옵니다.
+    /// </summary>
+    public List<RuneInstance> GetBasicRunesByColor(RuneColor color)
+    {
+        return playerDeck.Where(inst => inst.SO.isBasicRune && inst.SO.color == color).ToList();
+    }
+
+    /// <summary>
+    /// 선택된 특정 기본 룬을 새로운 보상 룬으로 교체(강화)합니다.
+    /// </summary>
+    public void EnhanceRune(RuneInstance basicRuneToEnhance, RuneSO rewardRuneSO)
+    {
+        if (basicRuneToEnhance == null || rewardRuneSO == null) return;
+        if (!playerDeck.Contains(basicRuneToEnhance))
+        {
+            Debug.LogError("강화하려는 룬이 덱에 존재하지 않습니다!");
+            return;
+        }
+
+        int preservedValue = basicRuneToEnhance.value;
+        playerDeck.Remove(basicRuneToEnhance);
+        var newRewardInstance = new RuneInstance(rewardRuneSO.name, preservedValue);
+        playerDeck.Add(newRewardInstance);
+
+        Debug.Log($"룬 강화 완료: '{basicRuneToEnhance.SO.displayName}'(값:{preservedValue}) -> '{rewardRuneSO.displayName}'(값:{preservedValue})");
+
+        SaveDeckState();
+        RefreshUI();
+    }
     #endregion
 }
