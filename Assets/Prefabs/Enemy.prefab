@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e0a5b038c3f1e047bcb6d93cb35e6d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyData: {fileID: 0}
+  intentUIPrefab: {fileID: 7042012639575575165, guid: 69079e68d82e3114db7d45e1f60220ee, type: 3}
 --- !u!95 &3407556856130556244
 Animator:
   serializedVersion: 5

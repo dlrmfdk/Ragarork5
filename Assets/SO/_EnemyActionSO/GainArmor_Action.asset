@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: GainArmor_Action
   m_EditorClassIdentifier: 
   actionType: 1
-  value: 0
   hitCount: 1
-  intentIcon: {fileID: 21300000, guid: 4048028f0da989d479a74e552bd92f5f, type: 3}
-  intentFormat: '{0}'
+  intentIcon: {fileID: 21300000, guid: 4c1b5a0ab25356a4b8e08b6281f29155, type: 3}
+  showDamageValue: 1

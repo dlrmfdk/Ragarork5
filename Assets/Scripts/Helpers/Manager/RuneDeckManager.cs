@@ -111,38 +111,41 @@ public class RuneDeckManager : MonoBehaviour
         }
     }
 
-
     private void OnReRoll()
     {
-        if (!isUIManagerReady || hasRerolledThisTurn) return;
+        // 1. UI가 준비되지 않았거나, 이번 턴에 이미 리롤을 했다면 아무것도 하지 않음
+        if (!isUIManagerReady || hasRerolledThisTurn)
+        {
+            if (hasRerolledThisTurn) Debug.Log("이번 턴에는 이미 리롤을 사용했습니다.");
+            return;
+        }
 
         Debug.Log("리롤을 실행합니다.");
 
-        // ▼▼▼ 리롤 로직 수정 ▼▼▼
-        // 패에 있는 룬들을 하나씩 확인합니다.
+        // 2. 패에 있는 룬들을 묘지로 보내거나 소멸시킵니다.
         for (int i = 0; i < selectionCount; i++)
         {
             var rerolledInstance = selections[i];
             if (rerolledInstance == null) continue;
 
-            // 룬의 색상이 회색이 아닐 경우에만 묘지로 보냅니다.
+            // 회색 룬이 아니면 묘지로 보냅니다.
             if (rerolledInstance.SO.color != RuneColor.Gray)
             {
                 discardPile.Add(rerolledInstance);
             }
-            else
-            {
-                // 회색 룬일 경우, 아무것도 하지 않아 묘지로 가지 않고 소멸됩니다.
-                Debug.Log($"회색 룬 '{rerolledInstance.SO.displayName}'이(가) 리롤되어 소멸되었습니다.");
-            }
         }
-        // ▲▲▲ 수정 완료 ▲▲▲
 
-        // 패를 완전히 비우고 다음 행동을 준비합니다.
-        ClearSelectionsAndPrepareForNextAction();
+        // 3. 이번 턴에 리롤을 사용했다고 기록합니다.
+        hasRerolledThisTurn = true;
+
+        // 4. 패(selections)를 비우고 카운트를 0으로 만듭니다.
+        selections = new List<RuneInstance>(new RuneInstance[5]);
+        selectionCount = 0;
+
+        // 5. UI를 새로고침하여 빈 패를 보여주고, 비활성화된 리롤 버튼 상태를 반영합니다.
+        RefreshUI();
     }
 
-    // RuneDeckManager.cs
     private void FinalizeTurnAfterAction()
     {
         Debug.Log("모든 룬 효과 처리 완료. 후처리 효과 및 턴 정리를 시작합니다.");
@@ -175,7 +178,7 @@ public class RuneDeckManager : MonoBehaviour
                 Debug.Log($"회색 룬 '{usedInstance.SO.displayName}'이(가) 사용 후 소멸되었습니다.");
             }
         }
-        // ▲▲▲ 수정 완료 ▲▲▲
+ 
 
         ClearSelectionsAndPrepareForNextAction();
         SaveDeckState();
@@ -311,6 +314,7 @@ public class RuneDeckManager : MonoBehaviour
     }
 
     public bool AddRuneToHand(RuneSO runeToAdd)
+
     {
         if (selectionCount >= selections.Count || runeToAdd == null) return false;
         var newInstance = new RuneInstance(runeToAdd.name, 0); // 패널티 룬은 value가 0이라고 가정
@@ -406,25 +410,26 @@ public class RuneDeckManager : MonoBehaviour
 
     public void CreateNewDeck()
     {
+        Debug.Log("<color=green>--- CreateNewDeck 함수 실행 시작! ---</color>");
+
         playerDeck = new List<RuneInstance>();
         discardPile = new List<RuneInstance>();
 
-        Debug.Log("[RDM] 새로운 덱 생성을 시작합니다. 'Is Basic Rune'이 체크된 모든 룬을 추가합니다.");
+        Debug.Log("[RDM] 'Rune Definitions' 리스트의 모든 룬을 검색합니다...");
 
-        // 1. runeDefinitions 리스트에 있는 모든 룬 정의를 순회합니다.
         foreach (var runeSO in runeDefinitions)
         {
-            // 2. 'Is Basic Rune'이 체크되어 있고, 'Initial Deck Count'가 1 이상인지 확인합니다.
-            if (runeSO != null && runeSO.isBasicRune && runeSO.initialDeckCount > 0)
-            {
-                Debug.Log($"[RDM] 기본 룬 '{runeSO.displayName}'을(를) {runeSO.initialDeckCount}개 추가합니다.");
+            if (runeSO == null) continue;
 
-                // 3. 해당 룬을 initialDeckCount 만큼 덱에 추가합니다.
+            if (runeSO.isBasicRune && runeSO.initialDeckCount > 0)
+            {
+                Debug.Log($"<color=cyan>[조건 만족!] '{runeSO.displayName}'을(를) {runeSO.initialDeckCount}개 덱에 추가합니다.</color>");
+
                 for (int i = 0; i < runeSO.initialDeckCount; i++)
                 {
-                    // 4. 각 룬 인스턴스에 고유한 무작위 값을 부여합니다.
-                    //    (유틸리티 룬의 값은 나중에 다른 용도로 사용할 수 있습니다.)
-                    playerDeck.Add(new RuneInstance(runeSO.name, Random.Range(1, 11)));
+                    // ▼▼▼ 여기에 || runeSO.color == RuneColor.White 조건을 추가했습니다. ▼▼▼
+                    int value = (runeSO.color == RuneColor.Red || runeSO.color == RuneColor.Blue || runeSO.color == RuneColor.Yellow || runeSO.color == RuneColor.White) ? i + 1 : 1;
+                    playerDeck.Add(new RuneInstance(runeSO.name, value));
                 }
             }
         }

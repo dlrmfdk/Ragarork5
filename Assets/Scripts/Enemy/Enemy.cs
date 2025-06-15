@@ -8,11 +8,15 @@ using Spine.Unity; // Spine 애니메이션 사용을 위해 추가
 //적 행동 타입 enum 정의
 public enum EnemyActionType { Attack, Defend, Buff, Debuff } 
 
+
 public class Enemy : MonoBehaviour
 {
     private EnemySO enemyData;
     public EnemySO EnemyData => enemyData; // 공개 읽기 전용 속성
 
+    [Header("적 패턴 UI")]
+    [SerializeField] private GameObject intentUIPrefab; //IntentUI 프리팹 연결
+    private EnemyIntentUI intentUIInstance;
 
     //다음 행동 저장을 위한 변수 추가
     private EnemyActionSO nextAction;
@@ -81,6 +85,24 @@ public class Enemy : MonoBehaviour
         if (skeletonAnimation != null)
         {
             skeletonAnimation.AnimationState.SetAnimation(0, "idle", true); // 트랙 0번, Idle 애니메이션, 반복 true
+        }
+
+
+        if (intentUIPrefab != null)
+        {
+            // "UI_Foreground" 라는 이름의 Canvas를 찾습니다.
+            GameObject canvasObj = GameObject.Find("UI_Foreground");
+            if (canvasObj != null)
+            {
+                GameObject uiObj = Instantiate(intentUIPrefab, canvasObj.transform);
+                intentUIInstance = uiObj.GetComponent<EnemyIntentUI>();
+                intentUIInstance.SetTarget(this.transform);
+                intentUIInstance.Hide();
+            }
+            else
+            {
+                Debug.LogError("'UI_Foreground' Canvas를 씬에서 찾을 수 없습니다! 의도 UI를 생성할 수 없습니다.");
+            }
         }
     }
 
@@ -185,7 +207,11 @@ public class Enemy : MonoBehaviour
             // 마지막 적이 죽었을 때
             RewardManager.Instance.ShowRewardPanel();
         }
-
+        // 적 패턴 UI 파괴 로직 추가
+        if (intentUIInstance != null)
+        {
+            Destroy(intentUIInstance.gameObject);
+        }
         Destroy(gameObject);
     }
 
@@ -206,11 +232,35 @@ public class Enemy : MonoBehaviour
         nextAction = enemyData.actionPatterns[randomIndex];
         Debug.Log($"{gameObject.name}의 다음 행동 결정: {nextAction.name}");
 
-        // ★★★ 나중에 UI 시스템이 만들어지면 여기서 UI 업데이트를 요청합니다. ★★★
-        // 예: intentUIManager.ShowIntent(this, nextAction);
+       
+        UpdateIntentUI();
     }
 
- 
+
+    public void UpdateIntentUI()
+    {
+        if (intentUIInstance == null) return;
+
+        if (nextAction == null)
+        {
+            intentUIInstance.Hide();
+            return;
+        }
+
+        int displayValue = 0;
+        if (nextAction.actionType == EnemyActionType.Attack)
+        {
+            // 공격 행동일 경우, 대략적인 피해량을 계산해서 전달
+            displayValue = enemyData.Damage; // 여기서는 평균값인 기본 데미지를 표시
+        }
+        else if (nextAction.actionType == EnemyActionType.Defend)
+        {
+            displayValue = enemyData.Defense * 3;
+        }
+
+        intentUIInstance.ShowIntent(nextAction, displayValue);
+    }
+
 
     public IEnumerator PerformTurn()
     {

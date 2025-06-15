@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: Boss Enemy
   m_EditorClassIdentifier: 
   enemyName: Boss
-  enemyPrefab: {fileID: 8045317353110916379, guid: 2405a93de35c4444c83be6b3be308a5b, type: 3}
+  enemyPrefab: {fileID: 7200045573534697613, guid: 84721b338d2a8a6418b24d0fd4ac26ab, type: 3}
   hp: 100
   damage: 10
   defense: 0
   category: 2
+  actionPatterns: []
+  penaltyRune: {fileID: 0}
