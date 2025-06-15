@@ -263,12 +263,16 @@ public class RewardManager : MonoBehaviour
 
         if (runeRewardDone && goldRewardDone)
         {
-            if (mapButton != null)
-            {
-                mapButton.gameObject.SetActive(true);
-                Debug.Log("[RewardManager] 모든 보상 선택 완료 (또는 선택 불가), MapButton 활성화됨.");
-            }
-            if (RewardPanel != null) RewardPanel.SetActive(false);
+            // 1. 룬과 골드 보상을 '모두' 받았다면,
+            Debug.Log("[RewardManager] 모든 보상을 획득했습니다. 다음으로 진행합니다.");
+            if (mapButton != null) mapButton.gameObject.SetActive(true); // 다음 버튼 활성화
+            if (RewardPanel != null) RewardPanel.SetActive(false);     // 메인 보상 패널 숨기기
+        }
+        else
+        {
+            // 2. 아직 받지 않은 보상이 '남아있다면',
+            Debug.Log("[RewardManager] 아직 받지 않은 보상이 있습니다. 메인 보상 패널로 돌아갑니다.");
+            if (RewardPanel != null) RewardPanel.SetActive(true); // 메인 보상 패널을 다시 보여줌
         }
     }
 }
