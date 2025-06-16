@@ -1,0 +1,13 @@
+twinkle.png
+size:181,60
+filter:Linear,Linear
+pma:true
+attack1
+bounds:2,6,52,71
+offsets:4,12,57,83
+rotate:90
+attack2
+bounds:144,9,35,49
+attack3
+bounds:75,2,56,67
+rotate:90
