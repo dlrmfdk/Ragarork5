@@ -215,7 +215,7 @@ namespace S3MG{
 		void handleEvent(){
 			Debug.Log("Execute event");
             MapGenerator.instance.inactiveMap();  // ∏  ∫Ò»∞º∫»≠
-            SceneManager.LoadScene("RandomEvent");
+            SceneManager.LoadScene("sampleScene");
         }
 
 		void handleTreasure(){
@@ -259,7 +259,7 @@ namespace S3MG{
 		void handleRandom(){
 			Debug.Log("Execute random process");
             MapGenerator.instance.inactiveMap();  // ∏  ∫Ò»∞º∫»≠
-            SceneManager.LoadScene("sampleScene");
+            SceneManager.LoadScene("RandomEvent");
         }
 	}
 
