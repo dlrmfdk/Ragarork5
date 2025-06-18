@@ -403,7 +403,7 @@ public class Enemy : MonoBehaviour
 
 
 
-    // ▼▼▼ 이 함수를 아래의 새 코드로 교체해주세요 ▼▼▼
+
     private IEnumerator AttackPlayer(int damage, int hitCount)
     {
         // 1. 공격 애니메이션을 한 번만 재생합니다. (애니메이션 자체가 여러 번 때리는 모션일 수 있음)
@@ -429,6 +429,14 @@ public class Enemy : MonoBehaviour
             // 실제 공격 (데미지 처리)
             Player.Instance.TakeDamage(damage);
             Debug.Log($"{enemyData.EnemyName}이(가) 플레이어에게 {damage}의 데미지를 입혔습니다. ({i + 1}/{hitCount})");
+
+         
+            // 강화 상태라면, 자해의 룬을 부여합니다.
+            if (isEnraged && enemyData.penaltyRune != null && RuneDeckManager.Instance != null)
+            {
+                Debug.Log($"{enemyData.EnemyName}의 강화된 도끼가 자해의 룬을 부여합니다!");
+                RuneDeckManager.Instance.AddRuneToHand(enemyData.penaltyRune);
+            }
 
             // 마지막 타격이 아니라면, 다음 타격 전까지 잠시 대기하여 타격감을 줍니다.
             if (i < hitCount - 1)
