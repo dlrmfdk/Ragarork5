@@ -18,6 +18,12 @@ public class Enemy : MonoBehaviour
     [SerializeField] private GameObject intentUIPrefab; //IntentUI 프리팹 연결
     private EnemyIntentUI intentUIInstance;
 
+    // ▼▼▼ 여기에 effectOffset 변수를 추가해주세요. ▼▼▼
+    [Header("UI 및 위치 설정")]
+    [Tooltip("적 위치 기준으로 이펙트가 생성될 상대적 위치")]
+    public Vector3 effectOffset = new Vector3(-1.5f, 1.0f, 0);
+    // ▲▲▲ 추가 완료 ▲▲▲
+
     //다음 행동 저장을 위한 변수 추가
     private EnemyActionSO nextAction;
 
@@ -133,6 +139,12 @@ public class Enemy : MonoBehaviour
     // 일반 공격으로 피해를 받는 메소드 (방어력 고려)
     public int Hit(int damage, Player player)
     {
+        // ▼▼▼ 여기에 피격 이펙트 재생 코드를 추가합니다. ▼▼▼
+        // 이펙트 위치는 이 적(this)의 effectOffset을 사용합니다.
+        Vector3 effectPos = transform.position + this.effectOffset;
+        EffectManager.Instance.PlayEffect(EffectType.EnemyHit, effectPos);
+        // ▲▲▲ 추가 완료 ▲▲▲
+
         int finalDamage = damage;
 
         // 방어도가 있다면 먼저 피해량에서 차감
@@ -610,5 +622,5 @@ public enum EIndent
 {
     Weak,
     Weakening,
-
+    // 추가 인덴트 타입...
 } 

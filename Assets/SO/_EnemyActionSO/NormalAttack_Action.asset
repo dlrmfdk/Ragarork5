@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: NormalAttack_Action
   m_EditorClassIdentifier: 
   actionType: 0
+  damageMultiplier: 1
+  defenseMultiplier: 1
   hitCount: 1
-  intentIcon: {fileID: 21300000, guid: 78be1e8da6d0d044bac4006d76e948f3, type: 3}
+  intentIcon: {fileID: 21300000, guid: 874be534e1ea3074da09e41e25ee4e2b, type: 3}
   showDamageValue: 1

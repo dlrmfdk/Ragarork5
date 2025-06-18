@@ -16,5 +16,5 @@ MonoBehaviour:
   damageMultiplier: 0.3
   defenseMultiplier: 1
   hitCount: 3
-  intentIcon: {fileID: 21300000, guid: a6982a63fbc91494884c730b6b98925b, type: 3}
+  intentIcon: {fileID: 21300000, guid: 874be534e1ea3074da09e41e25ee4e2b, type: 3}
   showDamageValue: 1
