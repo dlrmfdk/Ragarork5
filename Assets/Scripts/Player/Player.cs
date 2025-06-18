@@ -218,6 +218,17 @@ public class Player : MonoBehaviour
             return;
         }
 
+        // ▼▼▼ 플레이어 피격 이펙트 생성 코드 추가 ▼▼▼
+        if (Player.Instance != null)
+        {
+            //Vector3 playerHitPos = Player.Instance.transform.position + Player.Instance.effectOffset;
+            EffectManager.Instance.PlayEffect(EffectType.PlayerHit, Player.Instance.transform.position);
+        }
+        // ▲▲▲ 추가 완료 ▲▲▲
+
+        // ▼▼▼ 여기에 적 공격 사운드 재생 코드를 추가합니다. ▼▼▼
+        SoundManager.Instance.PlaySfx(SfxType.EnemyAttack);
+        // ▲▲▲ 추가 완료 ▲▲▲
         int damageToShield = Mathf.Min(currentDefense, damage);
         currentDefense -= damageToShield;
         int damageToHealth = damage - damageToShield;

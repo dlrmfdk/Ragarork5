@@ -434,6 +434,15 @@ public class Enemy : MonoBehaviour
             // 플레이어가 살아있는지 확인
             if (Player.Instance == null || Player.Instance.CurrentHealth <= 0)
             {
+
+                // ▼▼▼ 플레이어 피격 이펙트 생성 코드 추가 ▼▼▼
+                if (Player.Instance != null)
+                {
+                    //Vector3 playerHitPos = Player.Instance.transform.position + Player.Instance.effectOffset;
+                    EffectManager.Instance.PlayEffect(EffectType.PlayerHit, Player.Instance.transform.position);
+                }
+                // ▲▲▲ 추가 완료 ▲▲▲
+
                 Debug.Log("플레이어가 사망하여 공격을 중단합니다.");
                 break; // 플레이어가 죽었으면 반복 중단
             }
