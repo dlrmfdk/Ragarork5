@@ -83,12 +83,19 @@ public class SoundManager : MonoBehaviour
     {
         if (sfxDictionary.TryGetValue(type, out AudioClip clip))
         {
-            // PlayOneShot은 여러 효과음이 겹쳐서 재생될 수 있게 해줍니다.
-            sfxSource.PlayOneShot(clip);
+            // ▼▼▼ 여기에 Null 체크를 추가하면 더 안전합니다. ▼▼▼
+            if (clip != null)
+            {
+                sfxSource.PlayOneShot(clip);
+            }
+            else
+            {
+                Debug.LogWarning($"Sfx Mappings 리스트의 '{type}' 타입에 오디오 클립이 비어있습니다(None).");
+            }
         }
         else
         {
-            Debug.LogWarning($"'{type}'에 해당하는 효과음 클립이 등록되지 않았습니다.");
+            Debug.LogWarning($"'{type}'에 해당하는 효과음 타입이 Sfx Mappings 리스트에 등록되지 않았습니다.");
         }
     }
 

@@ -31,9 +31,9 @@ MonoBehaviour:
     - weight: 50
       outcome:
         outcomeMessage: "\uC720\uBB3C\uC774 \uBE5B\uC744 \uBC1C\uD558\uBA70 \uB2F9\uC2E0\uC758
-          \uB8EC \uD558\uB098\uB97C \uAC15\uD654\uD569\uB2C8\uB2E4!"
-        type: 6
-        amount: 0
+          \uCCB4\uB825\uC744 20 \uD68C\uBCF5\uC2DC\uD0B5\uB2C8\uB2E4."
+        type: 0
+        amount: 20
         rune: {fileID: 0}
   - choiceDescription: "\uBB34\uC2DC\uD55C\uB2E4."
     guaranteedOutcomes:
