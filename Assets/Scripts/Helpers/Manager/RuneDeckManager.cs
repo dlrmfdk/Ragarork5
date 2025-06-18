@@ -10,6 +10,8 @@ public class RuneDeckManager : MonoBehaviour
 {
     public static RuneDeckManager Instance { get; private set; }
 
+    private static bool hasDeletedSaveOnLaunch = false;
+
     [Header("룬 정의 SO 리스트")]
     public List<RuneSO> runeDefinitions;
 
@@ -29,9 +31,27 @@ public class RuneDeckManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
+        if (Instance == null)
+        { Instance = this;
+           DontDestroyOnLoad(gameObject);
+            // ▼▼▼ 게임 실행 후 딱 한 번만 실행되는 로직 ▼▼▼
+            // 아직 한 번도 실행되지 않았을 때만 (자물쇠가 열려있을 때만)
+            if (!hasDeletedSaveOnLaunch)
+            {
+                // 1. 파일 삭제 시도
+                if (File.Exists(deckStatePath))
+                {
+                    File.Delete(deckStatePath);
+                    Debug.Log($"[RuneDeckManager.Awake] 새 게임 세션 시작. 기존 덱 세이브 파일(DeckState.json)을 삭제했습니다.");
+                }
+
+                // 2. 이제 실행했으니, 자물쇠를 잠급니다. (다시는 실행되지 않도록)
+                hasDeletedSaveOnLaunch = true;
+            }
+        }
         else { Destroy(gameObject); return; }
 
+        
         playerDeck = new List<RuneInstance>();
         discardPile = new List<RuneInstance>();
         selections = new List<RuneInstance>(new RuneInstance[5]);
