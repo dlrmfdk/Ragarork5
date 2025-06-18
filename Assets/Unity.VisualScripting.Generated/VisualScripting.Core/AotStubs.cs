@@ -755,9 +755,6 @@ namespace Unity.VisualScripting.Generated.Aot
 	// RuneSO.op_Implicit
 	// RuneSO.op_Equality
 	// RuneSO.op_Inequality
-	// DemoImage_FreeIconPack.SetDemoImage.op_Implicit
-	// DemoImage_FreeIconPack.SetDemoImage.op_Equality
-	// DemoImage_FreeIconPack.SetDemoImage.op_Inequality
 	// Assets.CaptainCatSparrow.SpellIconsVolume_2.Druid.Demo.Demo.op_Implicit
 	// Assets.CaptainCatSparrow.SpellIconsVolume_2.Druid.Demo.Demo.op_Equality
 	// Assets.CaptainCatSparrow.SpellIconsVolume_2.Druid.Demo.Demo.op_Inequality
@@ -9734,41 +9731,6 @@ namespace Unity.VisualScripting.Generated.Aot
 		// RuneSO.op_Inequality
 		[global::UnityEngine.Scripting.PreserveAttribute()]
 		public static void RuneSO_op_Inequality()
-		{
-			global::UnityEngine.Object arg0 = default(global::UnityEngine.Object);
-			global::UnityEngine.Object arg1 = default(global::UnityEngine.Object);
-			bool @operator = (arg0 != arg1);
-			global::Unity.VisualScripting.StaticFunctionInvoker<UnityEngine.Object, UnityEngine.Object, bool> optimized = new global::Unity.VisualScripting.StaticFunctionInvoker<UnityEngine.Object, UnityEngine.Object, bool>(default(global::System.Reflection.MethodInfo));
-			optimized.Invoke(null, arg0, arg1);
-			optimized.Invoke(default(object[]));
-		}
-		
-		// DemoImage_FreeIconPack.SetDemoImage.op_Implicit
-		[global::UnityEngine.Scripting.PreserveAttribute()]
-		public static void DemoImage_FreeIconPack_SetDemoImage_op_Implicit()
-		{
-			global::UnityEngine.Object arg0 = default(global::UnityEngine.Object);
-			bool conversion = ((bool)(arg0));
-			global::Unity.VisualScripting.StaticFunctionInvoker<UnityEngine.Object, bool> optimized = new global::Unity.VisualScripting.StaticFunctionInvoker<UnityEngine.Object, bool>(default(global::System.Reflection.MethodInfo));
-			optimized.Invoke(null, arg0);
-			optimized.Invoke(default(object[]));
-		}
-		
-		// DemoImage_FreeIconPack.SetDemoImage.op_Equality
-		[global::UnityEngine.Scripting.PreserveAttribute()]
-		public static void DemoImage_FreeIconPack_SetDemoImage_op_Equality()
-		{
-			global::UnityEngine.Object arg0 = default(global::UnityEngine.Object);
-			global::UnityEngine.Object arg1 = default(global::UnityEngine.Object);
-			bool @operator = (arg0 == arg1);
-			global::Unity.VisualScripting.StaticFunctionInvoker<UnityEngine.Object, UnityEngine.Object, bool> optimized = new global::Unity.VisualScripting.StaticFunctionInvoker<UnityEngine.Object, UnityEngine.Object, bool>(default(global::System.Reflection.MethodInfo));
-			optimized.Invoke(null, arg0, arg1);
-			optimized.Invoke(default(object[]));
-		}
-		
-		// DemoImage_FreeIconPack.SetDemoImage.op_Inequality
-		[global::UnityEngine.Scripting.PreserveAttribute()]
-		public static void DemoImage_FreeIconPack_SetDemoImage_op_Inequality()
 		{
 			global::UnityEngine.Object arg0 = default(global::UnityEngine.Object);
 			global::UnityEngine.Object arg1 = default(global::UnityEngine.Object);
