@@ -105,6 +105,8 @@ public class PlayerInputManager : MonoBehaviour
 
         if (Player.Instance != null)
         {
+            Vector3 playerEffectPos = Player.Instance.transform.position + Player.Instance.effectOffset;
+            EffectManager.Instance.PlayEffect(EffectType.PlayerAttackCast, playerEffectPos);
             Player.Instance.AtkAni();
         }
         // RuneDeckManager에게 공격이 완료되었음을 알리고, 후처리를 위임합니다.

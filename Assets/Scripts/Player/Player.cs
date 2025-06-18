@@ -34,21 +34,26 @@ public class Player : MonoBehaviour
     [SerializeField] private int gold = 0;
     public int Gold => gold;
 
+    [Header("이펙트 위치 오프셋")]
+    [Tooltip("캐릭터 위치 기준으로 이펙트가 생성될 상대적 위치")]
+    public Vector3 effectOffset = new Vector3(1.5f, 1.0f, 0); // 예시: 오른쪽으로 1.5, 위로 1.0
+
     // 추가 효과를 위한 변수들
     private bool isDoubleDamageTurn = false;
     private int invincibleTurnCount = 0;
 
-    [Header("오디오 및 UI 프리팹")]
-    [SerializeField] private AudioClip atksound;
-    [SerializeField] private AudioClip defsound;
-    [SerializeField] private AudioClip diesound;
+    //[Header("오디오 및 UI 프리팹")]
+    //[SerializeField] private AudioClip atksound;
+    //[SerializeField] private AudioClip defsound;
+    //[SerializeField] private AudioClip diesound;
+
     [SerializeField] private HpBarController playerHpBarPrefab;
 
 
     // 내부 참조 변수들
     private HpBarController hpBarController;
     private SkeletonAnimation skeletonAnimation;
-    private AudioSource audioSource;
+    //private AudioSource audioSource;
 
     void Awake()
     {
@@ -68,9 +73,9 @@ public class Player : MonoBehaviour
             return;
         }
 
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.playOnAwake = false;
+        //audioSource = GetComponent<AudioSource>();
+        //if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+        //audioSource.playOnAwake = false;
     }
 
     void OnEnable()
@@ -228,7 +233,8 @@ public class Player : MonoBehaviour
 
     public void IncreaseDefense(int defense)
     {
-        if (defsound != null) audioSource.PlayOneShot(defsound);
+        //if (defsound != null) audioSource.PlayOneShot(defsound);
+
         currentDefense += defense;
         UpdateAllUI();
     }
@@ -277,7 +283,7 @@ public class Player : MonoBehaviour
 
     public void Die()
     {
-        if (diesound != null) audioSource.PlayOneShot(diesound);
+        SoundManager.Instance.PlaySfx(SfxType.PlayerDie);
         Debug.Log("플레이어가 사망했습니다.");
 
         // 죽음 애니메이션 재생 (반복 안 함)
@@ -296,7 +302,7 @@ public class Player : MonoBehaviour
         if (skeletonAnimation == null) return;
 
         // 공격 사운드 재생
-        if (atksound != null) audioSource.PlayOneShot(atksound);
+        Invoke("PlayAttackSound", 0.3f);
 
         // 1. "attack1" 애니메이션을 1번만 재생합니다 (반복 안 함: false).
         skeletonAnimation.AnimationState.SetAnimation(0, "attack01", false);
@@ -324,5 +330,9 @@ public class Player : MonoBehaviour
         if (hpBarController != null) hpBarController.SetCurrentHP(currentHealth);
         if (currentHealth <= 0) Die();
     }
-
+    private void PlayAttackSound()
+    {
+        // SoundManager를 통해 플레이어 공격 효과음을 재생합니다.
+        SoundManager.Instance.PlaySfx(SfxType.PlayerAttack);
+    }
 }

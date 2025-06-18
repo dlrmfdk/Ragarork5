@@ -610,5 +610,5 @@ public enum EIndent
 {
     Weak,
     Weakening,
-    // 추가 인덴트 타입...
+
 } 

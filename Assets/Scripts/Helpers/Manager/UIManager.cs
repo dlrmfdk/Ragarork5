@@ -277,7 +277,7 @@ public class UIManager : MonoBehaviour
     }
 
     public void HideRuneUI()
-    {
+    { 
         if (runeDeckPanel != null) runeDeckPanel.SetActive(false);
         if (centralSlotPanel != null) centralSlotPanel.SetActive(false);
     }
