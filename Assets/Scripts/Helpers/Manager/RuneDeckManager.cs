@@ -467,5 +467,59 @@ public class RuneDeckManager : MonoBehaviour
         SaveDeckState();
         RefreshUI();
     }
+
+    // RuneDeckManager.cs 에 추가
+
+    /// <summary>
+    /// 턴 종료 시, 핸드에 있는 모든 패널티 룬의 효과를 발동시키고 제거합니다.
+    /// </summary>
+    public void ProcessAndRemovePenaltyRunes()
+    {
+        // 핸드에 룬이 없으면 실행하지 않습니다.
+        if (selectionCount == 0) return;
+
+        // 제거되지 않고 남을 일반 룬들을 담을 임시 리스트를 만듭니다.
+        List<RuneInstance> runesToKeep = new List<RuneInstance>();
+        bool penaltyRuneFound = false;
+
+        // 현재 핸드에 있는 모든 룬을 확인합니다.
+        for (int i = 0; i < selectionCount; i++)
+        {
+            var currentInstance = selections[i];
+            if (currentInstance == null) continue;
+
+            // 1. 룬 타입이 'Penalty'인지 확인합니다.
+            if (currentInstance.SO.runeType == RuneType.Penalty)
+            {
+                Debug.Log($"<color=red>패널티 룬 '{currentInstance.SO.displayName}'의 효과를 발동합니다.</color>");
+
+                // 2. 패널티 룬의 효과(EffectSO)를 실행합니다.
+                currentInstance.SO.effectSO?.Execute(Player.Instance, null, 0);
+
+                penaltyRuneFound = true;
+                // 이 룬은 소멸되므로, 남겨둘 리스트(runesToKeep)에 추가하지 않습니다.
+            }
+            else
+            {
+                // 3. 일반 룬이라면, 남겨둘 리스트에 추가합니다.
+                runesToKeep.Add(currentInstance);
+            }
+        }
+
+        // 4. 만약 패널티 룬이 하나라도 있었다면, 핸드 목록을 새로고침합니다.
+        if (penaltyRuneFound)
+        {
+            // 새로운 핸드 리스트를 만들고, 남겨둘 룬들로 채웁니다.
+            selections = new List<RuneInstance>(new RuneInstance[5]);
+            for (int i = 0; i < runesToKeep.Count; i++)
+            {
+                selections[i] = runesToKeep[i];
+            }
+            selectionCount = runesToKeep.Count;
+
+            // UI를 새로고침하여 패널티 룬이 사라진 것을 반영합니다.
+            RefreshUI();
+        }
+    }
     #endregion
 }

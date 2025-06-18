@@ -148,6 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e0a5b038c3f1e047bcb6d93cb35e6d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  intentUIPrefab: {fileID: 7042012639575575165, guid: 69079e68d82e3114db7d45e1f60220ee, type: 3}
 --- !u!61 &-8818084770554888919
 BoxCollider2D:
   m_ObjectHideFlags: 0

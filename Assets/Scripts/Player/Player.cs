@@ -43,7 +43,7 @@ public class Player : MonoBehaviour
     [SerializeField] private AudioClip defsound;
     [SerializeField] private AudioClip diesound;
     [SerializeField] private HpBarController playerHpBarPrefab;
-    [SerializeField] private Vector3 hpBarOffset = new Vector3(0, -250f, 0);
+
 
     // 내부 참조 변수들
     private HpBarController hpBarController;
@@ -170,7 +170,7 @@ public class Player : MonoBehaviour
                 if (hpBarController != null)
                 {
                     hpBarController.SetTarget(transform);
-                    hpBarController.SetOffset(hpBarOffset);
+               
                     UpdateAllUI();
                 }
             }
@@ -305,5 +305,24 @@ public class Player : MonoBehaviour
         skeletonAnimation.AnimationState.AddAnimation(0, "idle", true, 0);
     }
 
+
+    /// <summary>
+    /// 방어도를 무시하고 체력에 직접 피해를 줍니다. (자해, 고정 피해 등)
+    /// </summary>
+    public void TakePureDamage(int damage)
+    {
+        if (invincibleTurnCount > 0)
+        {
+            Debug.Log("플레이어가 무적 상태라 피해를 입지 않았습니다.");
+            return;
+        }
+
+        currentHealth -= damage;
+        Debug.Log($"<color=purple>플레이어가 {damage}의 순수 피해를 입었습니다. 남은 체력: {currentHealth}</color>");
+
+        // UI 업데이트 및 사망 처리
+        if (hpBarController != null) hpBarController.SetCurrentHP(currentHealth);
+        if (currentHealth <= 0) Die();
+    }
 
 }

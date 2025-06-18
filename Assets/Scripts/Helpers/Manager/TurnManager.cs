@@ -151,6 +151,11 @@ public class TurnManager : MonoBehaviour
 
     public void EndTurn()
     {
+        if (RuneDeckManager.Instance != null)
+        {
+            // 기존의 Remove... 함수 대신 새로운 Process... 함수를 호출합니다.
+            RuneDeckManager.Instance.ProcessAndRemovePenaltyRunes();
+        }
 
         Debug.Log("[TurnManager] EndTurn() 호출됨, myTurn 이전값=" + myTurn);
         if (!myTurn) return;

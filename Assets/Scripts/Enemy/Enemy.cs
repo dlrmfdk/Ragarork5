@@ -6,7 +6,7 @@ using Spine.Unity; // Spine 애니메이션 사용을 위해 추가
 
 
 //적 행동 타입 enum 정의
-public enum EnemyActionType { Attack, Defend, Buff, Debuff } 
+public enum EnemyActionType { Attack, Defend, Buff, Debuff , Charge }
 
 
 public class Enemy : MonoBehaviour
@@ -24,6 +24,9 @@ public class Enemy : MonoBehaviour
     //턴 카운터 변수 추가
     private int turnCounter = 0;
 
+    // ▼▼▼ 보스 패턴용 상태 변수 추가 ▼▼▼
+    private bool isCharging = false; // '힘 모으기' 상태 여부
+    private bool isEnraged = false;  // '도끼 강화' 상태 여부
     public CharacterIndent CharacterIndent { get; private set; }
 
     private int currentHp; //현재 체력
@@ -145,6 +148,15 @@ public class Enemy : MonoBehaviour
         // 고정 방어력(Defense)을 고려한 실제 체력 피해량 계산
         int effectiveDamage = Mathf.Max(finalDamage - enemyData.Defense, 0);
         currentHp -= effectiveDamage;
+
+        // ▼▼▼ '도끼 강화' 상태 전환 로직에 카테고리 확인 추가 ▼▼▼
+        // 아직 강화상태가 아니고, 카테고리가 'Boss'이며, 체력이 50% 이하로 떨어졌다면
+        if (!isEnraged && enemyData.Category == EnemyType.Boss && currentHp <= enemyData.HP * 0.5f)
+        {
+            isEnraged = true;
+            Debug.Log($"<color=red>{enemyData.EnemyName}이(가) 격분하여 도끼를 강화합니다!</color>");
+        }
+
         if (effectiveDamage > 0)
         {
             Debug.Log($"{enemyData.EnemyName}에게 {effectiveDamage}의 체력 피해를 입혔습니다. 남은 체력: {currentHp}");
@@ -291,12 +303,22 @@ public class Enemy : MonoBehaviour
 
     public IEnumerator PerformTurn()
     {
-        Debug.Log($"{enemyData.EnemyName}의 턴 시작. (이전 턴: {turnCounter})");
-
-        // ▼▼▼ 턴 카운터 증가를 맨 위로 이동 ▼▼▼
-        // 턴이 시작되면 어떤 행동을 하든 먼저 카운트를 올립니다.
+        Debug.Log($"{enemyData.EnemyName}의 턴 시작. 현재 턴: {turnCounter + 1}");
         turnCounter++;
-        Debug.Log($"현재 턴 카운트: {turnCounter}");
+
+        // --- '힘 모으기' 후 강력한 공격 실행 (보스 전용) ---
+        // isCharging 상태이면서, 카테고리가 Boss일 때만 이 로직을 실행합니다.
+        if (isCharging && enemyData.Category == EnemyType.Boss)
+        {
+            Debug.Log($"<color=orange>{enemyData.EnemyName}이(가) 힘을 모아 강력하게 내려찍습니다!</color>");
+            isCharging = false;
+
+            int chargedDamage = Mathf.RoundToInt(enemyData.Damage * 2.5f);
+            yield return StartCoroutine(AttackPlayer(chargedDamage, 1));
+
+            ChooseNextAction();
+            yield break;
+        }
 
         // 1. 이 적이 Elite 타입인지 확인
         if (enemyData.Category == EnemyType.Elite)
@@ -339,13 +361,29 @@ public class Enemy : MonoBehaviour
             switch (nextAction.actionType)
             {
                 case EnemyActionType.Attack:
-                    int randomDamage = Random.Range(1, enemyData.Damage + 1);
-                    yield return StartCoroutine(AttackPlayer(randomDamage, nextAction.hitCount));
+                    int damage = Mathf.RoundToInt(enemyData.Damage * nextAction.damageMultiplier);
+                    yield return StartCoroutine(AttackPlayer(damage, nextAction.hitCount));
                     break;
+
                 case EnemyActionType.Defend:
-                    int armorToGain = enemyData.Defense * 3;
+                    int armorToGain = Mathf.RoundToInt(enemyData.Defense * nextAction.defenseMultiplier);
                     GainArmor(armorToGain);
                     yield return new WaitForSeconds(1f);
+                    break;
+
+                case EnemyActionType.Charge:
+                    // '힘 모으기'는 보스만 가능하도록 안전장치를 추가합니다.
+                    if (enemyData.Category == EnemyType.Boss)
+                    {
+                        Debug.Log($"<color=yellow>{enemyData.EnemyName}이(가) 힘을 모으기 시작합니다...</color>");
+                        isCharging = true;
+                        yield return new WaitForSeconds(1f);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"{enemyData.EnemyName}은(는) Boss가 아니라 Charge 할 수 없습니다. 턴을 스킵합니다.");
+                        yield return new WaitForSeconds(1f);
+                    }
                     break;
             }
         }
