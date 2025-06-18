@@ -156,10 +156,15 @@ public class ShopManager : MonoBehaviour
 
     public void UpdatePlayerGoldUI()
     {
-        // ... (기존 코드와 동일) ...
+        // 1. 골드 텍스트 UI와 플레이어 인스턴스가 모두 존재하는지 확인합니다. (Null 오류 방지)
         if (playerGoldText != null && Player.Instance != null)
         {
-            playerGoldText.text = $"{Player.Instance.Gold}";
+            // 2. Player의 Gold(int) 값을 문자열(string)으로 변환하여 UI 텍스트에 할당합니다.
+            playerGoldText.text = Player.Instance.Gold.ToString();
+
+            // (선택) "100 G" 와 같이 단위를 붙이고 싶다면 아래처럼 사용할 수 있습니다.
+            // playerGoldText.text = $"{Player.Instance.Gold} G";
         }
     }
+
 }

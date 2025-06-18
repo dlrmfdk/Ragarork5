@@ -16,8 +16,8 @@ MonoBehaviour:
   color: 2
   rarity: 0
   displayName: "\uAD11\uC5ED\uC758 \uB8EC"
-  description: "\uBD89\uC740 \uB8EC\uC758 \uB370\uBBF8\uC9C0&\uD6A8\uACFC\uB97C \uAD11\uC5ED\uC73C\uB85C
-    \uC785\uD799\uB2C8\uB2E4."
+  description: "\uBD89\uC740 \uB8EC\uC758 \uB370\uBBF8\uC9C0&\uD6A8\uACFC\uB97C\n
+    \uAD11\uC5ED\uC73C\uB85C \uC785\uD799\uB2C8\uB2E4."
   icon: {fileID: 21300000, guid: 731656c13aab04f42bc2a9e3576c0e3a, type: 3}
   isBasicRune: 1
   initialDeckCount: 1

@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: Elite
   enemyPrefab: {fileID: 4438356569790596326, guid: 9dcc337edb579d24daed9647d51ef5df, type: 3}
-  hp: 100
+  hp: 70
   damage: 12
-  defense: 5
+  defense: 1
   category: 1
   actionPatterns:
   - {fileID: 11400000, guid: b58a2d9814d50b148a22ed19387829da, type: 2}

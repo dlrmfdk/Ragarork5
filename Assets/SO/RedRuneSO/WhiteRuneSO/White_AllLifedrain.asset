@@ -16,7 +16,7 @@ MonoBehaviour:
   color: 2
   rarity: 0
   displayName: "\uCC29\uCDE8\uC758 \uB8EC"
-  description: "\uC785\uD78C \uCD1D \uD53C\uD574\uB7C9\uB9CC\uD07C \uCCB4\uB825\uC744
+  description: "\uC785\uD78C \uCD1D \uD53C\uD574\uB7C9\uB9CC\uD07C\n \uCCB4\uB825\uC744
     \uD68C\uBCF5\uD569\uB2C8\uB2E4."
   icon: {fileID: 21300000, guid: 1a862a305a44ca64e939c2b35b24e829, type: 3}
   isBasicRune: 1
