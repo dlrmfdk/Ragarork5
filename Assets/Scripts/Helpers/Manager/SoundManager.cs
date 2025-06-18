@@ -17,7 +17,8 @@ public enum SfxType
     // UI 및 기타
     ButtonClick,
     RuneSelect,
-    CardDraw
+    CardDraw,
+    AtkBtn
 }
 
 // 효과음 종류와 실제 오디오 클립을 연결하는 데이터 구조

@@ -17,7 +17,7 @@ MonoBehaviour:
   rarity: 0
   displayName: "\uC790\uD574\uC758 \uB8EC"
   description: "\uD134 \uC885\uB8CC \uC2DC 3\uC758 \uD53C\uD574\uB97C \uBC1B\uC2B5\uB2C8\uB2E4."
-  icon: {fileID: 21300000, guid: 611a5e51eef69b84e904052ef8c47138, type: 3}
+  icon: {fileID: 21300000, guid: f44bf062172d59b4db02b29c751aa67f, type: 3}
   isBasicRune: 0
   initialDeckCount: 0
   effectSO: {fileID: 11400000, guid: 5a2df20742094f24182a02ade0d40ba7, type: 2}

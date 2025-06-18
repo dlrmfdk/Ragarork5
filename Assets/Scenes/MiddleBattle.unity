@@ -1702,13 +1702,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ee1ac87c9cdd954bbec8242a6be7717, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  normalEnemyList:
-  - {fileID: 11400000, guid: a06cc595cf5bab548a37a6fb45503a34, type: 2}
-  - {fileID: 11400000, guid: 0ab59ade5bf6f1d45bf03e0865e44dd4, type: 2}
-  eliteEnemyList: []
+  normalEnemyList: []
+  eliteEnemyList:
+  - {fileID: 11400000, guid: 20efe1446ca642945b73cb0223de80d9, type: 2}
   bossEnemyList: []
   minEnemiesToSpawn: 1
-  maxEnemiesToSpawn: 3
+  maxEnemiesToSpawn: 1
   hpBarPrefab: {fileID: 6600664751540032184, guid: 62ab91ef05d74b1468a8a6ab3ac8ceb1, type: 3}
   initialSpawnXPosition: 18
   spawnYPosition: -2

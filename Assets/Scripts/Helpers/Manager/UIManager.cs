@@ -226,28 +226,65 @@ public class UIManager : MonoBehaviour
         if (redButton != null)
         {
             redButton.onClick.RemoveAllListeners();
-            if (onDeckClick != null) redButton.onClick.AddListener(() => onDeckClick(RuneColor.Red));
+            if (onDeckClick != null)
+            {
+                // ▼▼▼ 수정: 클릭 시 사운드 재생 후 원래 기능 실행 ▼▼▼
+                redButton.onClick.AddListener(() =>
+                {
+                    SoundManager.Instance.PlaySfx(SfxType.RuneSelect); // 사운드 재생
+                    onDeckClick(RuneColor.Red);                      // 원래 기능 호출
+                });
+            }
         }
         if (blueButton != null)
         {
             blueButton.onClick.RemoveAllListeners();
-            if (onDeckClick != null) blueButton.onClick.AddListener(() => onDeckClick(RuneColor.Blue));
+            if (onDeckClick != null)
+            {
+                // ▼▼▼ 수정 ▼▼▼
+                blueButton.onClick.AddListener(() =>
+                {
+                    SoundManager.Instance.PlaySfx(SfxType.RuneSelect);
+                    onDeckClick(RuneColor.Blue);
+                });
+            }
         }
         if (whiteButton != null)
         {
             whiteButton.onClick.RemoveAllListeners();
-            if (onDeckClick != null) whiteButton.onClick.AddListener(() => onDeckClick(RuneColor.White));
+            if (onDeckClick != null)
+            {
+                // ▼▼▼ 수정 ▼▼▼
+                whiteButton.onClick.AddListener(() =>
+                {
+                    SoundManager.Instance.PlaySfx(SfxType.RuneSelect);
+                    onDeckClick(RuneColor.White);
+                });
+            }
         }
         if (yellowButton != null)
         {
             yellowButton.onClick.RemoveAllListeners();
-            if (onDeckClick != null) yellowButton.onClick.AddListener(() => onDeckClick(RuneColor.Yellow));
+            if (onDeckClick != null)
+            {
+                // ▼▼▼ 수정 ▼▼▼
+                yellowButton.onClick.AddListener(() =>
+                {
+                    SoundManager.Instance.PlaySfx(SfxType.RuneSelect);
+                    onDeckClick(RuneColor.Yellow);
+                });
+            }
         }
 
         if (drawButton != null)
         {
             drawButton.onClick.RemoveAllListeners();
-            if (onDrawClick != null) drawButton.onClick.AddListener(() => onDrawClick());
+            // (선택) 뽑기 버튼에도 사운드를 추가하고 싶다면 여기도 위와 같이 수정
+            
+            if (onDrawClick != null) drawButton.onClick.AddListener(() => {
+                SoundManager.Instance.PlaySfx(SfxType.AtkBtn);
+                onDrawClick();
+            }); 
         }
     }
 

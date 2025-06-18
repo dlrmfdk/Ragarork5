@@ -183,8 +183,6 @@ MonoBehaviour:
   finalNodeData:
   - {fileID: 11400000, guid: a4deefdba6121ec43ba0d2508d9264d6, type: 2}
   fixedNodeData:
-  - nodeData: {fileID: 11400000, guid: 4a8facd8b415688448a107de4976dc21, type: 2}
-    appearedOn: 6
   - nodeData: {fileID: 11400000, guid: eb0499932e1320d4f8985f1e9a5b6f37, type: 2}
     appearedOn: 13
   - nodeData: {fileID: 11400000, guid: eb0499932e1320d4f8985f1e9a5b6f37, type: 2}
@@ -201,14 +199,14 @@ MonoBehaviour:
     appearedAfter: 2
     reverseAppearedAfter: 0
   - nodeData: {fileID: 11400000, guid: e9b6002ed4bcd454993e0c31d3781c46, type: 2}
-    serializable: 0
+    serializable: 1
     chance: 0.3
     appearedAfter: 2
     reverseAppearedAfter: 0
   - nodeData: {fileID: 11400000, guid: 8c4236faeedba8040a486d94bf159dbe, type: 2}
-    serializable: 0
-    chance: 0.2
-    appearedAfter: 7
+    serializable: 1
+    chance: 0.1
+    appearedAfter: 2
     reverseAppearedAfter: 0
 --- !u!4 &373360284
 Transform:
@@ -337,7 +335,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &724637379
 RectTransform:
   m_ObjectHideFlags: 0
@@ -598,7 +596,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &906601082
 RectTransform:
   m_ObjectHideFlags: 0

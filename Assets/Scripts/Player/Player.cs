@@ -229,6 +229,7 @@ public class Player : MonoBehaviour
         // ▼▼▼ 여기에 적 공격 사운드 재생 코드를 추가합니다. ▼▼▼
         SoundManager.Instance.PlaySfx(SfxType.EnemyAttack);
         // ▲▲▲ 추가 완료 ▲▲▲
+
         int damageToShield = Mathf.Min(currentDefense, damage);
         currentDefense -= damageToShield;
         int damageToHealth = damage - damageToShield;

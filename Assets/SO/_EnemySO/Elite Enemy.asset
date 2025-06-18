@@ -14,11 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: Elite
   enemyPrefab: {fileID: 4438356569790596326, guid: 9dcc337edb579d24daed9647d51ef5df, type: 3}
-  hp: 10
-  damage: 20
-  defense: 2
+  hp: 100
+  damage: 12
+  defense: 5
   category: 1
   actionPatterns:
   - {fileID: 11400000, guid: b58a2d9814d50b148a22ed19387829da, type: 2}
   - {fileID: 11400000, guid: b58a2d9814d50b148a22ed19387829da, type: 2}
+  - {fileID: 11400000, guid: 873515a8aa027014497d8e83d1bb7a46, type: 2}
   penaltyRune: {fileID: 11400000, guid: 1bacbf137e1368d438b2a4c86025d3b3, type: 2}

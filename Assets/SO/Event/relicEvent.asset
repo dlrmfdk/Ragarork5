@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: Relic
   eventDescription: "\uB2F9\uC2E0\uC758 \uC55E\uC5D0 \uC720\uBB3C\uC774 \uC788\uC2B5\uB2C8\uB2E4.
     \uAC00\uC838\uAC00\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?"
-  eventImage: {fileID: 21300000, guid: ef2ec7e4e87357645873225886dcaacd, type: 3}
+  eventImage: {fileID: 21300000, guid: 497a766b1a831cc439b1f62411906809, type: 3}
   choices:
   - choiceDescription: "\uC720\uBB3C\uC744 \uAC00\uC838\uAC04\uB2E4."
     guaranteedOutcomes: []

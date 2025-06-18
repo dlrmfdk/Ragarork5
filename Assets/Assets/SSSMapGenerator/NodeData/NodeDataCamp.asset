@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e032077a4a20bcb40a43996aa978f1cd, type: 3}
   m_Name: NodeDataCamp
   m_EditorClassIdentifier: 
-  sprite: {fileID: 1834174218, guid: 9f5b7fbd25ba9fd42bd40193ef321153, type: 3}
+  sprite: {fileID: 21300000, guid: 93dbc8f96dc6c00418ba8f1a8e8992e4, type: 3}
   type: 2
   nodeName: Camp

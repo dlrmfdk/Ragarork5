@@ -239,7 +239,7 @@ namespace S3MG{
         void handleMiddle(){
 			Debug.Log("Midpoint");
             MapGenerator.instance.inactiveMap();  // ∏  ∫Ò»∞º∫»≠
-            SceneManager.LoadScene("sampleScene");
+            SceneManager.LoadScene("MiddleBattle");
         }
 
 		void handleFinal(){
