@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
@@ -289,9 +290,35 @@ public class UIManager : MonoBehaviour
         if (yellowCountText != null && counts.ContainsKey(RuneColor.Yellow)) yellowCountText.text = counts[RuneColor.Yellow].ToString();
     }
 
-    // UIManager.cs
+    void OnEnable()
+    {
+        // 씬 로드 이벤트를 구독합니다.
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
 
-    // UIManager.cs
+    void OnDisable()
+    {
+        // 씬 로드 이벤트 구독을 해제합니다.
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    /// <summary>
+    /// 새로운 씬이 로드될 때마다 호출되는 함수입니다.
+    /// </summary>
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // 로드된 씬의 이름에 "Battle"이 포함되어 있다면,
+        if (scene.name.Contains("Battle"))
+        {
+            // 전투 UI를 활성화합니다.
+            ShowRuneUI();
+        }
+        else
+        {
+            // 전투 씬이 아니라면 (예: 맵 씬), 전투 UI를 비활성화합니다.
+            HideRuneUI();
+        }
+    }
 
     public void UpdateCentralSlotsWithInstances(List<RuneInstance> selectedInstances)
     {

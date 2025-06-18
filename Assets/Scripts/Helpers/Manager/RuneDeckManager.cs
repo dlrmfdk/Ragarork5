@@ -198,7 +198,7 @@ public class RuneDeckManager : MonoBehaviour
   
 
     #region Effect Execution
-    // RuneDeckManager.cs
+
 
     private void ExecuteAoeRuneLogic()
     {
@@ -468,7 +468,6 @@ public class RuneDeckManager : MonoBehaviour
         RefreshUI();
     }
 
-    // RuneDeckManager.cs 에 추가
 
     /// <summary>
     /// 턴 종료 시, 핸드에 있는 모든 패널티 룬의 효과를 발동시키고 제거합니다.

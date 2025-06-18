@@ -8567,12 +8567,12 @@ Transform:
   m_GameObject: {fileID: 1564072184}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1673.6014, y: 997.25946, z: 0}
-  m_LocalScale: {x: 1.6475011, y: 1.6475011, z: 1.6475011}
+  m_LocalPosition: {x: 999.2523, y: 604.5864, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 127811976}
-  m_Father: {fileID: 1684189470}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1573186473
 GameObject:
@@ -8897,7 +8897,6 @@ MonoBehaviour:
   defsound: {fileID: 8300000, guid: edd50c3baf3d74b4d80fe0c058c8adee, type: 3}
   diesound: {fileID: 8300000, guid: fd5f1ad80c8b1244bbd1bfaaa4e8235f, type: 3}
   playerHpBarPrefab: {fileID: 741287261904009476, guid: b31844bc5070d1d4da9167903f60131b, type: 3}
-  hpBarOffset: {x: 0, y: -260, z: 0}
 --- !u!114 &1684189467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9009,8 +9008,7 @@ Transform:
   m_LocalPosition: {x: -16.59, y: -0.73, z: 0}
   m_LocalScale: {x: 0.60697985, y: 0.60697985, z: 0.60697985}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1564072186}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1711405797
@@ -10887,5 +10885,6 @@ SceneRoots:
   - {fileID: 1207511928}
   - {fileID: 43886817}
   - {fileID: 1241220632}
+  - {fileID: 1564072186}
   - {fileID: 1684189470}
   - {fileID: 929023032}

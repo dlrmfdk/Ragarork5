@@ -246,13 +246,16 @@ namespace S3MG{
 			switch(nodeText.text){
 				case "Boss01" :
 					Debug.Log("Fight the Boss 01");
-					break;
+                  
+                    break;
 				case "Boss02" :
 					Debug.Log("Fight the Boss 02");
 					break;
 				default :
 					Debug.Log("Fight the Boss 03");
-					break;
+                    MapGenerator.instance.inactiveMap();  // ∏  ∫Ò»∞º∫»≠
+                    SceneManager.LoadScene("BossBattle");
+                    break;
 			}
 		}
 

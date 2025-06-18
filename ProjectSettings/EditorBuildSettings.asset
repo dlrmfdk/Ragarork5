@@ -26,4 +26,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/RandomEvent.unity
     guid: 66b08d229f18923439b8ae9ccc3c7b07
+  - enabled: 1
+    path: Assets/Scenes/BossBattle.unity
+    guid: f09676d808653d646bd096b2fb7e0b73
   m_configObjects: {}

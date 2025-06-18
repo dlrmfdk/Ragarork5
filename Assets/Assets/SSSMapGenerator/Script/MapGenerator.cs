@@ -765,7 +765,8 @@ namespace S3MG{
 		public void activeMap(){
 			noMapOperation = false;
 			mapCanvas.SetActive(true);
-		}
+          
+        }
 
 		/*------------------------------------------------------------
 		Deactivate map : for operations from external classes

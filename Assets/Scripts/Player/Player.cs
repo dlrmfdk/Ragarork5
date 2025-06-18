@@ -55,7 +55,7 @@ public class Player : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            //DontDestroyOnLoad(gameObject);
             Debug.Log("[Player.Awake] Player 인스턴스 설정 및 DontDestroyOnLoad 적용됨.");
 
             // 최초 실행 시 현재 공격력을 기본 공격력으로 설정

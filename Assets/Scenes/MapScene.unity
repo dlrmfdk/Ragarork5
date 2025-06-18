@@ -181,7 +181,7 @@ MonoBehaviour:
   gamepadSensitive: 2
   startNodeData: {fileID: 11400000, guid: a5dd8b8215095554389f88a22f71c641, type: 2}
   finalNodeData:
-  - {fileID: 11400000, guid: a818ae8d6a172ab4bb739849eb4508b0, type: 2}
+  - {fileID: 11400000, guid: a4deefdba6121ec43ba0d2508d9264d6, type: 2}
   fixedNodeData:
   - nodeData: {fileID: 11400000, guid: 4a8facd8b415688448a107de4976dc21, type: 2}
     appearedOn: 6
