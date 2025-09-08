@@ -94,7 +94,6 @@ public class RewardManager : MonoBehaviour
         }
     }
 
-    // ▼▼▼ 이 함수를 수정합니다 ▼▼▼
     private void OpenRuneRewardPanel()
     {
         if (hasClaimedRuneReward)
@@ -167,11 +166,13 @@ public class RewardManager : MonoBehaviour
         }
         RuneRewardPanel.SetActive(true);
     }
-    // ▲▲▲ 함수 수정 완료 ▲▲▲
+
 
 
     private void OnRuneOptionChosen(RuneSO chosenRewardRune)
     {
+        UIManager.Instance.HideRuneTooltip();
+
         this.selectedRewardRune = chosenRewardRune; // 1. 선택한 보상 룬을 기억합니다.
         RuneRewardPanel?.SetActive(false); // 보상 선택창은 닫습니다.
 

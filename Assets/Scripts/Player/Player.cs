@@ -252,6 +252,16 @@ public class Player : MonoBehaviour
         UpdateAllUI();
     }
 
+    /// <summary>
+    /// 방어도를 0으로 초기화하고 UI를 업데이트합니다.
+    /// </summary>
+    public void ResetDefense()
+    {
+        currentDefense = 0;
+        Debug.Log("[Player] 턴 시작 시 방어도를 초기화합니다.");
+        UpdateAllUI(); // HP 바의 방어 수치를 갱신하기 위해 호출
+    }
+ 
     public void IncreaseAttack(float amount)
     {
         attackPower += (int)amount;

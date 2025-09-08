@@ -17,7 +17,7 @@ public class HpBarController : MonoBehaviour
     [Header("방어도(Defense) 슬라이더")]
     [SerializeField] private Slider defenseSlider;
     
-    private Vector3 offset = new Vector3(0, -20f, 0);
+    private Vector3 offset = new Vector3(0, -40f, 0);
     private Transform targetTransform;
     private Camera mainCamera;
     private Canvas canvas;

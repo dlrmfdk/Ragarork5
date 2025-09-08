@@ -99,6 +99,12 @@ public class TurnManager : MonoBehaviour
     private IEnumerator PlayerTurn()
     {
         Debug.Log("[PlayerTurn] 시작");
+        // 턴 시작 시 플레이어의 방어도를 초기화합니다.
+        if (Player.Instance != null)
+        {
+            Player.Instance.ResetDefense();
+        }
+
         isLoading = true;
         myTurn = true;
         OnTurnStarted?.Invoke(myTurn);

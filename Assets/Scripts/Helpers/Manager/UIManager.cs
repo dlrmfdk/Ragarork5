@@ -26,7 +26,7 @@ public class UIManager : MonoBehaviour
         }
         Instance = this;
 
-        // ▼▼▼ 추가: 시작할 때 툴팁 RectTransform을 미리 가져오기 ▼▼▼
+        // 시작할 때 툴팁 RectTransform을 미리 가져오기
         if (runeTooltipPanel != null)
         {
             tooltipRect = runeTooltipPanel.GetComponent<RectTransform>();
@@ -54,7 +54,7 @@ public class UIManager : MonoBehaviour
         if (drawButton != null) drawButton.interactable = false; // null 체크 추가
         if (rerollButton != null) rerollButton.interactable = false; // null 체크 추가
 
-        // ▼▼▼ 수정: 시작할 때 툴팁 숨기기 ▼▼▼
+        //시작할 때 툴팁 숨기기
         HideRuneTooltip();
 
         Debug.Log($"[UIManager.Start] UIManager '{this.gameObject.name}' Start() 호출됨. OnUIManagerReady 이벤트 발생 시도. 현재 Instance: {(Instance == null ? "null" : Instance.gameObject.name)}");
