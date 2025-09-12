@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6211085066179615593
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7774764771261994852}
+  - component: {fileID: 3789990626445393997}
+  m_Layer: 0
+  m_Name: RuneDeckManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7774764771261994852
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6211085066179615593}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 994.158, y: 547.208, z: -1.7179462}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3789990626445393997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6211085066179615593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3bb0699326e8e7418000f0edc550096, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  runeDefinitions:
+  - {fileID: 11400000, guid: 432ec8dca1b56a446a5d6db591591187, type: 2}
+  - {fileID: 11400000, guid: 643d762ea48d3d04fb7505103d9065f6, type: 2}
+  - {fileID: 11400000, guid: 2043cb756ad1e8046b119e61a3df90e5, type: 2}
+  - {fileID: 11400000, guid: d7761ab319348ce47a559f2fb896f765, type: 2}
+  - {fileID: 11400000, guid: 3a485e040736c4a4da0cbba87163b52e, type: 2}
+  - {fileID: 11400000, guid: 360e6a6df2cffb24a925415cf8ebd82e, type: 2}
+  - {fileID: 11400000, guid: 1022722c004f76a4187fb690e684f4bc, type: 2}
+  - {fileID: 11400000, guid: 2873881036d0fb440a3fe42f6eeab574, type: 2}
+  - {fileID: 11400000, guid: 7bd3f3f9dc2e5534fb4fb2546d2ecde5, type: 2}
+  - {fileID: 11400000, guid: 3d4ddefec1d5c98449b9f85aa571bdc3, type: 2}
+  - {fileID: 11400000, guid: 1bacbf137e1368d438b2a4c86025d3b3, type: 2}
+  - {fileID: 11400000, guid: 13a58c87315af91478650ce1100757c2, type: 2}
+  aoeRuneSO: {fileID: 11400000, guid: 2873881036d0fb440a3fe42f6eeab574, type: 2}
+  lifestealRuneSO: {fileID: 11400000, guid: 7bd3f3f9dc2e5534fb4fb2546d2ecde5, type: 2}
+  isUIManagerReady: 0

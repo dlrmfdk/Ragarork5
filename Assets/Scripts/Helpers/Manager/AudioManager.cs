@@ -1,44 +1,29 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-    public AudioClip bgmClip; // Inspector에서 BGM 파일을 연결할 변수
-    private AudioSource audioSource;
+    // 이 씬에서 재생할 BGM 파일을 Inspector에서 연결합니다.
+    public AudioClip bgmClip;
 
-    void Awake()
-    {
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
-
-        // AudioSource 설정
-        audioSource.clip = bgmClip;
-        audioSource.loop = true; // BGM 반복 재생
-        audioSource.playOnAwake = true;
-
-    }
-
-    // Start is called before the first frame update
     void Start()
     {
-        PlayBGM();
-    }
-
-    public void PlayBGM()
-    {
-        if (audioSource != null && bgmClip != null)
+        // 중앙 SoundManager가 있는지, BGM 클립이 할당되었는지 확인합니다.
+        if (SoundManager.Instance != null && bgmClip != null)
         {
-            audioSource.Play();
+            // AudioManager가 직접 재생하는 대신, SoundManager에게 BGM 재생을 '요청'합니다.
+            SoundManager.Instance.PlayBgm(bgmClip);
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
+        else
+        {
+            // 문제가 있을 경우 원인을 파악하기 쉽도록 로그를 남깁니다.
+            if (SoundManager.Instance == null)
+            {
+                Debug.LogError("SoundManager 인스턴스를 찾을 수 없습니다! 씬에 SoundManager가 있는지 확인해주세요.");
+            }
+            if (bgmClip == null)
+            {
+                Debug.LogWarning("AudioManager에 bgmClip이 할당되지 않았습니다.", this.gameObject);
+            }
+        }
     }
 }

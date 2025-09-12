@@ -67,6 +67,12 @@ public class SoundManager : MonoBehaviour
         sfxSource.loop = false;
         sfxSource.playOnAwake = false;
 
+        // ▼▼▼ 추가된 부분 시작 ▼▼▼
+        // 게임 시작 시 저장된 볼륨 값을 불러와서 적용
+        LoadVolumeSettings();
+        // ▲▲▲ 추가된 부분 끝 ▲▲▲
+
+
         // 인스펙터에서 설정한 리스트를 딕셔너리로 변환
         sfxDictionary = new Dictionary<SfxType, AudioClip>();
         foreach (var mapping in sfxMappings)
@@ -74,6 +80,47 @@ public class SoundManager : MonoBehaviour
             sfxDictionary[mapping.type] = mapping.clip;
         }
     }
+    // ▼▼▼ 아래 함수들이 새로 추가되었습니다 ▼▼▼
+
+    /// <summary>
+    /// BGM 볼륨을 설정합니다. (0.0 ~ 1.0)
+    /// </summary>
+    public void SetBGMVolume(float volume)
+    {
+        if (bgmSource != null)
+        {
+            bgmSource.volume = volume;
+            PlayerPrefs.SetFloat("BGMVolume", volume); // 변경된 값을 저장
+        }
+    }
+
+    /// <summary>
+    /// SFX 볼륨을 설정합니다. (0.0 ~ 1.0)
+    /// </summary>
+    public void SetSFXVolume(float volume)
+    {
+        if (sfxSource != null)
+        {
+            sfxSource.volume = volume;
+            PlayerPrefs.SetFloat("SFXVolume", volume); // 변경된 값을 저장
+        }
+    }
+
+    /// <summary>
+    /// PlayerPrefs에 저장된 볼륨 설정을 불러옵니다.
+    /// </summary>
+    private void LoadVolumeSettings()
+    {
+        // 저장된 BGM 볼륨 값을 불러와 적용 (저장된 값이 없으면 기본값 1.0)
+        float bgmVolume = PlayerPrefs.GetFloat("BGMVolume", 1.0f);
+        if (bgmSource != null) bgmSource.volume = bgmVolume;
+
+        // 저장된 SFX 볼륨 값을 불러와 적용 (저장된 값이 없으면 기본값 1.0)
+        float sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 1.0f);
+        if (sfxSource != null) sfxSource.volume = sfxVolume;
+    }
+    // ▲▲▲ 여기까지가 새로 추가된 함수들입니다 ▲▲▲
+
 
     /// <summary>
     /// 지정된 효과음을 한 번 재생합니다.
