@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6836066062660206258}
   - component: {fileID: 2318624554937994576}
   - component: {fileID: 3335426122473060471}
+  - component: {fileID: 1932815127918296495}
   m_Layer: 0
   m_Name: Spine GameObject (2S_Boss)
   m_TagString: Untagged
@@ -75,7 +76,6 @@ MeshRenderer:
   - {fileID: 2100000, guid: 375aab68e99e3cf4a957e5eef4802185, type: 2}
   - {fileID: 2100000, guid: ac68900a6a51590438e4591ff8094792, type: 2}
   - {fileID: 2100000, guid: 375aab68e99e3cf4a957e5eef4802185, type: 2}
-  - {fileID: 2100000, guid: ac68900a6a51590438e4591ff8094792, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -137,6 +137,20 @@ MonoBehaviour:
   physicsMovementRelativeTo: {fileID: 0}
   updateTiming: 1
   unscaledTime: 0
-  _animationName: 
+  _animationName: IDLE
   loop: 1
   timeScale: 1
+--- !u!114 &1932815127918296495
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1187102138996949967}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e0a5b038c3f1e047bcb6d93cb35e6d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  intentUIPrefab: {fileID: 7042012639575575165, guid: 69079e68d82e3114db7d45e1f60220ee, type: 3}
+  effectOffset: {x: -1.5, y: 1, z: 0}
