@@ -1,0 +1,13 @@
+2S_Boss_Summoner.png
+size:1634,1272
+filter:Linear,Linear
+fireball
+bounds:874,727,544,759
+rotate:90
+sprite1
+bounds:1,146,828,699
+sprite2
+bounds:830,1,786,725
+sprite3
+bounds:1,846,425,872
+rotate:90
