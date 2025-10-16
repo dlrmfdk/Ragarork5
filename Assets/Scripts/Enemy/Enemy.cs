@@ -252,10 +252,6 @@ public class Enemy : MonoBehaviour
 
         EnemySpawner.Instance.SpawnedEnemies.Remove(this);
 
-        if (EnemySpawner.Instance.SpawnedEnemies.Count == 0)
-        {
-            RewardManager.Instance.ShowRewardPanel();
-        }
 
         if (intentUIInstance != null)
         {

@@ -15,6 +15,9 @@ public class RuneDeckManager : MonoBehaviour
     [Header("룬 정의 SO 리스트")]
     public List<RuneSO> runeDefinitions;
 
+    // ▼▼▼ 1. 모든 룬 정보를 이름으로 빠르게 찾을 수 있는 사전을 만듭니다. ▼▼▼
+    private Dictionary<string, RuneSO> runeDefinitionMap;
+
     [Header("특별 룬 SO")]
     [SerializeField] private RuneSO aoeRuneSO;
     [SerializeField] private RuneSO lifestealRuneSO;
@@ -34,6 +37,10 @@ public class RuneDeckManager : MonoBehaviour
         if (Instance == null)
         { Instance = this;
            DontDestroyOnLoad(gameObject);
+
+            // ▼▼▼ Awake에서 사전을 미리 채워넣는 함수를 호출합니다. ▼▼▼
+            InitializeRuneMap();
+
             // ▼▼▼ 게임 실행 후 딱 한 번만 실행되는 로직 ▼▼▼
             // 아직 한 번도 실행되지 않았을 때만 (자물쇠가 열려있을 때만)
             if (!hasDeletedSaveOnLaunch)
@@ -56,6 +63,37 @@ public class RuneDeckManager : MonoBehaviour
         discardPile = new List<RuneInstance>();
         selections = new List<RuneInstance>(new RuneInstance[5]);
         LoadDeckState();
+    }
+
+    // ▼▼▼ 3. 사전을 초기화하는 함수를 새로 추가합니다. ▼▼▼
+    private void InitializeRuneMap()
+    {
+        runeDefinitionMap = new Dictionary<string, RuneSO>();
+        if (runeDefinitions == null) return; // 리스트가 비어있으면 실행하지 않음
+
+        foreach (var runeSO in runeDefinitions)
+        {
+            if (runeSO != null && !runeDefinitionMap.ContainsKey(runeSO.name))
+            {
+                // 룬의 파일 이름(고유 ID)을 Key로, 룬 데이터(SO)를 Value로 저장합니다.
+                runeDefinitionMap.Add(runeSO.name, runeSO);
+            }
+        }
+        Debug.Log($"[RuneDeckManager] {runeDefinitionMap.Count}개의 룬 정보를 사전에 등록했습니다.");
+    }
+
+    // ▼▼▼ 4. RuneInstance가 호출할 '룬 ID로 설계도 찾아주기' 함수를 추가합니다. ▼▼▼
+    public RuneSO FindRuneSOById(string id)
+    {
+        // 사전에 해당 ID가 있는지 확인하고, 있으면 바로 반환합니다.
+        if (runeDefinitionMap != null && runeDefinitionMap.TryGetValue(id, out RuneSO so))
+        {
+            return so;
+        }
+
+        // 사전에 없다면, 어떤 ID가 문제인지 정확히 알려줍니다.
+        Debug.LogError($"[RuneDeckManager] ID가 '{id}'인 RuneSO를 찾을 수 없습니다! runeDefinitions 리스트에 등록되어 있는지 확인해주세요.");
+        return null;
     }
 
     void OnEnable() { UIManager.OnUIManagerReady += HandleUIManagerReady; }

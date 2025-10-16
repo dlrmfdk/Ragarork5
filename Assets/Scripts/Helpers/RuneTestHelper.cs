@@ -31,6 +31,22 @@ public class RuneTestHelper : MonoBehaviour
                 TurnManager.Inst.EndTurn();
             }
         }
+        // ▼▼▼ 여기에 코드를 추가하세요 ▼▼▼
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            // 1. Player 인스턴스가 존재하는지 확인합니다.
+            if (Player.Instance != null)
+            {
+                // 2. Player의 AddGold 함수를 호출하여 100을 더해줍니다.
+                Player.Instance.AddGold(100);
+                Debug.Log("<color=green>[Rune Test Key - 알파 4] 플레이어에게 골드 100을 추가했습니다.</color>");
+            }
+            else
+            {
+                Debug.LogWarning("[Rune Test Key - 알파 4] Player 인스턴스를 찾을 수 없어 골드를 추가할 수 없습니다.");
+            }
+        }
+        // ▲▲▲ 코드 추가 완료 ▲▲▲
 #endif
     }
 

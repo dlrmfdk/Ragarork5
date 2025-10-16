@@ -86,27 +86,27 @@ public class ShopManager : MonoBehaviour
         }
     }
 
-    // ▼▼▼ 구매 로직을 완전히 새로 작성합니다. ▼▼▼
+    /// <summary>
+    /// (1단계) 룬 구매를 시도하고 강화 재료가 있는지 확인합니다.
+    /// </summary>
     public void AttemptPurchase(RuneSO rune, int price, ShopItemUI itemUI)
     {
         // 1. 골드가 충분한지 확인
         if (Player.Instance.Gold < price)
         {
             Debug.Log("골드가 부족합니다!");
-            // 여기에 골드 부족 알림 UI를 띄워줄 수 있습니다.
             return;
         }
 
-        // 2. 강화할 수 있는 같은 색의 기본 룬이 있는지 확인
+        // 2. 강화할 수 있는 같은 색의 '기본 룬'이 있는지 확인
         var basicRunes = RuneDeckManager.Instance.GetBasicRunesByColor(rune.color);
         if (basicRunes.Count == 0)
         {
             Debug.Log($"강화할 수 있는 {rune.color}색 기본 룬이 없습니다.");
-            // 여기에 알림 UI를 띄워줄 수 있습니다.
             return;
         }
 
-        // 3. 모든 조건이 충족되면, 구매 절차 시작
+        // 3. 모든 조건이 충족되면, 구매 정보를 임시 변수에 저장하고 강화 절차를 시작
         this.runeToPurchase = rune;
         this.purchasePrice = price;
         this.purchasingItemUI = itemUI;
@@ -115,17 +115,19 @@ public class ShopManager : MonoBehaviour
         ShowShopEnhancementPanel(basicRunes);
     }
 
+    /// <summary>
+    /// (2단계) 강화할 기본 룬을 선택하는 UI를 엽니다. (RewardManager 로직과 동일)
+    /// </summary>
     private void ShowShopEnhancementPanel(List<RuneInstance> basicRunes)
     {
         if (enhancementPanel == null || enhancementSlots == null) return;
 
-        // RewardManager의 ShowEnhancementPanel과 거의 동일한 로직
         for (int i = 0; i < enhancementSlots.Count; i++)
         {
             if (i < basicRunes.Count)
             {
                 enhancementSlots[i].gameObject.SetActive(true);
-                // 슬롯 UI에 룬 정보와, '클릭 시 이 함수를 실행하라'는 명령(콜백)을 함께 전달
+                // 슬롯 UI에 룬 정보와, '클릭 시 OnBasicRuneSelectedForPurchase 함수를 실행하라'는 명령(콜백)을 함께 전달
                 enhancementSlots[i].Setup(basicRunes[i], OnBasicRuneSelectedForPurchase);
             }
             else
@@ -136,23 +138,24 @@ public class ShopManager : MonoBehaviour
         enhancementPanel.SetActive(true);
     }
 
-    // 플레이어가 강화할 기본 룬을 최종 선택했을 때 호출될 함수
+    /// <summary>
+    /// (3단계) 플레이어가 강화할 기본 룬을 최종 선택했을 때 호출될 함수
+    /// </summary>
     private void OnBasicRuneSelectedForPurchase(RuneInstance chosenBasicRune)
     {
-        // 1. 골드 차감
+        // 1. 골드를 차감합니다.
         Player.Instance.SpendGold(this.purchasePrice);
 
-        // 2. 룬 강화 실행
+        // 2. RuneDeckManager에 룬 강화를 요청합니다.
         RuneDeckManager.Instance.EnhanceRune(chosenBasicRune, this.runeToPurchase);
 
-        // 3. UI 처리
-        enhancementPanel.SetActive(false); // 강화 패널 닫기
-        purchasingItemUI.MarkAsSold(); // 구매한 아이템을 '판매 완료'로 표시
-        UpdatePlayerGoldUI(); // 골드 UI 업데이트
+        // 3. 모든 UI를 최종 처리합니다.
+        enhancementPanel.SetActive(false);      // 강화 패널 닫기
+        purchasingItemUI.MarkAsSold();          // 구매한 아이템을 '판매 완료'로 표시
+        UpdatePlayerGoldUI();                   // 골드 UI 업데이트
 
-        Debug.Log($"{runeToPurchase.displayName}으로 강화 완료!");
+        Debug.Log($"구매 및 강화 완료: '{chosenBasicRune.SO.displayName}' -> '{runeToPurchase.displayName}'");
     }
-    // ▲▲▲ 로직 작성 완료 ▲▲▲
 
     public void UpdatePlayerGoldUI()
     {

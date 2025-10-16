@@ -58,9 +58,11 @@ public class RuneInstance
     {
         get
         {
+            // ▼▼▼ 이 부분을 수정하세요 ▼▼▼
             if (_so == null && RuneDeckManager.Instance != null)
             {
-                _so = RuneDeckManager.Instance.runeDefinitions.Find(r => r.name == runeId);
+                // 기존의 느린 Find 대신, 빠르고 안정적인 사전 검색 기능을 사용합니다.
+                _so = RuneDeckManager.Instance.FindRuneSOById(runeId);
             }
             return _so;
         }

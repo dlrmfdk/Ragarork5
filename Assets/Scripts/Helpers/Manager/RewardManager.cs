@@ -72,7 +72,7 @@ public class RewardManager : MonoBehaviour
         if (mapButton != null) mapButton.gameObject.SetActive(false);   // 다음 맵으로 가는 버튼 숨기기
     }
 
-    public void ShowRewardPanel()
+    public void ShowRewardPanel() //보상 창 활성화
     {
         // 1. 보상 획득 상태 초기화
         hasClaimedRuneReward = false;
@@ -84,7 +84,8 @@ public class RewardManager : MonoBehaviour
 
         // 3. 버튼 활성화
         if (RewardRuneButton != null) RewardRuneButton.interactable = true; // '룬 보상' 버튼을 클릭할 수 있게 만듦
-        if (RewardGoldButton != null) RewardGoldButton.interactable = true; // '골드 보상' 버튼을 클릭할 수 있게 만듦
+        if (RewardGoldButton != null) RewardGoldButton.interactable = false; // 골드 보상' 버튼은 우선 비활성화
+                                                                           
 
         // 4. 다음으로 진행하는 버튼 비활성화
         if (mapButton != null)
@@ -229,8 +230,15 @@ public class RewardManager : MonoBehaviour
         {
             RewardRuneButton.interactable = false;
         }
+        // ▼▼▼ 이 코드를 추가하세요 ▼▼▼
+        // 3. 룬 보상이 끝났으므로 이제 골드 보상 버튼을 활성화합니다.
+        if (RewardGoldButton != null && !hasClaimedGoldReward) // 아직 골드 보상을 안받았다면
+        {
+            RewardGoldButton.interactable = true;
+        }
+        // ▲▲▲ 추가 완료 ▲▲▲
 
-        // 3. 골드 보상도 받았는지 함께 확인하여, 모든 보상을 다 받았다면 
+        // 4. 골드 보상도 받았는지 함께 확인하여, 모든 보상을 다 받았다면 
         //    다음 스테이지로 가는 버튼을 활성화하는 함수를 호출합니다.
         CheckAndActivateMapButton();
     }
@@ -244,6 +252,7 @@ public class RewardManager : MonoBehaviour
         if (Player.Instance == null)
         {
             Debug.LogError("[RewardManager] OnGoldButtonClick: Player.Instance가 null입니다.");
+
             CheckAndActivateMapButton();
             return;
         }
