@@ -502,8 +502,8 @@ namespace S3MG{
 		void generateBackground(){
 			GameObject bg = Instantiate(backgroundPref, mapParent);
 			RectTransform rectTransform = bg.gameObject.GetComponent<RectTransform>();
-			rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, mapWidth + (backgroundPadding * 2));
-			rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, mapHeight + (backgroundPadding * 2));
+			rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, mapWidth + (backgroundPadding * 10));
+			rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, mapHeight + (backgroundPadding * 15));
 			Vector2 pos = rectTransform.anchoredPosition;
 			rectTransform.anchoredPosition = new Vector2(pos.x, pos.y - ((makeStart) ? startNodeSize / 2 : normalNodeSize / 2) - backgroundPadding);
 			bg.transform.SetAsFirstSibling();
