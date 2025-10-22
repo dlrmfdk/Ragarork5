@@ -1351,7 +1351,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sfxMappings:
   - type: 0
-    clip: {fileID: 8300000, guid: fd5f1ad80c8b1244bbd1bfaaa4e8235f, type: 3}
+    clip: {fileID: 8300000, guid: c669ec629f24c3942af69632f8f9aac7, type: 3}
   - type: 3
     clip: {fileID: 8300000, guid: edd50c3baf3d74b4d80fe0c058c8adee, type: 3}
   - type: 4

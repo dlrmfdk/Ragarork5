@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: NodeDataBoss02
   m_EditorClassIdentifier: 
   sprite: {fileID: 2142208686, guid: 9f5b7fbd25ba9fd42bd40193ef321153, type: 3}
-  type: 9
+  type: 11
   nodeName: UFO

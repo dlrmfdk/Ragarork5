@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: NodeDataBoss03
   m_EditorClassIdentifier: 
   sprite: {fileID: 1667731333, guid: 9f5b7fbd25ba9fd42bd40193ef321153, type: 3}
-  type: 9
+  type: 11
   nodeName: EvilEye

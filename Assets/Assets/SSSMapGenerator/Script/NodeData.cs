@@ -19,8 +19,11 @@ namespace S3MG{
 			Treasure,
 			Trap,
 			Enemy,
+			Enemy2,
 			Middle,
+			Middle2,
 			Final,
+			Final2,
 			Random,
 		}
 

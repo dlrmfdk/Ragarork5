@@ -32,4 +32,16 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MiddleBattle.unity
     guid: b7559aebc285cad4f88ee424dabd5cb4
+  - enabled: 1
+    path: Assets/Scenes/Stage2/MapScene2.unity
+    guid: 20334da6be5977047bd003a1f9173299
+  - enabled: 1
+    path: Assets/Scenes/Stage2/NormalBattle2.unity
+    guid: 1425b7423ef4e3e4baf1e368c1a6f906
+  - enabled: 1
+    path: Assets/Scenes/Stage2/MiddleBattle2.unity
+    guid: 87c6050817244cf41a016a464e80731b
+  - enabled: 1
+    path: Assets/Scenes/Stage2/BossBattle2.unity
+    guid: a76a31316faedef408073925435bbeb8
   m_configObjects: {}

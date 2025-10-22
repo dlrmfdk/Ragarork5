@@ -130,7 +130,7 @@ public class SoundManager : MonoBehaviour
     {
         if (sfxDictionary.TryGetValue(type, out AudioClip clip))
         {
-            // ▼▼▼ 여기에 Null 체크를 추가하면 더 안전합니다. ▼▼▼
+            
             if (clip != null)
             {
                 sfxSource.PlayOneShot(clip);

@@ -176,13 +176,22 @@ namespace S3MG{
 					case NodeData.Type.Enemy:
 						handleEnemy();
 						break;
-					case NodeData.Type.Middle:
+                    case NodeData.Type.Enemy2:
+                        handleEnemy2();
+                        break;
+                    case NodeData.Type.Middle:
 						handleMiddle();
 						break;
-					case NodeData.Type.Final:
+                    case NodeData.Type.Middle2:
+                        handleMiddle2();
+                        break;
+                    case NodeData.Type.Final:
 						handleFinal();
 						break;
-					case NodeData.Type.Random:
+                    case NodeData.Type.Final2:
+                        handleFinal2();
+                        break;
+                    case NodeData.Type.Random:
 						handleRandom();
 						break;
 					default:
@@ -236,13 +245,26 @@ namespace S3MG{
             SceneManager.LoadScene("NormalBattle");
         }
 
+        void handleEnemy2()
+        {
+            Debug.Log("Fight a enemy");
+            MapGenerator.instance.inactiveMap();  // ∏  ∫Ò»∞º∫»≠
+            SceneManager.LoadScene("NormalBattle2");
+        }
+
         void handleMiddle(){
 			Debug.Log("Midpoint");
             MapGenerator.instance.inactiveMap();  // ∏  ∫Ò»∞º∫»≠
             SceneManager.LoadScene("MiddleBattle");
         }
+        void handleMiddle2()
+        {
+            Debug.Log("Midpoint");
+            MapGenerator.instance.inactiveMap();  // ∏  ∫Ò»∞º∫»≠
+            SceneManager.LoadScene("MiddleBattle2");
+        }
 
-		void handleFinal(){
+        void handleFinal(){
 			switch(nodeText.text){
 				case "Boss01" :
 					Debug.Log("Fight the Boss 01");
@@ -258,8 +280,25 @@ namespace S3MG{
                     break;
 			}
 		}
+        void handleFinal2()
+        {
+            switch (nodeText.text)
+            {
+                case "Boss01":
+                    Debug.Log("Fight the Boss 01");
 
-		void handleRandom(){
+                    break;
+                case "Boss02":
+                    Debug.Log("Fight the Boss 02");
+                    break;
+                default:
+                    Debug.Log("Fight the Boss 03");
+                    MapGenerator.instance.inactiveMap();  // ∏  ∫Ò»∞º∫»≠
+                    SceneManager.LoadScene("BossBattle2");
+                    break;
+            }
+        }
+        void handleRandom(){
 			Debug.Log("Execute random process");
             MapGenerator.instance.inactiveMap();  // ∏  ∫Ò»∞º∫»≠
             SceneManager.LoadScene("RandomEvent");

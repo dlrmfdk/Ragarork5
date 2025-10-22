@@ -16,7 +16,15 @@ public class HpBarController : MonoBehaviour
 
     [Header("방어도(Defense) 슬라이더")]
     [SerializeField] private Slider defenseSlider;
-    
+
+    // ▼▼▼ 2. 방어도 텍스트 변수를 '추가'합니다 ▼▼▼
+    [Header("방어도 텍스트")]
+    [SerializeField] private TextMeshProUGUI defenseText;
+    // ▲▲▲ 추가 완료 ▲▲▲
+
+    [Header("방어도 아이콘")]
+    [SerializeField] private Image defenseIconImage; // 방어도 아이콘 이미지를 연결할 변수
+
     private Vector3 offset = new Vector3(0, -40f, 0);
     private Transform targetTransform;
     private Camera mainCamera;
@@ -56,6 +64,15 @@ public class HpBarController : MonoBehaviour
             Debug.LogWarning("HPBarController: defenseSlider가 할당되지 않았습니다. 방어도 표시 불가.");
         }
 
+        if (defenseText != null)
+        {
+            defenseText.gameObject.SetActive(false);
+        }
+
+        if (defenseIconImage != null)
+        {
+            defenseIconImage.gameObject.SetActive(false);
+        }
     }
 
 
@@ -125,7 +142,7 @@ public class HpBarController : MonoBehaviour
         if (updateHPCoroutine != null)
             StopCoroutine(updateHPCoroutine);
 
-        updateHPCoroutine = StartCoroutine(UpdateHealthBar(hpSlider, currentHP));
+        updateHPCoroutine = StartCoroutine(UpdateSliderBar(hpSlider, currentHP, null)); // HP 텍스트는 없으므로 null 전달
     }
 
     // 방어도 최대값 설정 (필요 시)
@@ -143,14 +160,25 @@ public class HpBarController : MonoBehaviour
         if (defenseSlider == null || !gameObject.activeInHierarchy)
             return;
 
+        if (defenseText != null)
+        {
+            defenseText.gameObject.SetActive(currentDefense > 0);
+        }
+
+        if (defenseIconImage != null)
+        {
+            defenseIconImage.gameObject.SetActive(currentDefense > 0);
+        }
+
+
         if (updateDefenseCoroutine != null)
             StopCoroutine(updateDefenseCoroutine);
 
-        updateDefenseCoroutine = StartCoroutine(UpdateHealthBar(defenseSlider, currentDefense));
+        updateDefenseCoroutine = StartCoroutine(UpdateSliderBar(defenseSlider, currentDefense, defenseText));
     }
 
     // 슬라이더 값을 부드럽게 변경하고, 동시에 텍스트도 업데이트합니다.
-    private IEnumerator UpdateHealthBar(Slider slider, float targetValue)
+    private IEnumerator UpdateSliderBar(Slider slider, float targetValue, TMP_Text textToUpdate, Image iconToUpdate = null)
     {
         float duration = 0.5f;
         float elapsed = 0f;
@@ -159,11 +187,31 @@ public class HpBarController : MonoBehaviour
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-            slider.value = Mathf.Lerp(startValue, targetValue, elapsed / duration);
+            float currentValue = Mathf.Lerp(startValue, targetValue, elapsed / duration);
+            slider.value = currentValue;
+
+            if (textToUpdate != null)
+            {
+                textToUpdate.text = Mathf.RoundToInt(currentValue).ToString();
+            }
 
             yield return null;
         }
         slider.value = targetValue;
+        if (textToUpdate != null)
+        {
+            textToUpdate.text = Mathf.RoundToInt(targetValue).ToString();
+
+            // [추가] 최종 값이 0 이하라면 텍스트를 다시 숨깁니다.
+            if (targetValue <= 0)
+            {
+                textToUpdate.gameObject.SetActive(false);
+                if (iconToUpdate != null) // 아이콘도 숨김
+                {
+                    iconToUpdate.gameObject.SetActive(false);
+                }
+            }
+        }
     }
 
     // 오프셋 설정 (HP바의 위치 조정)

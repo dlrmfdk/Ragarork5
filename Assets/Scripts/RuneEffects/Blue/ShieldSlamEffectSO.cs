@@ -13,7 +13,7 @@ public class ShieldSlamEffectSO : BaseRuneEffectSO
         user.IncreaseDefense(runeValue);
 
         // 2. [핵심] 방금 얻은 방어도를 포함한 '현재 총방어도' 수치를 가져옵니다.
-        int damageAmount = user.CurrentDefense;
+        int damageAmount = RuneDeckManager.Instance.GetPredictedTotalDefense();
 
         if (damageAmount <= 0)
         {
@@ -34,10 +34,9 @@ public class ShieldSlamEffectSO : BaseRuneEffectSO
         {
             if (enemy != null && enemy.currentHealth > 0)
             {
-                // ▼▼▼ [수정된 부분] ▼▼▼
-                // 3. [핵심] runeValue가 아닌, 위에서 계산한 'damageAmount'로 피해를 줍니다.
+                
                 enemy.Hit(damageAmount, user);
-                // ▲▲▲ 수정 완료 ▲▲▲
+                
             }
         }
     }

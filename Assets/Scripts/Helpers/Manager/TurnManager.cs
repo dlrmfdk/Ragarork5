@@ -87,6 +87,9 @@ public class TurnManager : MonoBehaviour
                 yield break;
             }
 
+            // 3. 적 턴을 시작하기 전, 1초간 '연출'을 위해 대기합니다.
+            yield return new WaitForSeconds(1.0f); // (이 시간을 0.5f ~ 1.5f 사이로 조절하세요)
+
             yield return StartCoroutine(EnemyTurn());
             if (IsBattleOver()) // 예: 플레이어 체력 확인
             {

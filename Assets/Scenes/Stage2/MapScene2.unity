@@ -155,7 +155,7 @@ MonoBehaviour:
   playOnAwake: 1
   makeStart: 0
   isOffset: 1
-  showText: 1
+  showText: 0
   crossable: 0
   allRandom: 0
   randomizeSeed: 1
@@ -181,14 +181,14 @@ MonoBehaviour:
   gamepadSensitive: 2
   startNodeData: {fileID: 11400000, guid: a5dd8b8215095554389f88a22f71c641, type: 2}
   finalNodeData:
-  - {fileID: 11400000, guid: a4deefdba6121ec43ba0d2508d9264d6, type: 2}
+  - {fileID: 11400000, guid: 9e51b08e78538d64fadd38fe4e58026f, type: 2}
   fixedNodeData:
   - nodeData: {fileID: 11400000, guid: eb0499932e1320d4f8985f1e9a5b6f37, type: 2}
     appearedOn: 13
   - nodeData: {fileID: 11400000, guid: eb0499932e1320d4f8985f1e9a5b6f37, type: 2}
     appearedOn: 5
   mapNodeData:
-  - nodeData: {fileID: 11400000, guid: 44019690c2889c5439a1734cc1e0efa7, type: 2}
+  - nodeData: {fileID: 11400000, guid: 0070c22a634b73343bbd4377eb20466d, type: 2}
     serializable: 1
     chance: 0.45
     appearedAfter: 1
@@ -203,7 +203,7 @@ MonoBehaviour:
     chance: 0.3
     appearedAfter: 2
     reverseAppearedAfter: 0
-  - nodeData: {fileID: 11400000, guid: 8c4236faeedba8040a486d94bf159dbe, type: 2}
+  - nodeData: {fileID: 11400000, guid: 87d8f782b9548d040bf79fbc09152da9, type: 2}
     serializable: 1
     chance: 0.1
     appearedAfter: 2
@@ -508,7 +508,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 263aa4db675e5d24d83b6df0e9dcbddd, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 611a5e51eef69b84e904052ef8c47138, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

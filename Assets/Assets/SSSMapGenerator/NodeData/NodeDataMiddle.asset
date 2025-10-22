@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: NodeDataMiddle
   m_EditorClassIdentifier: 
   sprite: {fileID: 21300000, guid: 90e99a7fde056a4418b9fe16084adb5c, type: 3}
-  type: 8
+  type: 9
   nodeName: Middle

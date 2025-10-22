@@ -464,6 +464,69 @@ public class RuneDeckManager : MonoBehaviour
     #endregion
 
     /// <summary>
+    /// (방패 밀치기 룬 등이 호출할)
+    /// 현재 손패의 '예측 총 방어도' 값만 계산하여 반환합니다.
+    /// </summary>
+    public int GetPredictedTotalDefense()
+    {
+        int totalDefense = 0;
+
+        // 현재 손패에 뽑힌 룬들(selectionCount 개수만큼)을 순회합니다.
+        for (int i = 0; i < selectionCount; i++)
+        {
+            var instance = selections[i];
+            if (instance == null || instance.SO == null) continue;
+
+            // 룬의 색상이 파란색이면, 방어도 합계에 더합니다.
+            if (instance.SO.color == RuneColor.Blue)
+            {
+                totalDefense += instance.value;
+            }
+        }
+        return totalDefense;
+    }
+    /// <summary>
+    /// (미래의 룬 효과가 호출할)
+    /// 현재 손패의 '예측 총 데미지' 값만 계산하여 반환합니다.
+    /// </summary>
+    public int GetPredictedTotalDamage()
+    {
+        int totalDamage = 0;
+        for (int i = 0; i < selectionCount; i++)
+        {
+            var instance = selections[i];
+            if (instance == null || instance.SO == null) continue;
+
+            if (instance.SO.color == RuneColor.Red)
+            {
+                totalDamage += instance.value;
+            }
+        }
+        return totalDamage;
+    }
+
+    // ▼▼▼ [2. 이 함수를 새로 추가] ▼▼▼
+    /// <summary>
+    /// (미래의 룬 효과가 호출할)
+    /// 현재 손패의 '예측 총 골드' 값만 계산하여 반환합니다.
+    /// </summary>
+    public int GetPredictedTotalGold()
+    {
+        int totalGold = 0;
+        for (int i = 0; i < selectionCount; i++)
+        {
+            var instance = selections[i];
+            if (instance == null || instance.SO == null) continue;
+
+            if (instance.SO.color == RuneColor.Yellow)
+            {
+                totalGold += instance.value;
+            }
+        }
+        return totalGold;
+    }
+    // ▲▲▲ 추가 완료 ▲▲▲
+    /// <summary>
     /// 현재 손패(selections)에 있는 룬들의 값을 단순 합산하여 UI에 표시합니다.
     /// </summary>
     private void CalculateAndDisplayHandTotals()
