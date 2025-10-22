@@ -501,8 +501,9 @@ public class RuneDeckManager : MonoBehaviour
     public List<RuneInstance> GetBasicRunesByColor(RuneColor color)
     {
         return playerDeck
-        .Where(inst => inst != null && inst.SO != null && inst.SO.isBasicRune && inst.SO.color == color)
-        .ToList();
+            .Where(inst => inst != null && inst.SO != null) // 1단계: 룬 인스턴스 자체와 룬 데이터(SO)가 null이 아닌지 확인
+            .Where(inst => inst.SO.isBasicRune && inst.SO.color == color)
+            .ToList();
     }
 
     /// <summary>
