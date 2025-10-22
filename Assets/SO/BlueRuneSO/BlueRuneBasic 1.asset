@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7f609cf4ce8afc4f8e8cfa894e58f39, type: 3}
+  m_Name: BlueRuneBasic 1
+  m_EditorClassIdentifier: 
+  runeType: 0
+  color: 1
+  rarity: 0
+  displayName: "\uBC29\uC5B4\uC758 \uB8EC"
+  description: " \uBC29\uC5B4\uB3C4\uAC00 n\uB9CC\uD07C \uC99D\uAC00\uD569\uB2C8\uB2E4.\n"
+  icon: {fileID: 21300000, guid: 4c58b6297ff6825409d1897900f3dfc8, type: 3}
+  isBasicRune: 1
+  initialDeckCount: 10
+  effectSO: {fileID: 11400000, guid: 4099c990cd6bbb643895858bd4a835c8, type: 2}

@@ -42,7 +42,7 @@ public class RestSceneManager : MonoBehaviour
         Player.Instance.Heal(healAmount);
 
         // 피드백 메시지 표시
-        ShowFeedback($"체력이 {healAmount}만큼 회복되었습니다.");
+        ShowFeedback($"체력이 {healAmount}만큼 \n 회복되었습니다.");
 
         // 휴식은 한 번만 가능하도록 버튼 비활성화
         restButton.interactable = false;

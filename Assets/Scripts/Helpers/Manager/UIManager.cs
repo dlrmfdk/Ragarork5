@@ -102,6 +102,13 @@ public class UIManager : MonoBehaviour
     [Header("플레이어 상태 UI")]
     public TextMeshProUGUI goldText; // Player.cs 대신 UIManager가 직접 참조
 
+    [Header("룬 예측 UI")]
+    [Tooltip("손패의 총합 데미지를 표시할 텍스트")]
+    [SerializeField] private TextMeshProUGUI previewDamageText;
+    [Tooltip("손패의 총합 방어도를 표시할 텍스트")]
+    [SerializeField] private TextMeshProUGUI previewDefenseText;
+    [Tooltip("손패의 총합 골드 획득량을 표시할 텍스트")]
+    [SerializeField] private TextMeshProUGUI previewGoldText;
 
     /// <summary>
     /// 골드 표시 UI를 업데이트합니다. Player 등 외부에서 호출됩니다.
@@ -120,6 +127,54 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 손패에 든 룬의 단순 합계 값을 UI에 표시합니다.
+    /// </summary>
+    public void UpdatePreviewTotals(int damage, int defense, int gold)
+    {
+        // 데미지 텍스트
+        if (previewDamageText != null)
+        {
+            if (damage > 0)
+            {
+                // 숫자를 문자열로 변환하여 텍스트에 표시
+                previewDamageText.text = damage.ToString();
+                previewDamageText.gameObject.SetActive(true);
+            }
+            else
+            {
+                previewDamageText.gameObject.SetActive(false); // 0이면 숨김
+            }
+        }
+
+        // 방어도 텍스트
+        if (previewDefenseText != null)
+        {
+            if (defense > 0)
+            {
+                previewDefenseText.text = defense.ToString();
+                previewDefenseText.gameObject.SetActive(true);
+            }
+            else
+            {
+                previewDefenseText.gameObject.SetActive(false); // 0이면 숨김
+            }
+        }
+
+        // 골드 텍스트
+        if (previewGoldText != null)
+        {
+            if (gold > 0)
+            {
+                previewGoldText.text = gold.ToString();
+                previewGoldText.gameObject.SetActive(true);
+            }
+            else
+            {
+                previewGoldText.gameObject.SetActive(false); // 0이면 숨김
+            }
+        }
+    }
 
     /// <summary>
     /// 룬 설명 툴팁을 보여줍니다.

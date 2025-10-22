@@ -37,6 +37,23 @@ public class ChangeScene : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 게임 종료 버튼을 클릭했을 때 호출될 함수
+    /// </summary>
+    public void OnClickExitGame()
+    {
+        Debug.Log("게임 종료 버튼 클릭됨");
+
+        // 유니티 에디터에서 테스트 중일 경우
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+
+        // 실제 빌드된 게임(PC, 모바일 등)일 경우
+#else
+        Application.Quit();
+#endif
+    }
+
     private IEnumerator WaitAndChangeScene(float waitTime)
     {
         yield return new WaitForSeconds(waitTime); // 사운드 재생이 끝날 때까지 대기

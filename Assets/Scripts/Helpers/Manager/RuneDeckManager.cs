@@ -137,6 +137,9 @@ public class RuneDeckManager : MonoBehaviour
         selections[selectionCount++] = chosenInstance;
 
         RefreshUI();
+
+        //10.23 김서현 추가 (룬 데미지, 방어도, 골드 등 합계 UI)
+        CalculateAndDisplayHandTotals(); // [추가!] 룬을 뽑을 때마다 합계 다시 계산
     }
 
     private void OnDrawClick()
@@ -157,11 +160,17 @@ public class RuneDeckManager : MonoBehaviour
         else
         {
             // 3. 광역 룬이 없다면, 기존의 일반 공격(타겟팅) 또는 방어 로직을 실행합니다.
+            // ▼▼▼ [이 부분을 수정합니다] ▼▼▼
             bool hasRedRunes = selections.Any(instance => instance != null && instance.SO.color == RuneColor.Red);
-            if (hasRedRunes)
+            // '타겟팅이 필요하다(requiresEnemyTarget)'고 설정된 룬이 있는지 확인
+            bool needsTargeting = selections.Any(inst => inst != null && inst.SO.requiresEnemyTarget);
+
+            if (hasRedRunes || needsTargeting) // 붉은 룬이 있거나 || 타겟팅이 필요한 룬이 있다면
             {
+                // 단일 타겟팅 시작
                 PlayerInputManager.Instance.StartEnemyTargeting(selections);
             }
+            // ▲▲▲ 수정 완료 ▲▲▲
             else
             {
                 ExecuteAllSelectedRunesImmediately();
@@ -202,6 +211,13 @@ public class RuneDeckManager : MonoBehaviour
 
         // 5. UI를 새로고침하여 빈 패를 보여주고, 비활성화된 리롤 버튼 상태를 반영합니다.
         RefreshUI();
+
+        //10.23 "
+        selections = new List<RuneInstance>(new RuneInstance[5]);
+        selectionCount = 0;
+
+        RefreshUI();
+        CalculateAndDisplayHandTotals(); // [추가!] 리롤(초기화) 시 합계 다시 계산 (0으로)
     }
 
     private void FinalizeTurnAfterAction()
@@ -252,6 +268,7 @@ public class RuneDeckManager : MonoBehaviour
         selectionCount = 0;
         hasRerolledThisTurn = false;
         RefreshUI();
+        CalculateAndDisplayHandTotals(); // [이 줄을 추가하세요]
     }
   
 
@@ -301,14 +318,29 @@ public class RuneDeckManager : MonoBehaviour
         foreach (var instance in selections)
         {
             if (instance?.SO?.effectSO == null) continue;
-            if (instance.SO.color == RuneColor.Red)
+
+            // ▼▼▼ [이 부분을 수정합니다] ▼▼▼
+            // 룬의 색상이 Red이거나 || '적 타겟팅 필요' 플래그가 켜져있다면
+            if (instance.SO.color == RuneColor.Red || instance.SO.requiresEnemyTarget)
             {
+                // 선택한 '단일 타겟'(singleTargetList)에게 효과를 실행
                 instance.SO.effectSO.Execute(user, singleTargetList, instance.value);
             }
             else
             {
+                // 그 외 모든 룬 (기본 방어, 골드 획득 등)
                 instance.SO.effectSO.Execute(user, allEnemies, instance.value);
             }
+            // ▲▲▲ 수정 완료 ▲▲▲
+
+            //if (instance.SO.color == RuneColor.Red)
+            //{
+            //    instance.SO.effectSO.Execute(user, singleTargetList, instance.value);
+            //}
+            //else
+            //{
+            //    instance.SO.effectSO.Execute(user, allEnemies, instance.value);
+            //}
         }
         FinalizeTurnAfterAction();
     }
@@ -431,6 +463,45 @@ public class RuneDeckManager : MonoBehaviour
     }
     #endregion
 
+    /// <summary>
+    /// 현재 손패(selections)에 있는 룬들의 값을 단순 합산하여 UI에 표시합니다.
+    /// </summary>
+    private void CalculateAndDisplayHandTotals()
+    {
+        // UIManager가 준비되지 않았으면 실행하지 않습니다.
+        if (UIManager.Instance == null || !isUIManagerReady) return;
+
+        int totalDamage = 0;
+        int totalDefense = 0;
+        int totalGold = 0;
+
+        // 현재 손패에 뽑힌 룬들(selectionCount 개수만큼)을 순회합니다.
+        for (int i = 0; i < selectionCount; i++)
+        {
+            var instance = selections[i];
+            if (instance == null || instance.SO == null) continue;
+
+            // 1단계: 룬의 '색상'을 기준으로 단순 합산합니다.
+            switch (instance.SO.color)
+            {
+                case RuneColor.Red:
+                    totalDamage += instance.value;
+                    break;
+                case RuneColor.Blue:
+                    totalDefense += instance.value;
+                    break;
+                case RuneColor.Yellow:
+                    totalGold += instance.value;
+                    break;
+                    // White, Gray는 합산에서 제외합니다.
+            }
+        }
+
+        // UIManager의 함수를 호출하여 UI를 업데이트합니다.
+        UIManager.Instance.UpdatePreviewTotals(totalDamage, totalDefense, totalGold);
+    }
+    // ▲▲▲ 함수 추가 완료 ▲▲▲
+
     #region Save/Load & UI
     public void RefreshUI()
     {
@@ -443,9 +514,13 @@ public class RuneDeckManager : MonoBehaviour
         }
         UIManager.Instance.UpdateDeckCounts(countsByColor);
         UIManager.Instance.UpdateCentralSlotsWithInstances(selections);
-        bool full = (selectionCount == selections.Count);
-        UIManager.Instance.SetDrawButton(full);
-        UIManager.Instance.SetReRollButton(full && !hasRerolledThisTurn);
+        //bool full = (selectionCount == selections.Count);
+
+        bool canAct = (selectionCount > 0);
+
+
+        UIManager.Instance.SetDrawButton(canAct);
+        UIManager.Instance.SetReRollButton(canAct && !hasRerolledThisTurn);
     }
 
     public void SaveDeckState()
@@ -506,6 +581,18 @@ public class RuneDeckManager : MonoBehaviour
             .ToList();
     }
 
+    // ▼▼▼ [새로 추가] 같은 색상의 '모든 룬'을 가져오는 함수 ▼▼▼
+    /// <summary>
+    /// 현재 덱에서 특정 색상의 '모든 룬' 인스턴스 목록을 가져옵니다. (기본 룬 + 강화 룬 모두)
+    /// </summary>
+    public List<RuneInstance> GetAllRunesByColor(RuneColor color)
+    {
+        return playerDeck
+            .Where(inst => inst != null && inst.SO != null)
+            .Where(inst => inst.SO.color == color) // 'isBasicRune' 조건이 제거되었습니다.
+            .ToList();
+    }
+    // ▲▲▲ 추가 완료 ▲▲▲
     /// <summary>
     /// 선택된 특정 기본 룬을 새로운 보상 룬으로 교체(강화)합니다.
     /// </summary>

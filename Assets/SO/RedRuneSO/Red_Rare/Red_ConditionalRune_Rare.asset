@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   runeType: 0
   color: 0
-  rarity: 0
+  rarity: 1
   displayName: "\uC5F0\uC18C \uAC15\uD654 \uB8EC"
   description: "\uC801\uC774 \uD654\uC0C1 \uC0C1\uD0DC\uC77C \uACBD\uC6B0 5\uC758
     \uD53C\uD574\uB97C \uC8FC\uACE0\n\uC544\uB2D0\uACBD\uC6B0, 2\uC758 \uD53C\uD574\uB97C

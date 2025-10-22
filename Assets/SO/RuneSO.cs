@@ -52,4 +52,10 @@ public class RuneSO : ScriptableObject
 
     [Header("효과 SO")]
     public BaseRuneEffectSO effectSO;
+
+    // ▼▼▼ [이 부분을 맨 아래에 추가하세요] ▼▼▼
+    [Header("효과 대상 지정")]
+    [Tooltip("체크 시, 이 룬은 붉은 룬이 아니더라도 적 타겟팅을 유발합니다. (예: 방패 밀치기)\n체크 해제 시, 타겟팅이 필요 없는 효과(방어, 골드 획득 등)로 간주됩니다.")]
+    public bool requiresEnemyTarget = false;
+    // ▲▲▲ 추가 완료 ▲▲▲
 }

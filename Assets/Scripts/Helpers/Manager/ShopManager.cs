@@ -98,9 +98,11 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        // 2. 강화할 수 있는 같은 색의 '기본 룬'이 있는지 확인
-        var basicRunes = RuneDeckManager.Instance.GetBasicRunesByColor(rune.color);
-        if (basicRunes.Count == 0)
+        // ▼▼▼ [수정] 'GetBasicRunesByColor' -> 'GetAllRunesByColor'로 변경 ▼▼▼
+        // 2. 강화할 수 있는 같은 색의 '모든 룬'이 있는지 확인 (기본 룬 + 강화 룬 포함)
+        var runesToEnhance = RuneDeckManager.Instance.GetAllRunesByColor(rune.color);
+        if (runesToEnhance.Count == 0)
+        // ▲▲▲ 수정 완료 (변수 이름 변경) ▲▲▲
         {
             Debug.Log($"강화할 수 있는 {rune.color}색 기본 룬이 없습니다.");
             return;
@@ -112,7 +114,7 @@ public class ShopManager : MonoBehaviour
         this.purchasingItemUI = itemUI;
 
         // 4. 강화 패널을 보여줌
-        ShowShopEnhancementPanel(basicRunes);
+        ShowShopEnhancementPanel(runesToEnhance);
     }
 
     /// <summary>

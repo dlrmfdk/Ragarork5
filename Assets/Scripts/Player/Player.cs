@@ -20,8 +20,12 @@ public class Player : MonoBehaviour
     [Header("방어도 관련")]
     private int currentDefense = 0;
 
+    // ▼▼▼ [이 줄을 추가해주세요] ▼▼▼
+    public int CurrentDefense => currentDefense; // 외부에서 현재 방어도를 읽을 수 있게 해주는 속성
+    // ▲▲▲ 추가 완료 ▲▲▲
+
     [Header("공격 관련")]
-    [SerializeField] private int baseAttackPower = 10; // '기본' 공격력
+    [SerializeField] private int baseAttackPower = 0; // '기본' 공격력
     private int attackPower; // 현재 공격력 (버프 등으로 변동 가능)
     public int AttackPower => attackPower;
 
@@ -134,7 +138,7 @@ public class Player : MonoBehaviour
 
         currentDefense = 0;
         attackPower = baseAttackPower;
-        currentMana = maxMana;
+        //currentMana = maxMana;
 
         isDoubleDamageTurn = false;
         invincibleTurnCount = 0;

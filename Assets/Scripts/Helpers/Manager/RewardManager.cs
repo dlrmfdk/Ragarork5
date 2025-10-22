@@ -178,12 +178,16 @@ public class RewardManager : MonoBehaviour
         RuneRewardPanel?.SetActive(false); // 보상 선택창은 닫습니다.
 
         // 2. 덱에서 강화할 수 있는 같은 색의 기본 룬 목록을 가져옵니다.
-        var basicRunes = RuneDeckManager.Instance.GetBasicRunesByColor(chosenRewardRune.color);
+        //var basicRunes = RuneDeckManager.Instance.GetBasicRunesByColor(chosenRewardRune.color);
+        // ▼▼▼ [수정] 'GetBasicRunesByColor' -> 'GetAllRunesByColor'로 변경 ▼▼▼
+        // 2. 덱에서 강화할 수 있는 같은 색의 '모든 룬' 목록을 가져옵니다.
+        var runesToEnhance = RuneDeckManager.Instance.GetAllRunesByColor(chosenRewardRune.color);
+        // ▲▲▲ 수정 완료 (변수 이름도 basicRunes -> runesToEnhance로 변경) ▲▲▲
 
-        if (basicRunes.Count > 0)
+        if (runesToEnhance.Count > 0)
         {
             // 3. 강화할 룬이 있다면 강화 패널을 엽니다.
-            ShowEnhancementPanel(basicRunes);
+            ShowEnhancementPanel(runesToEnhance);
         }
         else
         {
