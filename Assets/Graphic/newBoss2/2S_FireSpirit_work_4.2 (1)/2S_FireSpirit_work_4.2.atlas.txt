@@ -1,0 +1,75 @@
+2S_FireSpirit_work_4.2.png
+size:1514,1551
+filter:Linear,Linear
+pma:true
+Fire_2
+bounds:2,624,1062,925
+Fire_4
+bounds:2,32,643,590
+offsets:26,1,669,707
+Head
+bounds:1066,476,426,429
+rotate:90
+L_Hand
+bounds:1282,288,46,91
+offsets:2,0,54,96
+rotate:90
+R_Hand
+bounds:1431,245,50,68
+offsets:266,3,322,149
+rotate:90
+Rune_dark
+bounds:1431,192,51,60
+rotate:90
+Rune_light
+bounds:1431,192,51,60
+rotate:90
+Rune_light_2
+bounds:1431,192,51,60
+rotate:90
+Rune_right
+bounds:1409,360,103,114
+dirt1
+bounds:647,100,522,343
+rotate:90
+dirt2
+bounds:1066,904,645,439
+rotate:90
+레이어 1
+bounds:1145,287,135,187
+레이어 10
+bounds:1029,5,105,179
+rotate:90
+레이어 11
+bounds:1427,49,76,100
+레이어 12
+bounds:992,112,176,150
+레이어 13
+bounds:1337,42,88,107
+레이어 14
+bounds:1210,2,140,125
+rotate:90
+레이어 2
+bounds:647,8,90,138
+rotate:90
+레이어 3
+bounds:1170,144,141,131
+rotate:90
+레이어 4
+bounds:1409,297,78,61
+레이어 5
+bounds:1303,151,135,126
+rotate:90
+레이어 6
+bounds:992,473,58,149
+레이어 7
+bounds:787,9,89,125
+rotate:90
+레이어 8
+bounds:992,264,207,151
+rotate:90
+레이어 9
+bounds:914,12,113,86
+레이어0
+bounds:1282,336,138,125
+rotate:90

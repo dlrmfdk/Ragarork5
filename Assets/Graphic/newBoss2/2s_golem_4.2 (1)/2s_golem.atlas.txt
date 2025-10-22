@@ -1,0 +1,41 @@
+2s_golem.png
+size:1943,1930
+filter:Linear,Linear
+pma:true
+body
+bounds:2,443,986,1485
+offsets:34,0,1020,1488
+dark
+bounds:1476,413,126,180
+rotate:90
+dirt1
+bounds:976,17,522,343
+dirt2
+bounds:2,2,645,439
+drop1
+bounds:1658,486,29,53
+drop2
+bounds:1734,751,114,102
+drop2-1
+bounds:649,27,169,47
+offsets:1,0,170,47
+drop3-1
+bounds:1476,364,47,47
+drop3
+bounds:1476,364,47,47
+drop3-2
+bounds:1476,364,47,47
+left arm1
+bounds:649,76,365,325
+offsets:0,0,366,340
+rotate:90
+left arm2
+bounds:1587,855,354,1073
+offsets:0,0,397,1073
+light
+bounds:1476,541,256,304
+offsets:10,11,275,325
+right arm1
+bounds:990,362,484,483
+right arm2
+bounds:990,847,595,1081
