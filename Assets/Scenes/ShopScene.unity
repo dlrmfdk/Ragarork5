@@ -4875,13 +4875,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   allSellableRunes:
   - {fileID: 11400000, guid: 2043cb756ad1e8046b119e61a3df90e5, type: 2}
-  - {fileID: 11400000, guid: 432ec8dca1b56a446a5d6db591591187, type: 2}
+  - {fileID: 11400000, guid: 7c550fbea029be94ea1042964ae044d2, type: 2}
   - {fileID: 11400000, guid: d7761ab319348ce47a559f2fb896f765, type: 2}
   - {fileID: 11400000, guid: 3a485e040736c4a4da0cbba87163b52e, type: 2}
   - {fileID: 11400000, guid: 2043cb756ad1e8046b119e61a3df90e5, type: 2}
-  - {fileID: 11400000, guid: 2043cb756ad1e8046b119e61a3df90e5, type: 2}
-  - {fileID: 11400000, guid: 2043cb756ad1e8046b119e61a3df90e5, type: 2}
-  - {fileID: 11400000, guid: 2043cb756ad1e8046b119e61a3df90e5, type: 2}
+  - {fileID: 11400000, guid: cabf19b9ab8e7d349a46877eaaa01a13, type: 2}
   numberOfItemsToShow: 6
   itemContainer: {fileID: 428158831}
   shopItemPrefab: {fileID: 2150274323120636809, guid: f4fec971d86fab840a2949f7e369b4e7, type: 3}
@@ -4943,6 +4941,9 @@ MonoBehaviour:
   runeTooltipPanel: {fileID: 58932986}
   tooltipText: {fileID: 248622699}
   goldText: {fileID: 802248712}
+  previewDamageText: {fileID: 0}
+  previewDefenseText: {fileID: 0}
+  previewGoldText: {fileID: 0}
 --- !u!1 &1733946299
 GameObject:
   m_ObjectHideFlags: 0
