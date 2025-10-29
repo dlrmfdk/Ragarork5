@@ -7,7 +7,13 @@ using Spine.Unity; // Spine 애니메이션 사용을 위해 추가
 
 //적 행동 타입 enum 정의
 public enum EnemyActionType { Attack, Defend, Buff, Debuff , Charge }
-
+public enum StatusEffectType
+{
+    Burn,
+    Poison,
+    Bleed,
+    // 필요에 따라 다른 상태이상 추가...
+}
 
 public class Enemy : MonoBehaviour
 {
@@ -53,6 +59,8 @@ public class Enemy : MonoBehaviour
     //출혈 효과 관련 변수 추가
     private int bleedDamagePerTurn = 0;
     private int bleedTurnsRemaining = 0;
+
+
 
     /// <summary>
     /// 이 적이 현재 화상 상태인지 여부를 반환합니다. (읽기 전용)
@@ -472,6 +480,11 @@ public class Enemy : MonoBehaviour
     {  
         poisonStack += amount;
         Debug.Log($"{enemyData.EnemyName}에게 {amount}의 독이 부여되었습니다. 총 독 수치: {poisonStack}");
+       
+        if (hpBarController != null && poisonStack > 0) // 스택이 있을 때만
+        {
+            hpBarController.UpdateStatusIcon(StatusEffectType.Poison, true, poisonStack);
+        }
     }
 
     /// <summary>
@@ -495,6 +508,15 @@ public class Enemy : MonoBehaviour
         {
             poisonStack--;
             Debug.Log($"{enemyData.EnemyName}의 독 수치가 1 감소하여 {poisonStack}이 되었습니다.");
+            if (poisonStack <= 0) // 효과 종료 시
+            {
+                if (hpBarController != null)
+                {
+                    // ▼▼▼ 함수 호출 변경: 감소된 스택으로 텍스트 업데이트 (0이 되면 자동으로 숨겨짐) ▼▼▼
+                    bool stillPoisoned = poisonStack > 0;
+                    hpBarController.UpdateStatusIcon(StatusEffectType.Poison, stillPoisoned, poisonStack);
+                }
+            }
         }
     }
     // --- 화상 효과 관련 메소드 추가 ---
@@ -509,6 +531,10 @@ public class Enemy : MonoBehaviour
         burnTurnsRemaining = duration;  // 값 갱신 (중첩이 필요하면 로직 변경: += 또는 Max)
         Debug.Log($"{enemyData.EnemyName}에게 {duration}턴 동안 매 턴 {damage}의 화상 효과가 부여되었습니다.");
         // 필요하다면 화상 아이콘 등 UI 표시 로직 추가
+        if (hpBarController != null)
+        {
+            hpBarController.UpdateStatusIcon(StatusEffectType.Burn, true, burnTurnsRemaining);
+        }
     }
 
     /// <summary>
@@ -523,11 +549,19 @@ public class Enemy : MonoBehaviour
             TakeDirectDamage(burnDamagePerTurn);  //방어도 무시하고 직접 피해 입힘
             burnTurnsRemaining--;
 
+            if (hpBarController != null)
+            {
+                // ▼▼▼ 함수 호출 변경: 감소된 턴 수로 텍스트 업데이트 (0이 되면 자동으로 숨겨짐) ▼▼▼
+                bool stillBurning = burnTurnsRemaining > 0;
+                hpBarController.UpdateStatusIcon(StatusEffectType.Burn, stillBurning, burnTurnsRemaining);
+            }
+
             if (burnTurnsRemaining <= 0)
             {
                 burnDamagePerTurn = 0; // 화상 효과 종료
                 Debug.Log($"{enemyData.EnemyName}의 화상 효과가 종료되었습니다.");
                 // 필요하다면 화상 아이콘 등 UI 제거 로직 추가
+                
             }
             else
             {
@@ -547,6 +581,11 @@ public class Enemy : MonoBehaviour
         this.bleedDamagePerTurn = damagePerTurn; // 계산된 값을 그대로 받음
         this.bleedTurnsRemaining = duration;
         Debug.Log($"{enemyData.EnemyName}에게 {duration}턴 동안 매 턴 {bleedDamagePerTurn}의 출혈 효과가 부여되었습니다.");
+
+        if (hpBarController != null)
+        {
+            hpBarController.UpdateStatusIcon(StatusEffectType.Bleed, true, bleedTurnsRemaining);
+        }
     }
     /// <summary>
     /// 턴 시작 시 출혈 피해를 처리합니다.
@@ -559,10 +598,19 @@ public class Enemy : MonoBehaviour
             TakeDirectDamage(bleedDamagePerTurn); // 방어력 무시 직접 피해
             bleedTurnsRemaining--;
 
+            if (hpBarController != null)
+            {
+                // ▼▼▼ 함수 호출 변경: 감소된 턴 수로 텍스트 업데이트 (0이 되면 자동으로 숨겨짐) ▼▼▼
+                bool stillBleeding = bleedTurnsRemaining > 0;
+                hpBarController.UpdateStatusIcon(StatusEffectType.Bleed, stillBleeding, bleedTurnsRemaining);
+            }
+
             if (bleedTurnsRemaining <= 0)
             {
                 bleedDamagePerTurn = 0; // 출혈 효과 종료
                 Debug.Log($"{enemyData.EnemyName}의 출혈 효과가 종료되었습니다.");
+
+                
             }
             else
             {

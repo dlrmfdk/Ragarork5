@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: Monster
   enemyPrefab: {fileID: 6998024497525715056, guid: d1060c310e6d02b4e854d8bb6eee06f8, type: 3}
-  hp: 30
+  hp: 100
   damage: 5
-  defense: 1
+  defense: 0
   category: 0
   actionPatterns:
   - {fileID: 11400000, guid: 873515a8aa027014497d8e83d1bb7a46, type: 2}

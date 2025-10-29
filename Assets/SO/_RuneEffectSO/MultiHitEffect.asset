@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: MultiHitEffect
   m_EditorClassIdentifier: 
   numberOfHits: 2
-  damageMultiplierPerHit: 0.5
+  damageMultiplierPerHit: 0.7
   delayBetweenHits: 0.3

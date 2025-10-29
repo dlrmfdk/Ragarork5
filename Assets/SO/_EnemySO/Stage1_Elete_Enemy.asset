@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ee6b0eb5d72fd9e42bb86d6b473b312f, type: 3}
-  m_Name: Elite Enemy
+  m_Name: Stage1_Elete_Enemy
   m_EditorClassIdentifier: 
   enemyName: Elite
   enemyPrefab: {fileID: 4438356569790596326, guid: 9dcc337edb579d24daed9647d51ef5df, type: 3}
-  hp: 70
+  hp: 100
   damage: 12
-  defense: 1
+  defense: 0
   category: 1
   actionPatterns:
   - {fileID: 11400000, guid: b58a2d9814d50b148a22ed19387829da, type: 2}

@@ -15,7 +15,7 @@ MonoBehaviour:
   enemyName: asdasd
   enemyPrefab: {fileID: 4296835893799551385, guid: caa53625cfe311449aa8efdd76aebb89, type: 3}
   hp: 50
-  damage: 3
+  damage: 5
   defense: 0
   category: 0
   actionPatterns:

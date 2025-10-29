@@ -13,31 +13,31 @@ MonoBehaviour:
   m_Name: relicEvent
   m_EditorClassIdentifier: 
   eventName: Relic
-  eventDescription: "\uB2F9\uC2E0\uC758 \uC55E\uC5D0 \uC720\uBB3C\uC774 \uC788\uC2B5\uB2C8\uB2E4.
-    \uAC00\uC838\uAC00\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?"
-  eventImage: {fileID: 21300000, guid: 497a766b1a831cc439b1f62411906809, type: 3}
+  eventDescription: "\uB2F9\uC2E0\uC758 \uC55E\uC5D0 \uD3EC\uC158\uC774 \uC788\uC2B5\uB2C8\uB2E4.
+    \uB9C8\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?"
+  eventImage: {fileID: 21300000, guid: ace8a02646afeda4880fc3cb14cad705, type: 3}
   choices:
-  - choiceDescription: "\uC720\uBB3C\uC744 \uAC00\uC838\uAC04\uB2E4."
+  - choiceDescription: "\uD3EC\uC158\uC744 \uB9C8\uC2E0\uB2E4."
     guaranteedOutcomes: []
     randomOutcomes:
     - weight: 50
       outcome:
-        outcomeMessage: "\uC720\uBB3C\uC744 \uC9D1\uC5B4 \uB4DC\uB294 \uC21C\uAC04,
-          \uBD88\uAE38\uD55C \uAE30\uC6B4\uC774 \uB2F9\uC2E0\uC744 \uB36E\uCE69\uB2C8\uB2E4.
-          (\uCCB4\uB825 -20)"
+        outcomeMessage: "\uD3EC\uC158\uC744 \uBA39\uB294 \uC21C\uAC04 \uBC30\uAC00
+          \uC544\uD30C\uC635\uB2C8\uB2E4. (\uCCB4\uB825 -20)"
         type: 1
         amount: 20
         rune: {fileID: 0}
     - weight: 50
       outcome:
-        outcomeMessage: "\uC720\uBB3C\uC774 \uBE5B\uC744 \uBC1C\uD558\uBA70 \uB2F9\uC2E0\uC758
-          \uCCB4\uB825\uC744 20 \uD68C\uBCF5\uC2DC\uD0B5\uB2C8\uB2E4."
+        outcomeMessage: "\uD3EC\uC158\uC744 \uBA39\uB294 \uC21C\uAC04 \uAE30\uBD84\uC774
+          \uC88B\uC544\uC9D1\uB2C8\uB2E4. (\uCCB4\uB825 +20)"
         type: 0
         amount: 20
         rune: {fileID: 0}
   - choiceDescription: "\uBB34\uC2DC\uD55C\uB2E4."
     guaranteedOutcomes:
-    - outcomeMessage: "\uB2F9\uC2E0\uC740 \uC870\uC6A9\uD788 \uC720\uBB3C\uC744 \uC9C0\uB098\uCE69\uB2C8\uB2E4."
+    - outcomeMessage: "\uB2F9\uC2E0\uC740 \uC870\uC6A9\uD788 \uD3EC\uC158\uC774 \uC788\uB294
+        \uBC29\uC744 \uC9C0\uB098\uCE69\uB2C8\uB2E4."
       type: 7
       amount: 0
       rune: {fileID: 0}

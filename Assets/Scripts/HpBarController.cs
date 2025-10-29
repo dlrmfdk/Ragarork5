@@ -2,6 +2,16 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using TMPro;
+using System.Collections.Generic;
+
+// 인스펙터 연결용 클래스
+[System.Serializable]
+public class StatusIconMapping
+{
+    public StatusEffectType effectType;
+    public Image iconImage;
+    public TextMeshProUGUI durationText; // ▼▼▼ 1. 턴 수 텍스트 변수 추가 ▼▼▼
+}
 
 public class HpBarController : MonoBehaviour
 {
@@ -25,6 +35,11 @@ public class HpBarController : MonoBehaviour
     [Header("방어도 아이콘")]
     [SerializeField] private Image defenseIconImage; // 방어도 아이콘 이미지를 연결할 변수
 
+    [Header("상태이상 아이콘 목록")]
+    [SerializeField] private List<StatusIconMapping> statusIconMappings; // 아이콘 연결 리스트
+
+    private Dictionary<StatusEffectType, StatusIconMapping> statusIconDictionary; // ▼▼▼ 2. Dictionary 타입을 Mapping 객체로 변경 ▼▼▼
+
     private Vector3 offset = new Vector3(0, -40f, 0);
     private Transform targetTransform;
     private Camera mainCamera;
@@ -33,6 +48,8 @@ public class HpBarController : MonoBehaviour
     // 슬라이더 값 업데이트용 코루틴
     private Coroutine updateHPCoroutine;
     private Coroutine updateDefenseCoroutine;
+
+
 
     void Start()
     {
@@ -73,8 +90,64 @@ public class HpBarController : MonoBehaviour
         {
             defenseIconImage.gameObject.SetActive(false);
         }
+
+        // Dictionary 초기화 및 아이콘 숨기기
+        statusIconDictionary = new Dictionary<StatusEffectType, StatusIconMapping>(); // 타입 변경
+        if (statusIconMappings != null)
+        {
+            foreach (var mapping in statusIconMappings)
+            {
+                if (mapping.iconImage != null)
+                {
+                    statusIconDictionary[mapping.effectType] = mapping; // 객체 저장
+                    mapping.iconImage.gameObject.SetActive(false); // 아이콘 숨김
+                    if (mapping.durationText != null)
+                    {
+                        mapping.durationText.gameObject.SetActive(false); // 텍스트 숨김
+                    }
+                }
+            }
+        }
     }
 
+    // ▼▼▼ 4. SetStatusIconActive 함수를 'UpdateStatusIcon' 함수로 변경 ▼▼▼
+    /// <summary>
+    /// 지정된 상태 이상 아이콘과 남은 턴 수를 업데이트합니다. Enemy.cs 등에서 호출됩니다.
+    /// </summary>
+    /// <param name="type">상태 이상 종류</param>
+    /// <param name="isActive">아이콘 활성화 여부</param>
+    /// <param name="duration">남은 턴 수 (0 이하면 텍스트 숨김)</param>
+    public void UpdateStatusIcon(StatusEffectType type, bool isActive, int duration = 0)
+    {
+        // Dictionary에서 해당 타입의 Mapping 객체를 찾습니다.
+        if (statusIconDictionary != null && statusIconDictionary.TryGetValue(type, out StatusIconMapping mapping))
+        {
+            if (mapping.iconImage != null)
+            {
+                // 아이콘 활성화/비활성화
+                mapping.iconImage.gameObject.SetActive(isActive);
+            }
+
+            // 텍스트 업데이트 로직
+            if (mapping.durationText != null)
+            {
+                // 아이콘이 활성화 상태이고, duration 값이 0보다 크면 텍스트 표시
+                if (isActive && duration > 0)
+                {
+                    mapping.durationText.text = duration.ToString();
+                    mapping.durationText.gameObject.SetActive(true);
+                }
+                else // 그렇지 않으면 텍스트 숨김
+                {
+                    mapping.durationText.gameObject.SetActive(false);
+                }
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"HpBarController에 '{type}' 타입의 아이콘 매핑이 등록되지 않았습니다.");
+        }
+    }
 
     void Update()
     {

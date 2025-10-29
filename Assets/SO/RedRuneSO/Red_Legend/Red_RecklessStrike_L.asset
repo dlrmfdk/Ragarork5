@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7f609cf4ce8afc4f8e8cfa894e58f39, type: 3}
+  m_Name: Red_RecklessStrike_L
+  m_EditorClassIdentifier: 
+  runeType: 0
+  color: 0
+  rarity: 2
+  displayName: "\uBB34\uBAA8\uD55C \uAC15\uD0C0"
+  description: "nx3\uC758 \uB370\uBBF8\uC9C0\uB97C \uC8FC\uC9C0\uB9CC \n\uC790\uC2E0\uC5D0\uAC8C\uB3C4
+    n\uB9CC\uD07C\uC758\n \uB370\uBBF8\uC9C0\uB97C \uC90D\uB2C8\uB2E4."
+  icon: {fileID: 0}
+  isBasicRune: 0
+  initialDeckCount: 0
+  effectSO: {fileID: 11400000, guid: 74a934b8626b902449c2281dff8c16b6, type: 2}
+  requiresEnemyTarget: 0

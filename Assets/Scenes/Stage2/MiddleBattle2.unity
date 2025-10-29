@@ -1917,7 +1917,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   normalEnemyList: []
   eliteEnemyList:
-  - {fileID: 11400000, guid: 20efe1446ca642945b73cb0223de80d9, type: 2}
+  - {fileID: 11400000, guid: 2183a2a4d5a49654a86f998fb16a6e55, type: 2}
   bossEnemyList: []
   minEnemiesToSpawn: 1
   maxEnemiesToSpawn: 1
@@ -6708,7 +6708,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -100
-  m_Sprite: {fileID: 21300000, guid: dac14b543b5d28d44a5a934a344f367b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: fc90e4c10be38024897e3e9670bd4a81, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -6728,8 +6728,8 @@ Transform:
   m_GameObject: {fileID: 1099484328}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5154, y: 7.1, z: 0}
-  m_LocalScale: {x: 1.9980235, y: 1.9299092, z: 0.33761802}
+  m_LocalPosition: {x: -1, y: 5, z: 0}
+  m_LocalScale: {x: 3.0513308, y: 3.0513308, z: 0.4120737}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -7514,7 +7514,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
