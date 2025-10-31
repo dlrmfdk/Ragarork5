@@ -24,11 +24,11 @@ public class ConditionalDamageEffectSO : BaseRuneEffectSO
             if (conditionMet)
             {
                 // CHANGED: 고정된 conditionalDamage 대신 runeValue를 사용합니다.
-                target.Hit(runeValue, user);
+                target.Hit(runeValue+5, user);
             }
             else
             {
-                target.Hit(baseDamage, user);
+                target.Hit(runeValue, user);
             }
         }
     }

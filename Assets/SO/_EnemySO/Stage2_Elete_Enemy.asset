@@ -15,8 +15,8 @@ MonoBehaviour:
   enemyName: Monster
   enemyPrefab: {fileID: 9110295653235843930, guid: 769628c18f0478b4a96db6218838d6f5, type: 3}
   hp: 200
-  damage: 5
-  defense: 0
+  damage: 7
+  defense: 10
   category: 1
   actionPatterns:
   - {fileID: 11400000, guid: 873515a8aa027014497d8e83d1bb7a46, type: 2}

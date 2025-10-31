@@ -91,22 +91,50 @@ public class TurnManager : MonoBehaviour
             yield return new WaitForSeconds(1.0f); // (이 시간을 0.5f ~ 1.5f 사이로 조절하세요)
 
             yield return StartCoroutine(EnemyTurn());
-            if (IsBattleOver()) // 예: 플레이어 체력 확인
+            // ▼▼▼ 이 부분이 핵심 수정 사항입니다 ▼▼▼
+
+            // 적 턴 직후 승리 확인
+
+            if (IsBattleOver())
+
             {
-                HandleBattleEnd(false); // 플레이어 패배 (예시)
+
+                // 적 턴이 끝났을 때 적이 죽은 것은 '플레이어 승리'입니다.
+
+                HandleBattleEnd(true);
+
                 yield break;
+
             }
+
+
+
+            // 적 턴 직후 플레이어 사망 확인
+
+            if (Player.Instance.CurrentHealth <= 0)
+
+            {
+
+                HandleBattleEnd(false); // 플레이어 패배
+
+                yield break;
+
+            }
+
+            // ▲▲▲ 수정 완료 ▲▲▲
         }
     }
 
     private IEnumerator PlayerTurn()
     {
         Debug.Log("[PlayerTurn] 시작");
-        // 턴 시작 시 플레이어의 방어도를 초기화합니다.
+        // ▼▼▼ 이 부분을 수정합니다 ▼▼▼
+        // 턴 시작 시 플레이어의 방어도를 처리합니다 (유지 또는 초기화).
         if (Player.Instance != null)
         {
-            Player.Instance.ResetDefense();
+            Player.Instance.ProcessTurnStartDefense(); // ResetDefense 대신 이 함수 호출
         }
+        // ▲▲▲ 수정 완료 ▲▲▲
 
         isLoading = true;
         myTurn = true;
@@ -146,14 +174,42 @@ public class TurnManager : MonoBehaviour
 
         if (enemySpawner != null && enemySpawner.SpawnedEnemies != null)
         {
-            var currentEnemies = new List<Enemy>(enemySpawner.SpawnedEnemies);
-            foreach (var e in currentEnemies)
+            // ▼▼▼ [핵심 수정] 리스트 복사본 사용 및 루프 내 사망 처리 ▼▼▼
+            var enemiesPerformingTurn = new List<Enemy>(enemySpawner.SpawnedEnemies); // 턴 시작 시점의 적 목록 복사
+
+            foreach (var enemy in enemiesPerformingTurn)
             {
-                if (e != null && e.gameObject.activeInHierarchy && e.currentHealth > 0)
+                // 1. 적이 이미 죽었거나 비활성화 상태면 건너<0xEB><0x9C><0x84>
+                if (enemy == null || !enemy.gameObject.activeInHierarchy || enemy.currentHealth <= 0)
                 {
-                    yield return StartCoroutine(e.PerformTurn());
+                    continue;
+                }
+
+                // 2. 적의 행동 코루틴 실행
+                yield return StartCoroutine(enemy.PerformTurn());
+
+                // 3. [중요] 적이 방금 행동(특히 상태이상 데미지)으로 죽었는지 확인
+                if (enemy != null && enemy.currentHealth <= 0)
+                {
+                    Debug.Log($"[EnemyTurn] {enemy.name}이(가) 자신의 턴 행동 중 사망 감지. DieSequence 완료 대기.");
+                    // 적의 DieSequence 코루틴이 완전히 끝날 때까지 기다립니다.
+                    // (DieSequence 내부에서 리스트 제거 및 오브젝트 파괴가 일어남)
+                    // -> Enemy 스크립트가 DieSequence 코루틴 핸들을 반환하도록 수정하거나,
+                    // -> 충분한 시간(애니메이션 시간 이상)을 기다려 줍니다. 여기서는 후자를 사용.
+                    //    (DieSequence의 애니메이션 대기 시간 + 약간의 여유)
+                    yield return new WaitForSeconds(1.5f); // 예: DieSequence 애니메이션 시간이 1초라면 1.5초 대기
+
+                    // 4. [중요] 한 명이 죽었으므로, 전투가 끝났는지 '즉시' 확인
+                    if (IsBattleOver())
+                    {
+                        Debug.Log("[EnemyTurn] 루프 중 전투 종료 감지됨.");
+                        // HandleBattleEnd는 GameLoop에서 처리하므로 여기서는 루프만 탈출
+                        isLoading = false; // 로딩 상태 해제
+                        yield break; // EnemyTurn 코루틴 종료
+                    }
                 }
             }
+            // ▲▲▲ 수정 완료 ▲▲▲
         }
         isLoading = false;
     }

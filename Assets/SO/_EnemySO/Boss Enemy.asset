@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: Boss
   enemyPrefab: {fileID: 8045317353110916379, guid: 2405a93de35c4444c83be6b3be308a5b, type: 3}
-  hp: 100
+  hp: 200
   damage: 10
-  defense: 0
+  defense: 10
   category: 2
   actionPatterns:
-  - {fileID: 11400000, guid: 070c14fa8cd0bf140a5b275e54e714bc, type: 2}
   - {fileID: 11400000, guid: bc096efaee09465468337aa3fcde046d, type: 2}
   - {fileID: 11400000, guid: dfef96746148c444697c494b25427d00, type: 2}
+  chargeAttackAction: {fileID: 11400000, guid: 070c14fa8cd0bf140a5b275e54e714bc, type: 2}
   penaltyRune: {fileID: 11400000, guid: 13a58c87315af91478650ce1100757c2, type: 2}

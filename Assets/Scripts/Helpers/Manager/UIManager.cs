@@ -4,6 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using System.Text.RegularExpressions; // ▼▼▼ Regex 사용 위해 추가 ▼▼▼
+#if UNITY_EDITOR // 에디터 종료 위해 추가
+using UnityEditor;
+#endif
 
 public class UIManager : MonoBehaviour
 {
@@ -13,6 +17,13 @@ public class UIManager : MonoBehaviour
     [Header("툴팁 설정")]
     [Tooltip("기준 UI(룬 버튼) 위치에서 툴팁이 얼마나 떨어져 표시될지 설정합니다.")]
     public Vector2 tooltipOffset = new Vector2(0, 80); // Y값을 조절하여 버튼 위/아래 간격 설정
+
+    // ▼▼▼ 1. 게임 종료 버튼 변수 추가 ▼▼▼
+    [Header("게임 오버 UI")]
+    [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private Button restartButton;
+    [SerializeField] private Button exitButton; // 게임 종료 버튼 추가
+    // ▲▲▲ 변수 추가 완료 ▲▲▲
 
     private RectTransform tooltipRect;
     void Awake()
@@ -33,8 +44,40 @@ public class UIManager : MonoBehaviour
         }
         // UIManager는 씬에 종속적이므로 DontDestroyOnLoad를 사용하지 않습니다.
         Debug.Log($"[UIManager.Awake] UIManager.Instance가 '{Instance.gameObject.name}'으로 설정됨.");
+
+        // 재시작 버튼에 RestartGame 함수 연결
+        if (restartButton != null)
+        {
+            restartButton.onClick.RemoveAllListeners(); // 기존 리스너 제거
+            restartButton.onClick.AddListener(RestartGame); // 함수 연결
+        }
+
+        // ▼▼▼ 2. 게임 종료 버튼 연결 코드 추가 ▼▼▼
+        if (exitButton != null)
+        {
+            exitButton.onClick.RemoveAllListeners(); // 기존 리스너 제거
+            exitButton.onClick.AddListener(OnClickExitGame); // 함수 연결
+        }
+        // ▲▲▲ 연결 코드 추가 완료 ▲▲▲
+
     }
 
+    // ▼▼▼ 3. 게임 종료 함수 추가 (Lobby/PauseManager와 동일한 내용) ▼▼▼
+    /// <summary>
+    /// 게임 종료 버튼 클릭 시 호출될 함수입니다.
+    /// </summary>
+    public void OnClickExitGame()
+    {
+        Debug.Log("게임 종료 버튼 클릭됨 (게임 오버 화면)");
+        Time.timeScale = 1f; // 안전하게 타임스케일 복구
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+    // ▲▲▲ 함수 추가 완료 ▲▲▲
     void Start()
     {
         // 초기 UI 상태 설정
@@ -61,6 +104,34 @@ public class UIManager : MonoBehaviour
         // UIManager의 모든 설정이 완료된 후 이벤트 발생
         OnUIManagerReady?.Invoke();
     }
+
+    /// <summary>
+    /// 게임 오버 패널을 화면에 표시합니다. Player.cs에서 호출됩니다.
+    /// </summary>
+    public void ShowGameOverPanel()
+    {
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true);
+            // 필요하다면 다른 UI들(룬 UI 등)을 여기서 숨길 수 있습니다.
+            HideRuneUI();
+        }
+    }
+
+    // ▼▼▼ 4. 게임 재시작 함수 추가 ▼▼▼
+    /// <summary>
+    /// 재시작 버튼 클릭 시 호출될 함수입니다.
+    /// </summary>
+    public void RestartGame()
+    {
+        // 게임 시간을 다시 정상으로 돌려놓습니다 (일시정지 상태였다면).
+        Time.timeScale = 1f;
+
+        // 게임의 가장 첫 씬(예: "TitleScene" 또는 "LobbyScene")을 로드합니다.
+        // 만약 GameManager의 StartNewGame이 초기화 로직을 포함한다면 그것을 호출할 수도 있습니다.
+        SceneManager.LoadScene("Lobby"); // 여기에 실제 타이틀 씬 이름을 넣으세요.
+    }
+    // ▲▲▲ 함수 추가 완료 ▲▲▲
 
     void OnDestroy()
     {
@@ -188,6 +259,39 @@ public class UIManager : MonoBehaviour
     /// </summary>
 
 
+    /// <summary>
+    /// (상태이상 아이콘 등) 단순한 제목과 설명 텍스트로 툴팁을 보여줍니다.
+    /// </summary>
+    public void ShowSimpleTooltip(string title, string description)
+    {
+        // 툴팁 UI가 연결되어 있는지 확인
+        if (tooltipRect == null || tooltipText == null) return;
+
+        // 1. 툴팁 내용 설정 (RuneSO나 RuneInstance 없이 텍스트만 사용)
+        if (string.IsNullOrEmpty(title))
+        {
+            tooltipText.text = description; // 제목이 없으면 설명만
+        }
+        else
+        {
+            tooltipText.text = $"<b>{title}</b>\n\n{description}"; // 제목 + 설명
+        }
+
+        // ▼▼▼ 6. 이 코드를 추가하세요 ▼▼▼
+        // 툴팁을 Hierarchy의 맨 아래로 보내 맨 위에 그리도록 함
+        tooltipRect.transform.SetAsLastSibling();
+        // ▲▲▲ 추가 완료 ▲▲▲
+        // 2. 툴팁 활성화
+        runeTooltipPanel.SetActive(true);
+
+        // 3. 마우스 위치를 기준으로 오프셋을 더한 위치 계산 (RuneInstance 버전과 동일)
+        Vector3 desiredPosition = Input.mousePosition + (Vector3)tooltipOffset;
+
+        // 4. 위치 보정 및 최종 위치 설정
+        tooltipRect.position = GetCorrectedTooltipPosition(desiredPosition);
+    }
+    // ▲▲▲ 함수 추가 완료 ▲▲▲
+
 
     /// <summary>
     /// (보상 화면용) RuneSO를 받아 정적인 설명으로 툴팁을 보여줍니다.
@@ -203,7 +307,11 @@ public class UIManager : MonoBehaviour
         runeTooltipPanel.SetActive(true);
 
         // 3. 앵커를 기준으로 이상적인 위치 계산
-        Vector3 desiredPosition = anchorTransform.position;
+        //Vector3 desiredPosition = anchorTransform.position;
+        // ▼▼▼ 3. 이 부분을 수정/추가하세요 ▼▼▼
+        // 3. 앵커(버튼) 위치를 기준으로 '오프셋'을 더한 위치를 계산합니다.
+        Vector3 desiredPosition = anchorTransform.position + (Vector3)tooltipOffset;
+        // ▲▲▲ 수정 완료 ▲▲▲
         // 필요하다면 오프셋을 여기에 더할 수 있습니다.
         // desiredPosition += (Vector3)tooltipOffset;
 
@@ -214,23 +322,134 @@ public class UIManager : MonoBehaviour
     /// <summary>
     /// (핸드 슬롯용) RuneInstance를 받아 동적인 설명으로 툴팁을 보여줍니다.
     /// </summary>
+    /// 
+
+
+    //public void ShowRuneTooltip(RuneInstance runeInstance)
+    //{
+    //    if (tooltipRect == null || tooltipText == null || runeInstance?.SO == null) return;
+
+    //    // 1. 툴팁 내용 설정
+    //    string formattedDesc = runeInstance.SO.description.Replace("n", runeInstance.value.ToString());
+    //    tooltipText.text = $"<b>{runeInstance.SO.displayName}</b>\n\n{formattedDesc}";
+
+    //    // 2. 툴팁 활성화
+    //    runeTooltipPanel.SetActive(true);
+
+    //    // 3. 마우스 위치를 기준으로 이상적인 위치 계산
+    //    Vector3 desiredPosition = Input.mousePosition + (Vector3)tooltipOffset;
+
+    //    // 4. 위치 보정 및 최종 위치 설정
+    //    tooltipRect.position = GetCorrectedTooltipPosition(desiredPosition);
+    //}
+
+
+
     public void ShowRuneTooltip(RuneInstance runeInstance)
     {
         if (tooltipRect == null || tooltipText == null || runeInstance?.SO == null) return;
 
-        // 1. 툴팁 내용 설정
-        string formattedDesc = runeInstance.SO.description.Replace("n", runeInstance.value.ToString());
-        tooltipText.text = $"<b>{runeInstance.SO.displayName}</b>\n\n{formattedDesc}";
+        // 1. 원본 설명 가져오기
+        string description = runeInstance.SO.description;
+        int nValue = runeInstance.value; // 현재 룬의 값
 
-        // 2. 툴팁 활성화
+        // ▼▼▼ 2. 골드 값 가져오기 (계산을 위해 미리) ▼▼▼
+        int playerGold = 0;
+        if (Player.Instance != null)
+        {
+            playerGold = Player.Instance.Gold;
+        }
+        else
+        {
+            Debug.LogWarning("Player.Instance를 찾을 수 없어 골드 관련 계산이 0이 될 수 있습니다.");
+        }
+        // ▲▲▲
+        // 3.1. [n+(gold/DIVISOR)] 패턴 (예: [n+(gold/100)])
+        description = Regex.Replace(description, @"\[n\+\(gold\/(\d+)\)\]", match =>
+        {
+            if (int.TryParse(match.Groups[1].Value, out int divisor) && divisor != 0)
+            {
+                int bonusDamage = playerGold / divisor; // 정수 나눗셈 (소수점 버림)
+                int totalDamage = nValue + bonusDamage;
+                return totalDamage.ToString();
+            }
+            return match.Value;
+        });
+        // ▼▼▼ 4. 계산 자리 표시자 처리 (Regex 사용) ▼▼▼
+
+        // 4.1. [n*PERCENT%] 패턴 찾기 (예: [n*70%])
+        // Regex 설명: \[n\*(\d+)%\]
+        // \[ \] : 대괄호 문자 자체
+        // n\* : "n*" 문자열
+        // (\d+) : 숫자(0-9)가 1번 이상 반복되는 그룹 (이 숫자를 추출)
+        // %\] : "%]" 문자열
+        description = Regex.Replace(description, @"\[n\*(\d+)%\]", match =>
+        {
+            if (int.TryParse(match.Groups[1].Value, out int percent)) // 그룹 1 (숫자 부분) 추출
+            {
+                // 계산: n * percent / 100 (소수점 반올림)
+                int result = Mathf.RoundToInt((float)nValue * percent / 100f);
+                return result.ToString(); // 계산 결과 문자열로 반환
+            }
+            return match.Value; // 숫자로 변환 실패 시 원본 문자열 반환
+        });
+
+        // 4.2. [n/DIVISOR] 패턴 찾기 (예: [n/2])
+        // Regex 설명: \[n\/(\d+)\]
+        // \/ : 슬래시 문자 자체
+        description = Regex.Replace(description, @"\[n\/(\d+)\]", match =>
+        {
+            if (int.TryParse(match.Groups[1].Value, out int divisor) && divisor != 0) // 0으로 나누기 방지
+            {
+                // 계산: n / divisor (소수점 올림)
+                int result = Mathf.CeilToInt((float)nValue / divisor);
+                return result.ToString();
+            }
+            return match.Value;
+        });
+        // ▲▲▲ 계산 처리 완료 ▲▲▲
+        
+
+        // 3. 합계 자리 표시자 처리 (RuneDeckManager 필요)
+        if (RuneDeckManager.Instance != null)
+        {
+            if (description.Contains("blueSum"))
+            {
+                description = description.Replace("blueSum", RuneDeckManager.Instance.GetPredictedTotalDefense().ToString());
+            }
+            if (description.Contains("redSum"))
+            {
+                description = description.Replace("redSum", RuneDeckManager.Instance.GetPredictedTotalDamage().ToString());
+            }
+            if (description.Contains("yellowSum"))
+            {
+                description = description.Replace("yellowSum", RuneDeckManager.Instance.GetPredictedTotalGold().ToString());
+            }
+        }
+        else if (description.Contains("blueSum") || description.Contains("redSum") || description.Contains("yellowSum"))
+        {
+            Debug.LogWarning("RuneDeckManager 인스턴스를 찾을 수 없어 합계 자리 표시자를 계산할 수 없습니다.");
+            description = description.Replace("blueSum", "?").Replace("redSum", "?").Replace("yellowSum", "?");
+        }
+
+
+        // 2. 기본 [n] 자리 표시자 대체
+        description = description.Replace("n", nValue.ToString());
+
+        // 5. 최종 포맷된 설명으로 툴팁 텍스트 설정
+        tooltipText.text = $"<b>{runeInstance.SO.displayName}</b>\n\n{description}";
+
+        // ▼▼▼ 6. 이 코드를 추가하세요 ▼▼▼
+        // 툴팁을 Hierarchy의 맨 아래로 보내 맨 위에 그리도록 함
+        tooltipRect.transform.SetAsLastSibling();
+        // ▲▲▲ 추가 완료 ▲▲▲
+
+        // --- 툴팁 위치 계산 및 표시는 기존과 동일 ---
         runeTooltipPanel.SetActive(true);
-
-        // 3. 마우스 위치를 기준으로 이상적인 위치 계산
         Vector3 desiredPosition = Input.mousePosition + (Vector3)tooltipOffset;
-
-        // 4. 위치 보정 및 최종 위치 설정
         tooltipRect.position = GetCorrectedTooltipPosition(desiredPosition);
     }
+
 
     /// <summary>
     /// 룬 설명 툴팁을 숨깁니다.

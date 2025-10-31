@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26f29b6e05809d74ab8b0f0bea810609, type: 3}
   m_Name: LifestealAttackEffect
   m_EditorClassIdentifier: 
-  lifestealPercentage: 0.1
+  lifestealPercentage: 3

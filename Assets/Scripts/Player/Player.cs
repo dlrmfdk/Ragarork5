@@ -58,6 +58,14 @@ public class Player : MonoBehaviour
     private HpBarController hpBarController;
     private SkeletonAnimation skeletonAnimation;
     //private AudioSource audioSource;
+    // ▼▼▼ 1. 방어도 유지 관련 변수 추가 ▼▼▼
+    private int defenseCarryOverTurns = 0; // 방어도가 유지될 남은 턴 수
+    // ▲▲▲ 변수 추가 완료 ▲▲▲
+
+    // ▼▼▼ 1. 변수 2개 추가 ▼▼▼
+    private Vector3 initialPosition; // 캐릭터의 원래 위치를 저장할 변수
+    private Coroutine hitEffectCoroutine; // 현재 실행 중인 피격 코루틴을 저장할 변수
+    // ▲▲▲ 변수 추가 완료 ▲▲▲
 
     void Awake()
     {
@@ -118,6 +126,10 @@ public class Player : MonoBehaviour
         // 체력은 Start에서 한 번만 초기화하여 유지되도록 함
         currentHealth = maxHealth;
 
+        // ▼▼▼ 2. Start 함수에 1줄 추가 ▼▼▼
+        // 게임 시작 시(또는 씬 로드 시) 캐릭터의 '원래 위치'를 저장
+        initialPosition = transform.position;
+        // ▲▲▲ 추가 완료 ▲▲▲
         // 새 전투마다 초기화될 스탯들
         PrepareForNewBattle();
 
@@ -222,6 +234,15 @@ public class Player : MonoBehaviour
             return;
         }
 
+        // ▼▼▼ 피격 연출 코루틴 호출 (이펙트/사운드와 함께) ▼▼▼
+        // 이미 피격 연출 중이라면 중지하고 새로 시작 (연속 피격 시 깔끔함)
+        if (hitEffectCoroutine != null)
+        {
+            StopCoroutine(hitEffectCoroutine);
+        }
+        hitEffectCoroutine = StartCoroutine(HitJoltCoroutine());
+        // ▲▲▲ 피격 연출 호출 끝 ▲▲▲
+
         // ▼▼▼ 플레이어 피격 이펙트 생성 코드 추가 ▼▼▼
         if (Player.Instance != null)
         {
@@ -247,6 +268,43 @@ public class Player : MonoBehaviour
         if (currentHealth <= 0) Die();
     }
 
+    // ▼▼▼ 4. 스크립트 맨 아래 (또는 적절한 위치)에 새 코루틴 추가 ▼▼▼
+    /// <summary>
+    /// 플레이어가 피격당했을 때 뒤로 움찔하는 연출을 보여주는 코루틴
+    /// </summary>
+    private IEnumerator HitJoltCoroutine()
+    {
+        float joltDistance = -1f; // 뒤로 밀려날 거리 (좌표 기준. 왼쪽으로 0.3)
+        float joltDuration = 0.08f;  // 뒤로 밀려나는 데 걸리는 시간 (매우 짧게)
+        float returnDuration = 0.12f; // 제자리로 돌아오는 데 걸리는 시간
+
+        Vector3 joltPosition = initialPosition + new Vector3(joltDistance, 0, 0);
+        float elapsed = 0f;
+
+        // 1. 뒤로 빠르게 이동
+        while (elapsed < joltDuration)
+        {
+            transform.position = Vector3.Lerp(initialPosition, joltPosition, elapsed / joltDuration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        transform.position = joltPosition;
+
+        // 2. 제자리로 천천히 복귀
+        elapsed = 0f;
+        while (elapsed < returnDuration)
+        {
+            transform.position = Vector3.Lerp(joltPosition, initialPosition, elapsed / returnDuration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        transform.position = initialPosition; // 정확히 제자리로
+
+        hitEffectCoroutine = null; // 코루틴 종료
+    }
+    // ▲▲▲ 함수 추가 완료 ▲▲▲
+
+
     public void IncreaseDefense(int defense)
     {
         //if (defsound != null) audioSource.PlayOneShot(defsound);
@@ -256,15 +314,60 @@ public class Player : MonoBehaviour
         UpdateAllUI();
     }
 
+    // ▼▼▼ 2. 방어도 유지 턴 설정 함수 추가 ▼▼▼
+    /// <summary>
+    /// 지정된 턴 수만큼 방어도를 유지하도록 설정합니다.
+    /// </summary>
+    public void SetDefenseCarryOver(int turns)
+    {
+        // 이미 설정된 값보다 더 큰 값이 들어오면 갱신 (예: 1턴 유지 중에 2턴 유지 효과 사용)
+        if (turns > defenseCarryOverTurns)
+        {
+            defenseCarryOverTurns = turns;
+            Debug.Log($"방어도가 다음 {defenseCarryOverTurns}턴 동안 유지됩니다.");
+            // 필요하다면 여기에 방어도 유지 아이콘/효과 표시 로직 추가
+        }
+    }
+    // ▲▲▲ 함수 추가 완료 ▲▲▲
+
+
+    // ▼▼▼ 3. ResetDefense 함수 수정 또는 새 함수 추가 ▼▼▼
+    /// <summary>
+    /// 턴 시작 시 방어도를 처리합니다. 유지가 아니면 초기화, 유지 중이면 턴 카운트 감소.
+    /// </summary>
+    public void ProcessTurnStartDefense()
+    {
+        if (defenseCarryOverTurns > 0) // 방어도 유지 턴이 남아있다면
+        {
+            defenseCarryOverTurns--; // 남은 턴 수 감소
+            Debug.Log($"방어도 유지 중. 남은 턴: {defenseCarryOverTurns}. 현재 방어도: {currentDefense}");
+            // 방어도는 초기화하지 않음
+            if (defenseCarryOverTurns <= 0)
+            {
+                Debug.Log("방어도 유지가 이번 턴에 종료됩니다.");
+                // 필요하다면 방어도 유지 아이콘/효과 제거 로직 추가
+            }
+        }
+        else // 방어도 유지가 아니라면
+        {
+            currentDefense = 0; // 방어도를 0으로 초기화
+            Debug.Log("[Player] 턴 시작 시 방어도를 초기화합니다.");
+        }
+        UpdateAllUI(); // 변경된 방어도(유지되거나 0이 됨)를 UI에 반영
+    }
+
+    // 기존 ResetDefense 함수는 이제 사용되지 않거나, ProcessTurnStartDefense로 대체됩니다.
+    // 혼란을 피하기 위해 주석 처리하거나 삭제하는 것을 권장합니다.
+
     /// <summary>
     /// 방어도를 0으로 초기화하고 UI를 업데이트합니다.
     /// </summary>
-    public void ResetDefense()
-    {
-        currentDefense = 0;
-        Debug.Log("[Player] 턴 시작 시 방어도를 초기화합니다.");
-        UpdateAllUI(); // HP 바의 방어 수치를 갱신하기 위해 호출
-    }
+    //public void ResetDefense()
+    //{
+    //    currentDefense = 0;
+    //    Debug.Log("[Player] 턴 시작 시 방어도를 초기화합니다.");
+    //    UpdateAllUI(); // HP 바의 방어 수치를 갱신하기 위해 호출
+    //}
  
     public void IncreaseAttack(float amount)
     {
@@ -320,6 +423,15 @@ public class Player : MonoBehaviour
         }
 
         // 여기에 게임 오버 처리 로직 추가 (예: 결과창 표시)
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowGameOverPanel();
+        }
+        else
+        {
+            Debug.LogError("UIManager 인스턴스를 찾을 수 없어 게임 오버 UI를 표시할 수 없습니다!");
+        }
+        // ▲▲▲ 추가 완료 ▲▲▲
     }
 
     public void AtkAni()

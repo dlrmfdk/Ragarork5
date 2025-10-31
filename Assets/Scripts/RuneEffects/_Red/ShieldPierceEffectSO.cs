@@ -30,7 +30,7 @@ public class ShieldPierceEffectSO : BaseRuneEffectSO
             if (target.CurrentArmor > 0)
             {
                 Debug.Log($"{target.EnemyData.EnemyName}은(는) 방어도가 있으므로 {pierceDamage}의 관통 피해를 입습니다.");
-                target.Hit(runeValue, user);
+                target.Hit(runeValue*2, user);
             }
             else
             {

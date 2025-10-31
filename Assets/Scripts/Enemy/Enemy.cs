@@ -61,6 +61,10 @@ public class Enemy : MonoBehaviour
     private int bleedTurnsRemaining = 0;
 
 
+    // ▼▼▼ 2. 변수 2개 추가 ▼▼▼
+    private Vector3 initialPosition; // 적의 원래 위치를 저장할 변수
+    private Coroutine hitEffectCoroutine; // 현재 실행 중인 피격 코루틴
+    // ▲▲▲ 변수 추가 완료 ▲▲▲
 
     /// <summary>
     /// 이 적이 현재 화상 상태인지 여부를 반환합니다. (읽기 전용)
@@ -105,6 +109,10 @@ public class Enemy : MonoBehaviour
             skeletonAnimation.AnimationState.SetAnimation(0, "idle", true); // 트랙 0번, Idle 애니메이션, 반복 true
         }
 
+        // ▼▼▼ 3. Initialize 함수 끝에 1줄 추가 ▼▼▼
+        // 생성 시점의 '원래 위치'를 저장
+        initialPosition = transform.position;
+        // ▲▲▲ 추가 완료 ▲▲▲
 
         if (intentUIPrefab != null)
         {
@@ -149,6 +157,15 @@ public class Enemy : MonoBehaviour
     {
         // ▼▼▼ 여기에 피격 이펙트 재생 코드를 추가합니다. ▼▼▼
         // 이펙트 위치는 이 적(this)의 effectOffset을 사용합니다.
+        // ▼▼▼ 피격 연출 코루틴 호출 ▼▼▼
+        // 이미 피격 연출 중이라면 중지하고 새로 시작
+        if (hitEffectCoroutine != null)
+        {
+            StopCoroutine(hitEffectCoroutine);
+        }
+        hitEffectCoroutine = StartCoroutine(HitJoltCoroutine());
+        // ▲▲▲ 피격 연출 호출 끝 ▲▲▲
+
         Vector3 effectPos = transform.position + this.effectOffset;
         EffectManager.Instance.PlayEffect(EffectType.EnemyHit, effectPos);
         // ▲▲▲ 추가 완료 ▲▲▲
@@ -166,7 +183,8 @@ public class Enemy : MonoBehaviour
         }
 
         // 고정 방어력(Defense)을 고려한 실제 체력 피해량 계산
-        int effectiveDamage = Mathf.Max(finalDamage - enemyData.Defense, 0);
+        //int effectiveDamage = Mathf.Max(finalDamage - enemyData.Defense, 0);
+        int effectiveDamage = finalDamage;
         currentHp -= effectiveDamage;
 
         // ▼▼▼ '도끼 강화' 상태 전환 로직에 카테고리 확인 추가 ▼▼▼
@@ -214,6 +232,15 @@ public class Enemy : MonoBehaviour
     //방어력을 무시하는 직접적인 피해를 받는 메소드 추가
     public void TakeDirectDamage(int damageAmount)
     {
+        // ▼▼▼ 피격 연출 코루틴 호출 ▼▼▼
+        // (Hit와 동일하게)
+        if (hitEffectCoroutine != null)
+        {
+            StopCoroutine(hitEffectCoroutine);
+        }
+        hitEffectCoroutine = StartCoroutine(HitJoltCoroutine());
+        // ▲▲▲ 피격 연출 호출 끝 ▲▲▲
+
         currentHp -= damageAmount;
         Debug.Log($"{enemyData.EnemyName}이(가) {damageAmount}의 직접 피해를 입었습니다. 남은 체력: {currentHp}");
 
@@ -223,6 +250,42 @@ public class Enemy : MonoBehaviour
         if (currentHp <= 0)
             Die();
     }
+    // ▼▼▼ 6. 스크립트 맨 아래 (또는 적절한 위치)에 새 코루틴 추가 ▼▼▼
+    /// <summary>
+    /// 적이 피격당했을 때 오른쪽으로 움찔하는 연출을 보여주는 코루틴
+    /// </summary>
+    private IEnumerator HitJoltCoroutine()
+    {
+        // [수정] 플레이어(-0.3f)와 반대로, 오른쪽(+)으로 밀려납니다.
+        float joltDistance = 1f; // 오른쪽으로 밀려날 거리
+        float joltDuration = 0.08f;  // 밀려나는 데 걸리는 시간
+        float returnDuration = 0.12f; // 제자리로 돌아오는 데 걸리는 시간
+
+        Vector3 joltPosition = initialPosition + new Vector3(joltDistance, 0, 0);
+        float elapsed = 0f;
+
+        // 1. 오른쪽으로 빠르게 이동
+        while (elapsed < joltDuration)
+        {
+            transform.position = Vector3.Lerp(initialPosition, joltPosition, elapsed / joltDuration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        transform.position = joltPosition;
+
+        // 2. 제자리(initialPosition)로 천천히 복귀
+        elapsed = 0f;
+        while (elapsed < returnDuration)
+        {
+            transform.position = Vector3.Lerp(joltPosition, initialPosition, elapsed / returnDuration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        transform.position = initialPosition; // 정확히 제자리로
+
+        hitEffectCoroutine = null; // 코루틴 종료
+    }
+    // ▲▲▲ 함수 추가 완료 ▲▲▲
 
     // 수정된 Die() 함수: 죽음 시퀀스 코루틴을 시작하는 역할만 합니다.
     void Die()
@@ -296,24 +359,33 @@ public class Enemy : MonoBehaviour
     {
         if (intentUIInstance == null) return;
 
-        if (nextAction == null)
+        // ▼▼▼ 1. 이 함수 전체를 아래 코드로 덮어쓰세요 ▼▼▼
+        if (nextAction == null || isDying)
         {
-            intentUIInstance.Hide();
+            intentUIInstance.Hide(); // Hide 함수는 툴팁 정보도 초기화함
             return;
         }
 
         int displayValue = 0;
-        if (nextAction.actionType == EnemyActionType.Attack)
+        string title = nextAction.tooltipTitle; // SO에서 툴팁 제목 가져오기
+        string description = "";
+
+        switch (nextAction.actionType)
         {
-            // 공격 행동일 경우, 대략적인 피해량을 계산해서 전달
-            displayValue = enemyData.Damage; // 여기서는 평균값인 기본 데미지를 표시
-        }
-        else if (nextAction.actionType == EnemyActionType.Defend)
-        {
-            displayValue = enemyData.Defense * 3;
+            case EnemyActionType.Attack:
+                displayValue = enemyData.Damage; // multiplier 계산 삭제
+                description = string.Format(nextAction.tooltipDescriptionFormat, displayValue); // 툴팁 설명은 그대로
+                break;
+            case EnemyActionType.Defend:
+                displayValue = enemyData.Defense; // multiplier 계산 삭제
+                description = string.Format(nextAction.tooltipDescriptionFormat, displayValue); // 툴팁 설명은 그대로
+                break;
+                // ... (default) ...
         }
 
-        intentUIInstance.ShowIntent(nextAction, displayValue);
+        // 3. UI 업데이트 및 툴팁 내용 전달
+        intentUIInstance.ShowIntent(nextAction, displayValue, title, description);
+        // ▲▲▲ 수정 완료 ▲▲▲
     }
 
 
@@ -330,7 +402,26 @@ public class Enemy : MonoBehaviour
             isCharging = false;
 
             int chargedDamage = Mathf.RoundToInt(enemyData.Damage * 2.5f);
-            yield return StartCoroutine(AttackPlayer(chargedDamage, 1));
+            // ▼▼▼ [핵심 수정] ▼▼▼
+            // 차지 공격에 사용할 애니메이션 이름을 가져옵니다.
+            string chargeAnimName = "attack"; // 기본값
+
+            // 1. EnemySO에 'chargeAttackAction'이 연결되어 있는지 확인
+            if (enemyData.chargeAttackAction != null)
+            {
+                // 2. 연결된 SO에서 애니메이션 이름 사용
+                chargeAnimName = enemyData.chargeAttackAction.animationName;
+            }
+            else
+            {
+                Debug.LogWarning($"{enemyData.EnemyName}의 EnemySO에 'Charge Attack Action'이 연결되지 않았습니다! 기본 애니메이션('attack')을 사용합니다.");
+                // 만약 보스의 기본 차지 공격 이름이 'attack_magic'이라면 아래처럼 수정하세요.
+                // chargeAnimName = "attack_magic";
+            }
+
+            // 3. 수정된 AttackPlayer 함수 호출 (animName 전달)
+            yield return StartCoroutine(AttackPlayer(chargedDamage, 1, chargeAnimName));
+            // ▲▲▲ 수정 완료 ▲▲▲
 
             ChooseNextAction();
             yield break;
@@ -359,6 +450,8 @@ public class Enemy : MonoBehaviour
         // 턴 시작 시 방어도 초기화
         currentArmor = 0;
         if (hpBarController != null) hpBarController.SetCurrentDefense(currentArmor);
+        Debug.Log($"[방어도 초기화] {enemyData.EnemyName}의 방어도를 0으로 설정!");
+        PrintEnemyData();
 
         // 턴 시작 시 상태 이상 처리
         ProcessPoisonAtTurnStart();
@@ -370,44 +463,99 @@ public class Enemy : MonoBehaviour
         ProcessBleedAtTurnStart();
         if (currentHp <= 0) yield break;
 
-        // 일반 행동 실행
-        if (nextAction != null)
+        // ▼▼▼ 수정된 부분: 'yield break'를 삭제하고, !isDying 플래그로 행동을 제어합니다. ▼▼▼
+
+
+
+        // 일반 행동 실행 (적이 살아있을 때만 실행)
+
+        if (nextAction != null && !isDying)
+
         {
+
             Debug.Log($"{gameObject.name}이(가) '{nextAction.name}' 행동을 실행합니다.");
+
             switch (nextAction.actionType)
+
             {
+
                 case EnemyActionType.Attack:
+
                     int damage = Mathf.RoundToInt(enemyData.Damage * nextAction.damageMultiplier);
-                    yield return StartCoroutine(AttackPlayer(damage, nextAction.hitCount));
+
+                    yield return StartCoroutine(AttackPlayer(damage, nextAction.hitCount, nextAction.animationName));
+
                     break;
+
+
 
                 case EnemyActionType.Defend:
+
                     int armorToGain = Mathf.RoundToInt(enemyData.Defense * nextAction.defenseMultiplier);
+
                     GainArmor(armorToGain);
+
                     yield return new WaitForSeconds(1f);
+
                     break;
 
+
+
                 case EnemyActionType.Charge:
+
                     // '힘 모으기'는 보스만 가능하도록 안전장치를 추가합니다.
+
                     if (enemyData.Category == EnemyType.Boss)
+
                     {
+
                         Debug.Log($"<color=yellow>{enemyData.EnemyName}이(가) 힘을 모으기 시작합니다...</color>");
+
                         isCharging = true;
+
                         yield return new WaitForSeconds(1f);
+
                     }
+
                     else
+
                     {
+
                         Debug.LogWarning($"{enemyData.EnemyName}은(는) Boss가 아니라 Charge 할 수 없습니다. 턴을 스킵합니다.");
+
                         yield return new WaitForSeconds(1f);
+
                     }
+
                     break;
+
             }
+
         }
-        else
+
+        else if (isDying) // 상태 이상으로 죽었다면
+
         {
-            Debug.LogWarning($"{gameObject.name}에게 실행할 행동(nextAction)이 결정되지 않았습니다.");
-            yield return new WaitForSeconds(1f);
+
+            Debug.Log($"{enemyData.EnemyName}이(가) 상태 이상으로 사망하여 행동을 실행하지 않습니다.");
+
+            yield return new WaitForSeconds(1f); // 행동 대신 잠시 대기
+
         }
+
+        else // nextAction이 null인 경우 (행동이 결정되지 않은 경우)
+
+        {
+
+            Debug.LogWarning($"{gameObject.name}에게 실행할 행동(nextAction)이 결정되지 않았습니다.");
+
+            yield return new WaitForSeconds(1f);
+
+        }
+
+
+
+        // ▲▲▲ 수정 완료 ▲▲▲
 
         // 턴 종료 시 처리
         ProcessPoisonAtTurnEnd();
@@ -420,13 +568,16 @@ public class Enemy : MonoBehaviour
 
 
 
-    private IEnumerator AttackPlayer(int damage, int hitCount)
+    private IEnumerator AttackPlayer(int damage, int hitCount, string animName)
     {
         // 1. 공격 애니메이션을 한 번만 재생합니다. (애니메이션 자체가 여러 번 때리는 모션일 수 있음)
         if (skeletonAnimation != null)
         {
-            // "attack" 애니메이션을 반복 없이 재생합니다.
-            skeletonAnimation.AnimationState.SetAnimation(0, "attack", false);
+            // "attack" 애니메이션을 반복 없이 재생합니다. "attack" 애니메이션이 없다면 "attack_magic"을 반복없이 재생합니다.
+            //skeletonAnimation.AnimationState.SetAnimation(0, "attack_magic", false);
+
+            skeletonAnimation.AnimationState.SetAnimation(0, animName, false);
+            
         }
 
         // 약간의 선딜레이 후 실제 타격이 시작되도록 합니다.

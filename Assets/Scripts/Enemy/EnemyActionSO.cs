@@ -22,4 +22,21 @@ public class EnemyActionSO : ScriptableObject
     [Header("UI 정보")]
     public Sprite intentIcon;
     public bool showDamageValue = true;
+
+    // ▼▼▼ [이 부분을 추가하세요] ▼▼▼
+    [Header("애니메이션")]
+    [Tooltip("이 행동을 할 때 재생할 애니메이션의 이름")]
+    public string animationName = "attack"; // 기본값을 "attack"으로 설정
+    // ▲▲▲ 추가 완료 ▲▲▲
+
+    // ▼▼▼ [수정] 이 변수들을 여기에 '추가'합니다 ▼▼▼
+    [Header("의도 툴팁 정보")]
+    [Tooltip("툴팁에 표시될 제목 (예: 공격)")]
+    public string tooltipTitle = "공격";
+
+    [Tooltip("툴팁에 표시될 설명 (예: {0}의 피해를 줍니다.)\n{0}은 계산된 피해량/방어도로 자동 대체됩니다.")]
+    [TextArea(2, 4)]
+    public string tooltipDescriptionFormat = "{0}의 피해를 줍니다.";
+    // ▲▲▲ 변수 추가 완료 ▲▲▲
+
 }

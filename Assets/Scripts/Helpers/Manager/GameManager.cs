@@ -53,6 +53,7 @@ public class GameManager : MonoBehaviour
 
         // 3. 보상 관련 상태 등 다른 게임 상태 변수 초기화
         rewardShown = false;
+        
         // Player.Instance.ResetPlayerStats(); // 예시: 플레이어 스탯 초기화
 
         // 4. 게임의 첫 번째 실제 플레이 씬 로드 (예: "MapScene")

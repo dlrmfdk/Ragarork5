@@ -228,15 +228,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.39607844}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 1430f2a0025fffe439df1170dc19c7b0, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: 2cc8ae14be143f347a6c2f85afe2c3dc, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -675,8 +675,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -92, y: 49}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -10, y: 69}
+  m_SizeDelta: {x: 400, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &248622699
 MonoBehaviour:
@@ -708,7 +708,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1228,7 +1228,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 21, y: 58}
+  m_AnchoredPosition: {x: 21, y: -53}
   m_SizeDelta: {x: 1247.0781, y: 654.8182}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &428158832
@@ -1251,8 +1251,8 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 300, y: 300}
-  m_Spacing: {x: 100, y: 100}
+  m_CellSize: {x: 0, y: 0}
+  m_Spacing: {x: 500, y: 500}
   m_Constraint: 1
   m_ConstraintCount: 3
 --- !u!1 &439386448
@@ -4874,12 +4874,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allSellableRunes:
-  - {fileID: 11400000, guid: 2043cb756ad1e8046b119e61a3df90e5, type: 2}
-  - {fileID: 11400000, guid: 7c550fbea029be94ea1042964ae044d2, type: 2}
-  - {fileID: 11400000, guid: d7761ab319348ce47a559f2fb896f765, type: 2}
+  - {fileID: 11400000, guid: f6b4bcecb59b65e469ae3b9ab308c69e, type: 2}
+  - {fileID: 11400000, guid: 642f30b86ed199241a9c835f7a97f734, type: 2}
+  - {fileID: 11400000, guid: 3a5fabc3cb7a00e4dad461ff6b07c7d6, type: 2}
   - {fileID: 11400000, guid: 3a485e040736c4a4da0cbba87163b52e, type: 2}
+  - {fileID: 11400000, guid: d7761ab319348ce47a559f2fb896f765, type: 2}
+  - {fileID: 11400000, guid: 360e6a6df2cffb24a925415cf8ebd82e, type: 2}
+  - {fileID: 11400000, guid: 643d762ea48d3d04fb7505103d9065f6, type: 2}
   - {fileID: 11400000, guid: 2043cb756ad1e8046b119e61a3df90e5, type: 2}
   - {fileID: 11400000, guid: cabf19b9ab8e7d349a46877eaaa01a13, type: 2}
+  - {fileID: 11400000, guid: 432ec8dca1b56a446a5d6db591591187, type: 2}
+  - {fileID: 11400000, guid: f7fbc298c5f1d4a4e8a6c34d92bf1158, type: 2}
+  - {fileID: 11400000, guid: ae82707624d35d64a80a0a347d72657b, type: 2}
+  - {fileID: 11400000, guid: dc9265db6286ae54f94295851b5fd690, type: 2}
+  - {fileID: 11400000, guid: 599d556d6b14a1944894d909773374f6, type: 2}
+  - {fileID: 11400000, guid: 7c550fbea029be94ea1042964ae044d2, type: 2}
   numberOfItemsToShow: 6
   itemContainer: {fileID: 428158831}
   shopItemPrefab: {fileID: 2150274323120636809, guid: f4fec971d86fab840a2949f7e369b4e7, type: 3}
@@ -4924,7 +4933,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f13bafd107cd79c40acd3726f704fc6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tooltipOffset: {x: 0, y: 80}
+  tooltipOffset: {x: 0, y: 100}
+  gameOverPanel: {fileID: 0}
+  restartButton: {fileID: 0}
+  exitButton: {fileID: 0}
   redButton: {fileID: 0}
   redCountText: {fileID: 0}
   blueButton: {fileID: 0}

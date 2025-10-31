@@ -6,7 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "LifestealAttackEffect", menuName = "Runes/Effects/LifestealAttackEffect")]
 public class LifestealAttackEffectSO : BaseRuneEffectSO
 {
-    [Range(0f, 1f)]
+    
     [SerializeField] private float lifestealPercentage = 0.2f; // 20%
 
     public override void Execute(Player user, IEnumerable<Enemy> targets, int runeValue)

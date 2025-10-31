@@ -18,3 +18,5 @@ MonoBehaviour:
   hitCount: 1
   intentIcon: {fileID: 21300000, guid: 874be534e1ea3074da09e41e25ee4e2b, type: 3}
   showDamageValue: 1
+  tooltipTitle: "\uAC15\uB825\uD55C \uACF5\uACA9"
+  tooltipDescriptionFormat: "{0}\uC758 \uD53C\uD574\uB97C \uC90D\uB2C8\uB2E4."

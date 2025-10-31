@@ -79,9 +79,9 @@ public class ShopManager : MonoBehaviour
         // ... (기존 코드와 동일) ...
         switch (rarity)
         {
-            case RuneRarity.Common: return 100;
-            case RuneRarity.Rare: return 150;
-            case RuneRarity.Legend: return 200;
+            case RuneRarity.Common: return 200;
+            case RuneRarity.Rare: return 450;
+            case RuneRarity.Legend: return 700;
             default: return 999;
         }
     }
@@ -108,13 +108,17 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
+        // ▼▼▼ [수정] 밸류(value) 기준으로 리스트 정렬 ▼▼▼
+        var sortedRunes = runesToEnhance.OrderBy(r => r.value).ToList();
+        // ▲▲▲ 수정 완료 ▲▲▲
+
         // 3. 모든 조건이 충족되면, 구매 정보를 임시 변수에 저장하고 강화 절차를 시작
         this.runeToPurchase = rune;
         this.purchasePrice = price;
         this.purchasingItemUI = itemUI;
 
         // 4. 강화 패널을 보여줌
-        ShowShopEnhancementPanel(runesToEnhance);
+        ShowShopEnhancementPanel(sortedRunes);
     }
 
     /// <summary>

@@ -660,6 +660,7 @@ MonoBehaviour:
   eventPool:
   - {fileID: 11400000, guid: b4184f2761105b14a8014426a4215841, type: 2}
   - {fileID: 11400000, guid: f2c3e09c34e60974d91948bbc291bb5d, type: 2}
+  - {fileID: 11400000, guid: e7a3b3706f5d02c4384f53d8be12a713, type: 2}
   eventPanel: {fileID: 1618735798}
   eventImage: {fileID: 1827487942}
   descriptionText: {fileID: 808540126}

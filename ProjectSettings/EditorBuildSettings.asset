@@ -44,4 +44,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Stage2/BossBattle2.unity
     guid: a76a31316faedef408073925435bbeb8
+  - enabled: 1
+    path: Assets/Scenes/Stage2/EndingScene.unity
+    guid: 8a80916602a32a949ad3d05029cb6227
   m_configObjects: {}

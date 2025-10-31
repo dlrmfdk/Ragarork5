@@ -186,8 +186,14 @@ public class RewardManager : MonoBehaviour
 
         if (runesToEnhance.Count > 0)
         {
+            // ▼▼▼ [수정] 밸류(value) 기준으로 리스트 정렬 ▼▼▼
+            // .OrderBy()는 오름차순 (1, 2, 3...)으로 정렬합니다.
+            // 내림차순 (10, 9, 8...)으로 하려면 .OrderByDescending(rune => rune.value)
+            var sortedRunes = runesToEnhance.OrderBy(rune => rune.value).ToList();
+            // ▲▲▲ 수정 완료 ▲▲▲
+
             // 3. 강화할 룬이 있다면 강화 패널을 엽니다.
-            ShowEnhancementPanel(runesToEnhance);
+            ShowEnhancementPanel(sortedRunes);
         }
         else
         {

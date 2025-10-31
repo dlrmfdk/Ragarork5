@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7f609cf4ce8afc4f8e8cfa894e58f39, type: 3}
+  m_Name: R_VenomousJab
+  m_EditorClassIdentifier: 
+  runeType: 0
+  color: 0
+  rarity: 0
+  displayName: "\uB3C5 \uCC0C\uB974\uAE30"
+  description: "n \uD53C\uD574\n\uB3C5 2 \uBD80\uC5EC"
+  icon: {fileID: 21300000, guid: 1a862a305a44ca64e939c2b35b24e829, type: 3}
+  isBasicRune: 0
+  initialDeckCount: 0
+  effectSO: {fileID: 11400000, guid: d4a97da5935253d4c944341424405675, type: 2}
+  requiresEnemyTarget: 0

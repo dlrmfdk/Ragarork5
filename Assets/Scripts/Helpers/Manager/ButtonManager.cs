@@ -33,4 +33,11 @@ public class ButtonManager : MonoBehaviour
         SceneManager.LoadScene("MapScene2");
 
     }
+
+    public void onEndClickedBoss2()
+    {   
+
+        SceneManager.LoadScene("EndingScene");
+
+    }
 }
