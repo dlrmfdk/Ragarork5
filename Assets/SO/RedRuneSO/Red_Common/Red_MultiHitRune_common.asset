@@ -15,7 +15,7 @@ MonoBehaviour:
   runeType: 0
   color: 0
   rarity: 0
-  displayName: "\uC5F0\uC18D \uD0C0\uACA9 \uB8EC"
+  displayName: "\uD39C\uB9AC\uB974\uC758 \uBC1C\uD1B1"
   description: "[n*70%] \uD53C\uD574\n2\uBC88 \uD0C0\uACA9"
   icon: {fileID: 21300000, guid: cc16da6188962544787f7f3b5c7f499f, type: 3}
   isBasicRune: 0

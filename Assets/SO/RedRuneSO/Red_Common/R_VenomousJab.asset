@@ -15,8 +15,8 @@ MonoBehaviour:
   runeType: 0
   color: 0
   rarity: 0
-  displayName: "\uB3C5 \uCC0C\uB974\uAE30"
-  description: "n \uD53C\uD574\n\uB3C5 2 \uBD80\uC5EC"
+  displayName: "\uC694\uB974\uBB38\uAC04\uB4DC\uC758 \uB3C5"
+  description: "n \uD53C\uD574 \uBC0F 2\uD134\uB3D9\uC548 n \uC911\uB3C5 \uBD80\uC5EC"
   icon: {fileID: 21300000, guid: 1a862a305a44ca64e939c2b35b24e829, type: 3}
   isBasicRune: 0
   initialDeckCount: 0

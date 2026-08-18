@@ -15,8 +15,8 @@ MonoBehaviour:
   runeType: 0
   color: 0
   rarity: 0
-  displayName: "\uD761\uD608\uC758 \uB8EC"
-  description: "n \uD53C\uD574\n[n*300%] \uD761\uD608"
+  displayName: "\uB2C8\uB4DC\uD638\uADF8\uC758 \uD45C\uC2DD"
+  description: "n \uD53C\uD574\n[n*50%] \uD761\uD608"
   icon: {fileID: 21300000, guid: 6413fdcb28068ab40b769338e81c9d97, type: 3}
   isBasicRune: 0
   initialDeckCount: 0
